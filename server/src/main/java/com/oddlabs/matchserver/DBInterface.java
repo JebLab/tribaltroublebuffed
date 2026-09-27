@@ -436,6 +436,28 @@ public final class DBInterface {
         }
     }
 
+    /**
+     * Nicks with a streak above zero mapped to that streak, longest first.
+     */
+    public static Map<String, Integer> getStreakLeaders(boolean current, int count) {
+        String column = current ? "current_win_streak" : "best_win_streak";
+        try (Connection conn = DBUtils.createDatabaseConnection(); PreparedStatement stmt = conn.prepareStatement(
+                "SELECT nick, " + column + " AS streak FROM profiles WHERE " + column + " > 0 ORDER BY " + column + " DESC, nick LIMIT ?")) {
+            stmt.setInt(1, count);
+            try (ResultSet result = stmt.executeQuery()) {
+                Map<String, Integer> leaders = new LinkedHashMap<>();
+                while (result.next()) {
+                    leaders.put(result.getString("nick").trim(), result.getInt("streak"));
+                }
+                return leaders;
+            }
+        } catch (SQLException e) {
+            System.out.println("Exception: " + e);
+            MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "getStreakLeaders", e);
+        }
+        return new LinkedHashMap<>();
+    }
+
     public static void increaseLosses(String nick) {
         increaseField("losses", nick);
     }
