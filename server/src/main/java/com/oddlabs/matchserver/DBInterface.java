@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 import org.jspecify.annotations.NullMarked;
@@ -1201,5 +1203,39 @@ public final class DBInterface {
             MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "getOnlineProfiles", e);
         }
         return new String[0];
+    }
+
+    /**
+     * Only games an online profile is still in count, since a server restart or abandoned game
+     * can leave the games row at started.
+     */
+    public static List<GameDataModel> getLiveGames() {
+        try (Connection conn = DBUtils.createDatabaseConnection(); PreparedStatement stmt = conn.prepareStatement(
+                "SELECT G.id, G.name, G.rated, G.time_start, GP.nick, GP.race, GP.team FROM games G INNER JOIN" + " game_players GP ON GP.game_id = G.id WHERE G.status = ? AND G.id IN (SELECT game_id FROM" + " online_profiles) ORDER BY G.time_start, G.id, GP.team")) {
+            stmt.setString(1, "started");
+            try (ResultSet result = stmt.executeQuery()) {
+                Map<Integer, GameDataModel> games = new LinkedHashMap<>();
+                while (result.next()) {
+                    int id = result.getInt("id");
+                    GameDataModel game = games.get(id);
+                    if (game == null) {
+                        game = new GameDataModel();
+                        game.setId(id);
+                        game.setName(result.getString("name"));
+                        game.setRated(result.getString("rated"));
+                        game.setTimeStart(result.getTimestamp("time_start"));
+                        games.put(id, game);
+                    }
+                    game.getPlayers().add(
+                            new GamePlayerModel(
+                                    result.getString("nick"), result.getString("race"), result.getInt("team")));
+                }
+                return new ArrayList<>(games.values());
+            }
+        } catch (SQLException e) {
+            System.out.println("Exception: " + e);
+            MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "getLiveGames", e);
+        }
+        return new ArrayList<>();
     }
 }
