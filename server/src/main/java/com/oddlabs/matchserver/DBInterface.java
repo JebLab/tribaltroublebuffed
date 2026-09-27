@@ -1238,4 +1238,25 @@ public final class DBInterface {
         }
         return new ArrayList<>();
     }
+
+    /**
+     * Games played per race, most played first.
+     */
+    public static Map<Integer, Integer> getRaceGameCounts(String nick) {
+        try (Connection conn = DBUtils.createDatabaseConnection(); PreparedStatement stmt = conn.prepareStatement(
+                "SELECT race, COUNT(*) AS games FROM game_players WHERE nick = ? GROUP BY race ORDER BY games DESC")) {
+            stmt.setString(1, nick);
+            try (ResultSet result = stmt.executeQuery()) {
+                Map<Integer, Integer> counts = new LinkedHashMap<>();
+                while (result.next()) {
+                    counts.put(result.getInt("race"), result.getInt("games"));
+                }
+                return counts;
+            }
+        } catch (SQLException e) {
+            System.out.println("Exception: " + e);
+            MatchmakingServer.getLogger().throwing(DBInterface.class.getName(), "getRaceGameCounts", e);
+        }
+        return new LinkedHashMap<>();
+    }
 }

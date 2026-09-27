@@ -8,6 +8,7 @@ import com.oddlabs.matchserver.discord.commands.LeaderboardsCommand;
 import com.oddlabs.matchserver.discord.commands.MatchesCommand;
 import com.oddlabs.matchserver.discord.commands.MatchupCommand;
 import com.oddlabs.matchserver.discord.commands.OnlineCommand;
+import com.oddlabs.matchserver.discord.commands.ProfileCommand;
 import com.oddlabs.matchserver.discord.commands.RankCommand;
 import com.oddlabs.matchserver.discord.commands.RegisterProfileToDiscordUserCommand;
 import com.oddlabs.matchserver.discord.commands.UnbanCommand;
@@ -73,6 +74,7 @@ public class DiscordBotService {
                     commands.add(new OnlineCommand());
                     commands.add(new MatchesCommand());
                     commands.add(new RankCommand());
+                    commands.add(new ProfileCommand());
                     commands.add(new KickCommand());
                     commands.add(new BanCommand());
                     commands.add(new UnbanCommand());
