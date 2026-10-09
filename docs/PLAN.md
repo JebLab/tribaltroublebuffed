@@ -12,7 +12,7 @@ It is grounded in three things: a line-by-line survey of the original Oddlabs so
 
 > **The game is no longer abandoned.** A community revival, *Tribal Trouble: Resurrected*, launches free on Steam on **15 October 2026** with working multiplayer, 12-player games, 2048 m islands, boats, and most of the modernization and accessibility work this project set out to do. A second fork, the *restoration fork*, has rebuilt the engine on OpenGL 4.1 with a test suite. Both are active daily.
 
-Everything below is therefore organised around one principle: **build on their work, contribute back, and put our original effort where nobody else is working — new content, missing engineering, and the gaps in free/accessible play.**
+Everything below is organised around one principle: **take their code as the base of an independent fork, and put our effort where it adds the most — new content, missing engineering, and the gaps in free/accessible play.** Josh's decision (9 October 2026): this project does not coordinate with, or contribute to, the Resurrected team. It uses their GPL-2 code, merges their public changes when useful, and ships its own builds as **Tribal Trouble Buffed**.
 
 Effort sizes used throughout (one experienced developer, rough): **S** = days, **M** = 1–3 weeks, **L** = 1–2 months, **XL** = a quarter or more.
 
@@ -40,25 +40,28 @@ What our own Milestone 0 achieved (Java 21 + LWJGL 2.9.3 on the 2015 code, `tt.c
 
 ## 1. The decision: which base to build on
 
-**Recommended: fork Resurrected, contribute upstream, keep our own fork for in-progress work.**
+**Decided 9 October 2026: an independent fork of Resurrected — *Tribal Trouble Buffed*, at `JebLab/tribaltroublebuffed`.**
 
-- Our GitHub fork is `JebLab/tribaltroublebuffed` (a fork of Tribal-Trouble/tribaltrouble): `main` mirrors upstream, `revamp` is our integration branch. Finished features go upstream as pull requests behind feature flags, exactly as their workflow requires (`docs/development-workflow.md`: `main` is the trunk, finished-but-unreleased work merges behind an off-by-default flag, `release` is cut for Steam, gameplay changes bump `SIM_VERSION`, protocol changes bump `API_VERSION`).
-- Our fork keeps anything upstream declines, playable as an opt-in ruleset. We never need to split the community to ship our ideas.
-- The restoration fork is the engine reference: when we touch rendering or structure, we port from it rather than invent.
+- Resurrected's code is the base (GPL-2 allows it; attribution stays). `main` mirrors their `main` so their public fixes can be merged into `revamp` while the gap is small; everything of ours lives on `revamp` and in our own releases.
+- No upstream pull requests, no Discord, nothing asked of the current maintainers. Design discussion happens in this repository's issues and `docs/design/`.
+- The restoration fork remains the engine reference: when we touch rendering or structure, we port from its public repository rather than invent.
 
-Alternatives, for the record:
+Consequences that shape the rest of the plan:
 
-- **Independent fork of Resurrected.** Full control, but Tribal Trouble's whole active community is a few hundred people on one Discord; a second product would hurt both. Only sensible if upstream refuses all new content.
-- **Continue from the 2015 code (what we have now).** Two years and ~1,900 commits behind, no multiplayer, no accessibility, no tests. Not sensible.
+- Their matchmaking servers, Discord bot and Steam app are theirs, and a modified client would be refused by their server anyway (it checks `API_VERSION` and `SIM_VERSION`). **Our multiplayer therefore starts with LAN/direct-IP play and a self-hosted server (M5, F2).**
+- Our builds ship through GitHub Releases and itch.io; a Steam page of our own only if the Steamworks fee is paid. The Steam app-id hook in the code is disabled until then.
+- Their Google-Sheet translation workflow is theirs; we maintain the `.properties` files in-repo.
+
+Alternatives considered: contributing upstream (rejected — Josh prefers an independent project), and continuing from the 2015 code (two years and ~1,900 commits behind; not sensible).
 
 Principles that apply to everything below:
 
-1. **Classic is sacred.** Every new unit, building, spell, mode or rule sits behind a flag and a lobby *ruleset* preset: **Classic** (2004 numbers), **Resurrected** (current defaults), **Revamped** (our content). Rated games keep their defaults until the community votes.
+1. **Classic is sacred.** Every new unit, building, spell, mode or rule sits behind a flag and a lobby *ruleset* preset: **Classic** (2004 numbers), **Resurrected** (their defaults as of our base), **Buffed** (our content). Ranked play, when we have it, uses a ruleset we publish.
 2. **Determinism is law.** The simulation is lockstep: every client runs the same world and compares checksums (Adler32 every 500 ticks). Any gameplay change must pass the headless simulation tests (Part 1, M4) before it merges.
 3. **Match the style.** Section 4.1 is a style guide derived from the original assets. New art and names should be indistinguishable in spirit from Oddlabs' work.
-4. **License clean.** Code GPL-2; new art and audio under CC-BY-SA 4.0 (or GPL-2) with attribution; no proprietary fonts or stock sounds of unknown origin. The "Tribal Trouble" name is used with the original developers' blessing by Resurrected; our fork doesn't claim a new product name.
+4. **License clean.** Code GPL-2; new art and audio under CC-BY-SA 4.0 (or GPL-2) with attribution; no proprietary fonts or stock sounds of unknown origin. "Tribal Trouble" is an Oddlabs trademark that Resurrected uses with the original developers' blessing; *Tribal Trouble Buffed* should ask for the same (one email to the original developers) or be ready to rename. Credits to Oddlabs and to the Resurrected and restoration forks stay in the game.
 5. **AI first-class.** No unit or building ships until the three AI difficulties know how to build and use it (the AI is table-driven per difficulty in `AdvancedAI`; extend the tables).
-6. **Design before code.** Each content item gets a one-page design note (RFC) posted to the Discord/GitHub discussion before implementation.
+6. **Design before code.** Each content item gets a one-page design note in `docs/design/` before implementation.
 
 ---
 
@@ -68,11 +71,11 @@ Status key: ✅ done upstream · 🟡 partly done or in progress upstream · ⬜
 
 | # | Milestone | Status | Our work | Effort |
 |---|---|---|---|---|
-| M1 | **Re-base and developer setup** | ⬜ | Fork Resurrected; clone; build with the Gradle wrapper and JDK 26 (`gradlew tt:run`); run their one-time `git config --local include.path ../.gitconfig`; join the Discord; read `docs/development-workflow.md`, `docs/releasing.md`, `docs/event-logs.md`; archive our Ant work on `legacy/ant-java21`. First small PR: Gradle toolchain auto-provisioning (foojay resolver) so contributors don't need to install JDK 26 by hand, replacing our `tt.cmd` idea upstream. | S |
+| M1 | **Re-base and developer setup** | ✅ 9 Oct 2026 | Done: fork, local re-base (`main` mirrors upstream, `revamp` is ours, the Ant work is on `legacy/ant-java21`), portable JDK 26 in `.toolchain/`, build and run verified (2 min 21 s to compile). Next: Gradle toolchain auto-provisioning (foojay resolver) so nobody installs a JDK by hand; our own README and project identity; disable the Steam app-id hook. | S |
 | M2 | **Modern runtime and display** | ✅ | Java 26, LWJGL 3.4.1 (GLFW window, OpenAL, STB, TinyFD), OpenGL 4.1 core context, jpackage/jlink/AppImage packaging, CI builds on every push, Windows fullscreen-behind-taskbar fix (#174), macOS display fix (#173), HiDPI cursor fix, hardware cursor restored (v1.0.0). Remaining for us: a **verification pass** on common hardware (2560×1440 at 120 Hz, ultrawide 21:9, 4K at 150 % scaling, 1280×800 Steam Deck, Intel iGPU) and bug reports. Note the menu and campaign art is still 800×600 paintings stretched to the window; aspect-correct (pillarboxed or repainted 16:9) menu backgrounds belong to Part 3 C7. | S (verify) |
-| M3 | **Engine convergence with the restoration fork** | 🟡 (#166) | Resurrected is 540 commits behind the fork it was built on: the 22-module split (simulation / engine / gui / net / …), ErrorProne + NullAway null-safety, the October 2026 rendering performance work (early-Z sorted foliage, particle shaders, global UBO, scissor clipping, GPU timing), Basis Universal textures, and 51 tests. Port in slices by subsystem, coordinating with both maintainers (the restoration fork's author also contributes to Resurrected). This is the highest-leverage engineering item: it unblocks M4 and M6. | L, ongoing |
+| M3 | **Engine convergence with the restoration fork** | 🟡 (#166) | Resurrected is 540 commits behind the fork it was built on: the 22-module split (simulation / engine / gui / net / …), ErrorProne + NullAway null-safety, the October 2026 rendering performance work (early-Z sorted foliage, particle shaders, global UBO, scissor clipping, GPU timing), Basis Universal textures, and 51 tests. Port in slices by subsystem from the restoration fork's public repository. This is the highest-leverage engineering item: it unblocks M4 and M6. | L, ongoing |
 | M4 | **Simulation test harness** | ⬜ (exists only in the restoration fork) | Port `HeadlessMatchRunner` / `FullGameSimulationTest` (runs AI-vs-AI matches to victory, with simulated network jitter) into Resurrected. CI then runs seeded 1v1, 6-player and 12-player-Enormous matches per PR with no exception or desync. Add replay-based determinism checks: record an `event.log` on one OS, replay on another in CI, compare world checksums. Add unit tests for the pathfinder and the island generator (seed → identical heightmap hash on every platform). This is the safety net for every `SIM_VERSION` bump in Part 3. | M |
-| M5 | **Play without a server** | 🟡 (Steam P2P draft PR #210; issue #203) | Today a joiner needs a matchmaker tunnel, and the lobby server refuses non-loopback sockets, even though the relay ("router") is already embedded in every client for single-player. Add **Host LAN / Direct-IP game**: lobby listens on a real interface, host runs the embedded router, joiners enter `ip:port`; UDP broadcast for LAN discovery; optional UPnP. Complements their Steam P2P for players without Steam. Also: pause and reconnect on disconnect (#35), take over a dropped teammate's units (#40), vote to forfeit (#23). | M (+S each) |
+| M5 | **Play without a server** | ⬜ **(this is our multiplayer)** | Today a joiner needs a matchmaker tunnel, and the lobby server refuses non-loopback sockets, even though the relay ("router") is already embedded in every client for single-player. Their matchmaker is not available to our client, so this comes first. Add **Host LAN / Direct-IP game**: lobby listens on a real interface, host runs the embedded router, joiners enter `ip:port`; UDP broadcast for LAN discovery; optional UPnP. Later: pause and reconnect on disconnect, take over a dropped teammate's units, vote to forfeit (all requested by players on their tracker: #35, #40, #23). | M (+S each) |
 | M6 | **Scale and performance** | 🟡 | The original was designed for 6 × 250 units on 1024 m islands; Resurrected allows 12 × 250 on 2048 m (an "Enormous island crashing at start" bug was fixed in #250). Known ceilings in the inherited code: far-tree billboards share one 16-bit index buffer (65,535 vertices); grid A* is capped to a 128×128 window and 600 nodes, with 1024 cost buckets that lose ordering on long paths; the animation manager registers entities in linear lists; region building allocates one node per 2 m cell (one million at 2048 m); terrain colour maps are re-baked on every load (256 chunks of 512² at 2048 m). Work: profiling suite (headless runs + the restoration fork's GPU timers), hierarchical pathfinding with larger windows and flow fields for groups, spatial hashing for target scans, batched draws, cached colour maps per map seed. | M–L, after M3/M4 |
 | M7 | **Controls and quality of life** (no rule changes) | 🟡 | Rebindable keys, keybinds in tooltips and Ctrl+1–9 control groups exist. Open upstream requests we can take: select-all peons / army hotkeys (#194), triple-click to select a type (#223), extra mouse buttons as keys (#71), click-and-drag selection preference (#66), zoom out further (#27), camera on hilly maps (#192), idle-peon button, edge-scroll speed. | S each |
 | M8 | **Documentation and onboarding** | ⬜ | Server hosting guide (#13), keybinds tutorial (#8), an `ARCHITECTURE.md` (neither fork has one; our survey is the draft), and the content-pipeline guide from Part 3. | S–M |
@@ -90,7 +93,7 @@ Already done upstream: registration, demo mode and the SVN updater removed; the 
 | # | Item | Status | Our work | Effort |
 |---|---|---|---|---|
 | F1 | **Non-Steam distribution parity** | ⬜ | Flathub (from the existing AppImage), winget, Homebrew cask, AUR; signed checksums on releases (minisign/Sigstore) because builds are unsigned today (the README walks users through OS warnings); an auto-update check for GitHub/itch builds. Code-signing certificates (Windows OV/EV, Apple notarisation) cost money — a maintainer decision, documented with prices. | S each |
-| F2 | **Self-host-friendly server** | 🟡 | The live server needs MySQL, two processes and manual setup (#13 asks for docs). The restoration fork already has a Micronaut + SQLite + Flyway services module. Target: one `server.jar` with an embedded database, a Docker image, and a community-server list so non-Steam players can find games. Pairs with M5. | M |
+| F2 | **Self-host-friendly server** | 🟡 | The live server needs MySQL, two processes and manual setup (#13 asks for docs). The restoration fork already has a Micronaut + SQLite + Flyway services module. Target: one `server.jar` with an embedded database, a Docker image, and a server list inside the game so players can find each other without their infrastructure. Required for anything beyond LAN play; pairs with M5. | M |
 | F3 | **Preservation and license hygiene** | ⬜ | Archive the 2004 installers and manual; record asset provenance (3D art Chaz Willets; audio Michael Huang, Nicklas Schmidt, Herman Witkam; music untagged); a written policy for new assets (CC-BY-SA 4.0); confirm the 2015 leftovers (hard-coded database passwords, a private-key passphrase in a servlet descriptor, a Vim swap file) are gone from the live forks — the credentials are already externalised to `server.properties`. | S |
 | F4 | **Credits and about screen** (#141) | ⬜ | Oddlabs, the original artists, and every community contributor, in-game. | S |
 
@@ -107,8 +110,8 @@ Their own list of known barriers: no screen-reader support (the GUI is a custom 
 | A3 | **Battlefield cues for deaf, blind and low-vision players** | 🟡 | Directional attack alerts with screen-edge and minimap indicators; a text event feed ("Armory under attack, north-east"); optional spoken event summaries; reduced-flash option for the Crackling Cloud lightning and any screen shake (photosensitivity). | M |
 | A4 | **Motor accessibility** | ⬜ | Click-to-start / click-to-end drag selection (no holding), adjustable double- and triple-click timing, edge-scroll dead zone and off switch (fixes the magnifier conflict), auto-pause when a dialog opens in single-player, a **Relaxed** AI below Easy. | S–M |
 | A5 | **Cognitive load and onboarding** | ⬜ | Tutorial refresh with a persistent objectives panel, optional hints, an in-game encyclopedia ("Tribalpedia") with unit/building/spell cards, text labels beside every icon, font-size tiers, a dyslexia-friendly font option (Atkinson Hyperlegible, open). | M |
-| A6 | **Localisation** | 🟡 (7 languages via a Google-Sheet workflow; Polish hidden pending review) | Add a Cyrillic/CJK fallback font (Noto Sans) so Russian, Chinese, Japanese and Korean translators can be onboarded; every Part 3 string ships in all languages. Right-to-left scripts only if the GUI toolkit gains mirroring (bigger job). | M |
-| A7 | **Verification, continuously** | ⬜ | Adopt the restoration fork's definition of done as a PR checklist; recruit playtesters with disabilities on the Discord; add Steam accessibility feature tags once earned. | S, recurring |
+| A6 | **Localisation** | 🟡 (7 languages inherited; Polish hidden) | Their translation sheet is theirs, so we keep the `.properties` files in-repo with a small CSV export/import script for translators. Add a Cyrillic/CJK fallback font (Noto Sans) so Russian, Chinese, Japanese and Korean can be added; every Part 3 string ships in all languages. Right-to-left scripts only if the GUI toolkit gains mirroring (bigger job). | M |
+| A7 | **Verification, continuously** | ⬜ | Adopt the restoration fork's definition of done as a change checklist; recruit playtesters with disabilities through accessibility-gaming communities (e.g. the AbleGamers and Can I Play That? communities); publish an accessibility statement with each release. | S, recurring |
 
 ---
 
@@ -185,7 +188,7 @@ Stretch: a per-race **Champion** (Headhunter / Berserker — the "fast, tanky be
 
 | # | Item | Status | Notes | Effort |
 |---|---|---|---|---|
-| C1 | **Archipelago campaign** | 🟡 upstream v2.2, due 15 Dec 2026 (#163: maps, mission scripting, narrative, AI for boats) | The fastest way to add content players will see soon: write missions and triggers for their campaign. The trigger toolkit exists (victory, defeat, near-point, near-army, spell-cast, supply-gathered, time, reinforcements). | M |
+| C1 | **Archipelago missions** | ⬜ (Resurrected is building its own Archipelago campaign for December; ours is separate) | A first set of boat-based missions using the existing trigger toolkit (victory, defeat, near-point, near-army, spell-cast, supply-gathered, time, reinforcements) and the boats already in the code. | M |
 | C2 | **Campaign Act III — "The Chicken War"** | ⬜ | 12 islands, both races playable, built around the Part 3 units and buildings; unlocks the new spells the way the originals unlock *Terrifying Toot* and *Crackling Cloud*. | L |
 | C3 | **Challenge islands** | ⬜ | 20 standalone scenarios with online leaderboards (survive 15 minutes exists as a campaign objective type; add speed-kill, defend-the-statue, no-armory runs). | M |
 | C4 | **Game modes** | 🟡 (a mode registry exists with only *Standard*; *Protect the Chief* is designed upstream, #238) | King of the Hill (hold the golden statue 5 minutes — the statues already exist as campaign scenery), Treasure Hunt (collect N statues), Hold Out (co-op waves vs AI), Chicken Rush (first to stock 50 chickens), free-for-all with alliances. | M each |
@@ -201,7 +204,7 @@ Status: Small 256 m, Medium 512 m, Large 1024 m, **Enormous 2048 m**, **Archipel
 | # | Item | Status | Notes | Effort |
 |---|---|---|---|---|
 | L1 | Performance at scale | see M6 | Everything else here is bottlenecked on this. | — |
-| L2 | **Map editor and map browser** | 🟡 (draft PR #281: 15 k lines; terrain brushes, resource painting, 12 spawns, shared editing sessions, server-hosted sharing) | Help test and land it; then curate hand-made competitive maps and a ranked map pool. | M |
+| L2 | **Map editor and map browser** | 🟡 (their draft PR #281: 15 k lines; terrain brushes, resource painting, 12 spawns, shared editing, server-hosted sharing) | Once it lands in their public `main` we can merge it; otherwise build our own, smaller editor. Then curate hand-made maps and a ranked map pool. | M |
 | L3 | **Minimap** | ⬜ (only a full-screen "map mode" exists) | A real minimap with pings, alerts and click-to-move; essential at 2048 m and for A3. | M |
 | L4 | **Fairness and start options** | ⬜ | Mirror/symmetric generation for ranked; same-island teams and min/max island count for Archipelago (maintainer suggestions on #80). | M |
 | L5 | **Continent maps** | ⬜ | 4096 m with rivers and lakes (ships on rivers, per #80), several biomes per map. Needs streaming or cached colour maps (1,024 chunks at this size) and L1. | XL |
@@ -217,7 +220,7 @@ Status: Small 256 m, Medium 512 m, Large 1024 m, **Enormous 2048 m**, **Archipel
 | O3 | **Mod support** | ⬜ | Builds on P3: mod folders overriding data files, assets and strings; later Steam Workshop for maps and mods. | L |
 | O4 | **Custom AI framework** | ⬜ (#98 asks for it) | AI behind an interface; ship personalities (Rusher, Turtle, Economist) plus Relaxed; AI that uses boats and all new content. | L |
 | O5 | **Balance telemetry** | ⬜ | Per-unit kills/deaths and resource curves from match reports → a public dashboard beside the OpenSkill leaderboard; data-driven balance votes. | M |
-| O6 | **Tournaments and seasons** | 🟡 (Discord bot has `/matches`, `/profile`, `/streaks`) | Brackets and seasonal resets on the website. | S–M |
+| O6 | **Tournaments and seasons** | ⬜ (their Discord bot is theirs) | Brackets and seasonal resets on a small website of our own, fed by the F2 server. | S–M |
 | O7 | **Tribalpedia** | ⬜ | In-game encyclopedia and lore; doubles as A5. | S–M |
 | O8 | **Co-op campaign** | ⬜ | Two humans share a team on campaign islands. | M |
 | O9 | **Cosmetics** | ⬜ | Chieftain customisation (the Tribal Trouble 2 idea) and banner choices as achievement unlocks; never gameplay. | M |
@@ -230,32 +233,31 @@ Status: Small 256 m, Medium 512 m, Large 1024 m, **Enormous 2048 m**, **Archipel
 
 | When | Focus |
 |---|---|
-| **Now → 15 Oct 2026** (Steam launch week) | Do not disturb upstream. M1 only: fork, build, play, join the Discord, introduce this plan, file verification bugs from M2. |
-| **Oct–Dec 2026** | M4 tests · M5 LAN/direct-IP · P1 Blender exporter · P4 flags and rulesets · M8 docs · F1 Flathub/winget · A1 self-voicing · C1 missions for the Archipelago campaign (due 15 Dec) · A4 motor options. |
+| **October 2026** | M1 is done. Project identity (README, name, credits, Steam hook off) · M2 verification notes · P4 flags and rulesets scaffold · first release tag so there is always a downloadable build. |
+| **Oct–Dec 2026** | M5 LAN/direct-IP · M4 tests · P1 Blender exporter · F2 self-host server · M8 docs · F1 Flathub/winget · A1 self-voicing · A4 motor options · C1 Archipelago missions. |
 | **Q1 2027** | First content drop behind the *Revamped* flag: Chicken Coop, Totem, Market, Shield and Torch gear · King of the Hill mode · L3 minimap · O1 single-player save/load · P3 data-driven stats. |
 | **Q2 2027** | Lodge and Champion, Drum and Net gear, two new spells per race, Palisade/Gate, Great Tower · Hold Out and Treasure Hunt · first new terrain (Volcanic) · A2 gamepad and Steam Deck · M3 convergence slices · M6 profiling. |
 | **H2 2027** | C2 Campaign Act III · second terrain · O3 mod support · O4 custom AI · L5 continent maps · L6 fog-of-war ruleset · C7 remastered art. |
 
-Each quarter ends with a playable build on our fork and a batch of upstream PRs.
+Each quarter ends with a tagged release on GitHub and itch.io.
 
 ## 6. Risks
 
 | Risk | Mitigation |
 |---|---|
-| Upstream declines new content or changes direction | Design notes before code; flags and rulesets so nothing touches Classic; our fork remains playable regardless. |
-| Balance upheaval alienates veterans | Classic preset untouched; rated play unchanged until a community vote backed by O5 telemetry. |
-| Art bandwidth | Gear-variant design reuses rigs; P1 exporter; recruit artists on the Discord; budget for commissions (C6, C7). |
-| Desyncs from gameplay changes | M4 harness runs on every PR; `SIM_VERSION` discipline; replay-based cross-platform checks. |
-| Fork drift (Resurrected vs restoration) | Work M3 in slices; keep both maintainers in the loop. |
-| Launch-week disruption | Nothing lands before 15 Oct; respect `release` branch rules. |
-| Name and trademark | Contribute under *Tribal Trouble: Resurrected*; no separate product name; keep Oddlabs credits. |
+| Upstream keeps moving fast (~1,000 commits in 15 months) and merging gets hard | Merge `upstream/main` into `revamp` monthly while the gap is small; once our content lands, switch to cherry-picking fixes; M3 keeps the engine aligned with the restoration fork instead. |
+| No shared servers or player pool | M5 LAN/direct-IP and F2 self-host server come first; until then builds are single-player and LAN. |
+| Balance upheaval alienates veterans | Classic preset untouched; Buffed is opt-in; O5 telemetry informs tuning. |
+| Art bandwidth | Gear-variant design reuses rigs; P1 exporter; commission or recruit artists directly; budget for C6, C7. |
+| Desyncs from gameplay changes | M4 harness runs on every change; `SIM_VERSION` discipline; replay-based cross-platform checks. |
+| Name and trademark | Ask the original developers for the same blessing Resurrected has; keep Oddlabs and fork credits; be ready to rename. |
 | One-person burnout | Quarterly scope cuts are allowed; every milestone ships something on its own. |
 
 ## 7. Immediate next steps
 
-1. ~~Decide the base~~ Done 9 Oct 2026: the fork is github.com/JebLab/tribaltroublebuffed; the local project is re-pointed at it (`main` mirrors upstream, `revamp` is ours) and the Ant work lives on `legacy/ant-java21`.
-2. Build and play the current Resurrected `main` and the Steam demo; note bugs on this PC (RTX 4060, 2560×1440 @ 120 Hz).
-3. Join the Discord and post a short version of this plan; ask the maintainers which of M4, M5, P1 they'd welcome first.
-4. First PRs: Gradle toolchain auto-download (M1), then the headless test harness (M4).
+1. ~~Decide the base~~ Done 9 Oct 2026: independent fork at github.com/JebLab/tribaltroublebuffed; the local project is re-pointed at it (`main` mirrors upstream, `revamp` is ours) and the Ant work lives on `legacy/ant-java21`.
+2. ~~Build and run~~ Done 9 Oct 2026 (JDK 26, 2 min 21 s). Next: play a skirmish and note anything off on this PC (RTX 4060, 2560×1440 @ 120 Hz).
+3. Project identity: our own README, the *Tribal Trouble Buffed* name, credits to Oddlabs and both forks, Steam app-id hook disabled, first tagged release.
+4. First engineering: Gradle toolchain auto-download (M1), LAN/direct-IP play (M5), the headless test harness (M4).
 5. Prototype the Blender exporter (P1) against the Native warrior until it round-trips.
-6. Write the first two design notes: Chicken Coop and Totem.
+6. Write the first two design notes in `docs/design/`: Chicken Coop and Totem.
