@@ -1,6 +1,6 @@
 # Tribal Trouble Revamp — Project Plan
 
-*Written 9 October 2026. Status: proposal, awaiting one decision (section 1).*
+*Written 9 October 2026. Status: adopted the same day — the base decision in section 1 is made; the fork is [JebLab/tribaltroublebuffed](https://github.com/JebLab/tribaltroublebuffed).*
 
 This plan has three parts, as requested:
 
@@ -42,7 +42,7 @@ What our own Milestone 0 achieved (Java 21 + LWJGL 2.9.3 on the 2015 code, `tt.c
 
 **Recommended: fork Resurrected, contribute upstream, keep our own fork for in-progress work.**
 
-- Our GitHub fork becomes `JebLab/tribaltrouble` (a fork of Tribal-Trouble/tribaltrouble). Finished features go upstream as pull requests behind feature flags, exactly as their workflow requires (`docs/development-workflow.md`: `main` is the trunk, finished-but-unreleased work merges behind an off-by-default flag, `release` is cut for Steam, gameplay changes bump `SIM_VERSION`, protocol changes bump `API_VERSION`).
+- Our GitHub fork is `JebLab/tribaltroublebuffed` (a fork of Tribal-Trouble/tribaltrouble): `main` mirrors upstream, `revamp` is our integration branch. Finished features go upstream as pull requests behind feature flags, exactly as their workflow requires (`docs/development-workflow.md`: `main` is the trunk, finished-but-unreleased work merges behind an off-by-default flag, `release` is cut for Steam, gameplay changes bump `SIM_VERSION`, protocol changes bump `API_VERSION`).
 - Our fork keeps anything upstream declines, playable as an opt-in ruleset. We never need to split the community to ship our ideas.
 - The restoration fork is the engine reference: when we touch rendering or structure, we port from it rather than invent.
 
@@ -253,7 +253,7 @@ Each quarter ends with a playable build on our fork and a batch of upstream PRs.
 
 ## 7. Immediate next steps
 
-1. **Decide the base** (section 1). If "fork Resurrected": click *Fork* on github.com/Tribal-Trouble/tribaltrouble; the local project is then re-pointed at it and the current Ant work moved to `legacy/ant-java21`.
+1. ~~Decide the base~~ Done 9 Oct 2026: the fork is github.com/JebLab/tribaltroublebuffed; the local project is re-pointed at it (`main` mirrors upstream, `revamp` is ours) and the Ant work lives on `legacy/ant-java21`.
 2. Build and play the current Resurrected `main` and the Steam demo; note bugs on this PC (RTX 4060, 2560×1440 @ 120 Hz).
 3. Join the Discord and post a short version of this plan; ask the maintainers which of M4, M5, P1 they'd welcome first.
 4. First PRs: Gradle toolchain auto-download (M1), then the headless test harness (M4).
