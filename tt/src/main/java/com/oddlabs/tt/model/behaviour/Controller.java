@@ -29,8 +29,13 @@ public abstract class Controller {
         }
     }
 
-    public @NonNull String getKey() {
-        return Integer.toString(getClass().hashCode());
+    /**
+     * Returns the key that {@link com.oddlabs.tt.player.Player#classifyUnits()} groups units by. Two controllers share
+     * a group when their keys are {@code equals}. Keys must not be built from identity hash codes: those differ
+     * between JVM runs, so lockstep clients and event-log replays would group units differently.
+     */
+    public @NonNull Object getKey() {
+        return getClass();
     }
 
     public abstract void decide();

@@ -4,6 +4,8 @@ import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.Selectable;
 import org.jspecify.annotations.NonNull;
 
+import java.util.List;
+
 public final class NullController extends Controller {
     private final @NonNull Selectable<?> selectable;
 
@@ -13,11 +15,11 @@ public final class NullController extends Controller {
     }
 
     @Override
-    public @NonNull String getKey() {
-        return super.getKey() + selectable.getAbilities().hasAbilities(
-                Abilities.BUILD_ARMIES) + selectable.getAbilities().hasAbilities(
-                        Abilities.REPRODUCE) + selectable.getAbilities().hasAbilities(
-                                Abilities.ATTACK) + selectable.getAbilities().hasAbilities(Abilities.SAIL);
+    public @NonNull Object getKey() {
+        Abilities abilities = selectable.getAbilities();
+        return List.of(super.getKey(), abilities.hasAbilities(Abilities.BUILD_ARMIES),
+                abilities.hasAbilities(Abilities.REPRODUCE), abilities.hasAbilities(Abilities.ATTACK),
+                abilities.hasAbilities(Abilities.SAIL));
     }
 
     @Override

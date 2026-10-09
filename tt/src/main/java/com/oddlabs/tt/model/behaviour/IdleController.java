@@ -7,6 +7,8 @@ import com.oddlabs.tt.model.Selectable;
 import com.oddlabs.tt.model.Unit;
 import org.jspecify.annotations.NonNull;
 
+import java.util.List;
+
 public final class IdleController extends Controller {
     private static final float MIN_SCAN_DELAY = 1f;
     private static final float MAX_SCAN_DELAY = 2f;
@@ -49,8 +51,8 @@ public final class IdleController extends Controller {
     }
 
     @Override
-    public @NonNull String getKey() {
-        return super.getKey() + unit.getAbilities().hasAbilities(Abilities.BUILD) + unit.getAbilities().hasAbilities(
-                Abilities.MAGIC);
+    public @NonNull Object getKey() {
+        return List.of(super.getKey(), unit.getAbilities().hasAbilities(Abilities.BUILD),
+                unit.getAbilities().hasAbilities(Abilities.MAGIC));
     }
 }

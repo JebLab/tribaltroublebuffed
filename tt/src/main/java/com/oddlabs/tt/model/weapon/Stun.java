@@ -101,8 +101,8 @@ public final class Stun implements Magic {
 
     private float calculateValueFromCurrentRadius(float current_radius, float max, float min) {
         float base_factor = 6f / 7f;
-        float error = (float) Math.pow(base_factor, hit_radius);
-        float factor = (float) Math.pow(base_factor, current_radius);
+        float error = (float) StrictMath.pow(base_factor, hit_radius);
+        float factor = (float) StrictMath.pow(base_factor, current_radius);
         float result = (max - min + error) * factor + min - error;
         return result;
     }

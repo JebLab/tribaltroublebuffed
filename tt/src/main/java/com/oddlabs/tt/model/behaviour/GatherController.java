@@ -11,6 +11,8 @@ import com.oddlabs.tt.pathfinder.TrackerAlgorithm;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.List;
+
 public final class GatherController<S extends Supply> extends Controller {
     private enum State {
         HARVEST,
@@ -49,8 +51,8 @@ public final class GatherController<S extends Supply> extends Controller {
     }
 
     @Override
-    public @NonNull String getKey() {
-        return super.getKey() + supply_type;
+    public @NonNull Object getKey() {
+        return List.of(super.getKey(), supply_type);
     }
 
     private void gather() {

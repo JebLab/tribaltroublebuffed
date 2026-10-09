@@ -133,7 +133,7 @@ public final class VikingIsland14 extends Island {
         new VictoryTrigger(getViewer(), runnable);
 
         // Insert treasures
-        float dir = (float) Math.sin(Math.PI / 4);
+        float dir = (float) StrictMath.sin(Math.PI / 4);
         float offset = HeightMap.METERS_PER_UNIT_GRID / 2f;
         float shadow_diameter = 4.5f;
         new SceneryModel(getViewer().getWorld(), 163 * 2 + offset, 126 * 2 + offset, 0, 1,

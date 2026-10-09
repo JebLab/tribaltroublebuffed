@@ -7,6 +7,8 @@ import com.oddlabs.tt.model.Ship;
 import com.oddlabs.tt.model.ShipAllocation;
 import com.oddlabs.tt.model.Unit;
 
+import java.util.List;
+
 public final class ShipAttackController extends Controller {
     private static final float MIN_SCAN_DELAY = 0.1f;
     private static final float MAX_SCAN_DELAY = 0.2f;
@@ -44,8 +46,9 @@ public final class ShipAttackController extends Controller {
         }
     }
 
-    public String getKey() {
-        return super.getKey() + unit.getAbilities().hasAbilities(Abilities.BUILD) + unit.getAbilities().hasAbilities(
-                Abilities.MAGIC);
+    @Override
+    public Object getKey() {
+        return List.of(super.getKey(), unit.getAbilities().hasAbilities(Abilities.BUILD),
+                unit.getAbilities().hasAbilities(Abilities.MAGIC));
     }
 }
