@@ -6,6 +6,8 @@ import com.oddlabs.tt.model.Building;
 import com.oddlabs.tt.model.Unit;
 import org.jspecify.annotations.NonNull;
 
+import java.util.List;
+
 public final class RepairController extends Controller {
     private enum State {
         HARVEST,
@@ -26,8 +28,10 @@ public final class RepairController extends Controller {
     }
 
     @Override
-    public @NonNull String getKey() {
-        return super.getKey() + building.hashCode();
+    public @NonNull Object getKey() {
+        // Building does not override equals, so repairers group per building by identity. Only the equality
+        // matters: the identity hash code merely picks a hash bucket and never decides group order or membership.
+        return List.of(super.getKey(), building);
     }
 
     @Override

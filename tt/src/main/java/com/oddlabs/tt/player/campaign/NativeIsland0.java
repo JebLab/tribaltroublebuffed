@@ -237,7 +237,7 @@ public final class NativeIsland0 extends Island {
 
         // Insert treasures
         final SceneryModel[] scenery_models = new SceneryModel[14];
-        float dir = (float) Math.sin(Math.PI / 4);
+        float dir = (float) StrictMath.sin(Math.PI / 4);
         float offset = HeightMap.METERS_PER_UNIT_GRID / 2f;
         float shadow_diameter = 4.5f;
         var treasures = getViewer().getWorld().getRacesResources().getTreasures();

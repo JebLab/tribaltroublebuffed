@@ -31,8 +31,11 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -663,9 +666,21 @@ public final class Player implements PlayerInterface {
     }
 
     public @NonNull Selectable<?> @NonNull [] @NonNull [] classifyUnits() {
-        Map<String, List<Selectable<?>>> map = units.getSet().stream().collect(Collectors.groupingBy(
-                u -> u.getPrimaryController().getKey()));
-        return map.values().stream().map(list -> list.toArray(Selectable[]::new)).toArray(Selectable[][]::new);
+        // Army keeps its units in a LinkedHashSet, so the groups follow the order the units were enabled in.
+        return groupByKey(units.getSet(), u -> u.getPrimaryController().getKey()).stream().map(
+                list -> list.toArray(Selectable[]::new)).toArray(Selectable[][]::new);
+    }
+
+    /**
+     * Groups items by key. Groups come in the order their keys first appear in {@code items}, and each group keeps the
+     * order of {@code items}. The AI acts on the groups in this order, so it must not depend on key hash codes, which
+     * can differ between JVM runs and would break lockstep and event-log replay.
+     */
+    static <T> @NonNull List<@NonNull List<T>> groupByKey(@NonNull Collection<T> items,
+            @NonNull Function<? super T, ?> key) {
+        Map<Object, List<T>> groups = items.stream().collect(Collectors.groupingBy(key, LinkedHashMap::new,
+                Collectors.toList()));
+        return List.copyOf(groups.values());
     }
 
     public void magicCast() {

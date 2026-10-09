@@ -38,6 +38,14 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":assets"))
     implementation("com.code-disaster.steamworks4j:steamworks4j:1.10.0")
+
+    testImplementation(platform("org.junit:junit-bom:6.0.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 // steamworks4j lacks module-info, so it stays on the classpath as the unnamed module.
