@@ -18,6 +18,8 @@ public final class Globals {
     public static final boolean[] INSERT_PLANTS = new boolean[]{true, true, true};
 
     public static final boolean SHIPS_ENABLED = true;
+    // Tribal Trouble Buffed has no Steam app: never load the Steam libraries.
+    public static final boolean STEAM_ENABLED = false;
 
     public static final String GAME_NAME = "TribalTrouble";
     private static final String SETTINGS_FILE_NAME = "settings";

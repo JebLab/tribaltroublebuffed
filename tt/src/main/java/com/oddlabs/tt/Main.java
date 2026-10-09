@@ -1,5 +1,6 @@
 package com.oddlabs.tt;
 
+import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.render.Renderer;
 import com.oddlabs.tt.steam.SteamManager;
 import com.oddlabs.tt.util.Utils;
@@ -48,7 +49,9 @@ public final class Main {
     static void main(@NonNull String @NonNull... args) {
         int status = 1;
         try {
-            SteamManager.init();
+            if (Globals.STEAM_ENABLED) {
+                SteamManager.init();
+            }
             logger.info("Starting game....");
             Renderer.getRenderer().run(args);
             status = 0;
