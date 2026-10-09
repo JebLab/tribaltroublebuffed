@@ -1,6 +1,7 @@
 package com.oddlabs.tt.landscape;
 
 import com.oddlabs.matchmaking.Game;
+import com.oddlabs.tt.ruleset.Ruleset;
 import org.jspecify.annotations.NonNull;
 
 import java.io.Serial;
@@ -8,7 +9,7 @@ import java.io.Serializable;
 
 public final class WorldParameters implements Serializable {
     @Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
     private final @NonNull String map_code;
     private final int initial_unit_count;
     private final int max_unit_count;
@@ -16,6 +17,7 @@ public final class WorldParameters implements Serializable {
     private final int map_size;
     private final int max_building_count;
     private final boolean ships;
+    private final @NonNull Ruleset ruleset;
 
     public WorldParameters(int initial_game_speed, @NonNull String map_code, int initial_unit_count,
             int max_unit_count) {
@@ -36,6 +38,7 @@ public final class WorldParameters implements Serializable {
         this.map_size = b.map_size;
         this.max_building_count = b.max_building_count;
         this.ships = b.ships;
+        this.ruleset = b.ruleset;
     }
 
     public static @NonNull Builder builder() {
@@ -70,6 +73,10 @@ public final class WorldParameters implements Serializable {
         return ships;
     }
 
+    public @NonNull Ruleset getRuleset() {
+        return ruleset;
+    }
+
     public static final class Builder {
         private @NonNull String mapcode = "";
         private int initial_unit_count;
@@ -78,6 +85,7 @@ public final class WorldParameters implements Serializable {
         private int map_size = Game.SIZE_NONE;
         private int max_building_count = Game.DEFAULT_MAX_BUILDING_COUNT;
         private boolean ships;
+        private @NonNull Ruleset ruleset = Ruleset.DEFAULT;
 
         private Builder() {
         }
@@ -114,6 +122,11 @@ public final class WorldParameters implements Serializable {
 
         public @NonNull Builder ships(boolean v) {
             this.ships = v;
+            return this;
+        }
+
+        public @NonNull Builder ruleset(@NonNull Ruleset v) {
+            this.ruleset = v;
             return this;
         }
 

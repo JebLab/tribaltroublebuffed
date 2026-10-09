@@ -1,0 +1,5 @@
+{
+  "description": "Test fixture: a misspelt key must fail the load.",
+  "extends": "resurrected",
+  "natives": { "tower": { "hit_ponts": 150 } }
+}

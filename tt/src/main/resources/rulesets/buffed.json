@@ -1,0 +1,4 @@
+{
+  "description": "Tribal Trouble Buffed: this fork's new content, layered on Resurrected. Identical to Resurrected until the first new buildings land (milestone M5). Field reference: docs/rulesets.md.",
+  "extends": "resurrected"
+}

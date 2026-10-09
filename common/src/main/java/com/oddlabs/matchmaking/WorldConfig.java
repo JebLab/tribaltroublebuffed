@@ -3,6 +3,7 @@ package com.oddlabs.matchmaking;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -27,6 +28,7 @@ public final class WorldConfig implements Serializable {
     private final int starting_units;
     private final int max_buildings;
     private final boolean ships;
+    private final @Nullable String ruleset;
 
     private WorldConfig(@NonNull Builder b) {
         this.gamespeed = b.gamespeed;
@@ -39,6 +41,7 @@ public final class WorldConfig implements Serializable {
         this.starting_units = b.starting_units;
         this.max_buildings = b.max_buildings;
         this.ships = b.ships;
+        this.ruleset = b.ruleset;
     }
 
     public static @NonNull Builder builder() {
@@ -89,6 +92,14 @@ public final class WorldConfig implements Serializable {
         return ships;
     }
 
+    /**
+     * Id of the ruleset the preset plays under ({@code classic}, {@code resurrected}, {@code buffed}). Null in presets
+     * saved before rulesets existed, which played under Resurrected's numbers.
+     */
+    public @Nullable String getRuleset() {
+        return ruleset;
+    }
+
     @JsonPOJOBuilder(buildMethodName = "build", withPrefix = "")
     public static final class Builder {
         private int gamespeed;
@@ -101,6 +112,7 @@ public final class WorldConfig implements Serializable {
         private int starting_units = Game.DEFAULT_INITIAL_UNIT_COUNT;
         private int max_buildings = Game.DEFAULT_MAX_BUILDING_COUNT;
         private boolean ships;
+        private @Nullable String ruleset;
 
         private Builder() {
         }
@@ -152,6 +164,11 @@ public final class WorldConfig implements Serializable {
 
         public @NonNull Builder ships(boolean ships) {
             this.ships = ships;
+            return this;
+        }
+
+        public @NonNull Builder ruleset(@Nullable String ruleset) {
+            this.ruleset = ruleset;
             return this;
         }
 

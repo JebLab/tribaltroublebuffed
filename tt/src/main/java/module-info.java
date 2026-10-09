@@ -11,4 +11,7 @@ module com.oddlabs.tt {
     requires org.lwjgl.opengl;
     requires org.lwjgl.stb;
     requires org.lwjgl.tinyfd;
+
+    // Ruleset data files are read into the records of this package.
+    opens com.oddlabs.tt.ruleset to com.fasterxml.jackson.databind;
 }

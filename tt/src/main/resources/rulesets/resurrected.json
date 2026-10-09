@@ -1,0 +1,31 @@
+{
+  "description": "Tribal Trouble: Resurrected's numbers at the time of the fork (October 2026). The complete base the other rulesets extend; campaign, tutorials and multiplayer play under it. Field reference: docs/rulesets.md.",
+  "natives": {
+    "peon": { "hit_points": 1, "speed": 5.0, "defense_chance": 0.0, "hit_chance": 0.2 },
+    "rock_warrior": { "hit_points": 1, "speed": 4.0, "defense_chance": 0.5, "hit_chance": 0.5 },
+    "iron_warrior": { "hit_points": 1, "speed": 4.0, "defense_chance": 0.7, "hit_chance": 0.75 },
+    "chicken_warrior": { "hit_points": 1, "speed": 4.0, "defense_chance": 0.7, "hit_chance": 0.95 },
+    "chieftain": { "hit_points": 40, "speed": 4.0, "defense_chance": 0.5, "hit_chance": 0.75 },
+    "quarters": { "hit_points": 200 },
+    "armory": { "hit_points": 200 },
+    "tower": { "hit_points": 100 },
+    "ship": { "hit_points": 250 }
+  },
+  "vikings": {
+    "peon": { "hit_points": 1, "speed": 5.0, "defense_chance": 0.0, "hit_chance": 0.2 },
+    "rock_warrior": { "hit_points": 1, "speed": 4.0, "defense_chance": 0.5, "hit_chance": 0.5 },
+    "iron_warrior": { "hit_points": 1, "speed": 4.0, "defense_chance": 0.7, "hit_chance": 0.75 },
+    "chicken_warrior": { "hit_points": 1, "speed": 4.0, "defense_chance": 0.7, "hit_chance": 0.95 },
+    "chieftain": { "hit_points": 60, "speed": 4.0, "defense_chance": 0.5, "hit_chance": 0.75 },
+    "quarters": { "hit_points": 200 },
+    "armory": { "hit_points": 200 },
+    "tower": { "hit_points": 100 },
+    "ship": { "hit_points": 250 }
+  },
+  "spells": {
+    "stinking_stew": { "radius": 26.0, "hit_chance": 0.5, "interval": 2.0, "seconds": 20.0, "damage": 10 },
+    "crackling_cloud": { "seconds": 22.0, "seconds_per_hit": 1.0, "speed": 8.0, "hit_chance": 1.0, "damage": 30 },
+    "terrifying_toot": { "radius": 36.0, "stun_seconds_closest": 30.0, "stun_seconds_farthest": 10.0 },
+    "ravaging_roar": { "radius": 36.0, "hit_chance_closest": 17.0, "hit_chance_farthest": 2.0, "damage_closest": 150, "damage_farthest": 30, "seconds": 0.8 }
+  }
+}

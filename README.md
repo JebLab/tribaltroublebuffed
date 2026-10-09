@@ -6,7 +6,7 @@ An independent, single-player fork of **Tribal Trouble**, the 2004 real-time str
 
 Oddlabs released the source under the GPL v2 in 2014. The community project [Tribal Trouble: Resurrected](https://github.com/Tribal-Trouble/tribaltrouble) modernised it (Java 26, LWJGL 3, OpenGL 4.1, bigger islands, boats, accessibility options). **Buffed starts from Resurrected's code and goes its own way:** new units, buildings, spells, game modes, maps and terrains for the single-player game, all in the original's cartoon style, with the classic rules always available as a preset.
 
-**Status (October 2026):** project set up; builds and runs on Windows; content work starts next. The full plan is in [docs/PLAN.md](docs/PLAN.md) and the milestone queue in [docs/MILESTONES.md](docs/MILESTONES.md).
+**Status (October 2026):** project set up; builds and runs on Windows; the Classic / Resurrected / Buffed rulesets are in (M2, see [docs/rulesets.md](docs/rulesets.md)); tests and CI are next. The full plan is in [docs/PLAN.md](docs/PLAN.md) and the milestone queue in [docs/MILESTONES.md](docs/MILESTONES.md).
 
 ## Building and running
 
@@ -44,7 +44,7 @@ Settings, campaign saves and per-run logs are written next to the game in portab
 ## How this differs from Resurrected
 
 - **Single-player focus.** The multiplayer menus, matchmaking client and server modules are inherited but not maintained here, and there are no Buffed servers. Steam integration is switched off (`Globals.STEAM_ENABLED`): no app id, achievements or rich presence.
-- **Rulesets.** *Classic* (the 2004 numbers), *Resurrected* (their defaults at the time of the fork) and *Buffed* (new content) will be selectable when starting a game, so the original balance is never lost.
+- **Rulesets.** *Classic* (the 2004 numbers), *Resurrected* (their defaults at the time of the fork) and *Buffed* (new content) are chosen in the Single-player menu, so the original balance is never lost. The numbers live in JSON files under `tt/src/main/resources/rulesets/`; [docs/rulesets.md](docs/rulesets.md) explains them.
 - **New content**, in the order listed in [docs/MILESTONES.md](docs/MILESTONES.md): buildings such as the Chicken Coop and Totem, new gear-based unit types, chieftain spells, single-player game modes, a minimap, mid-game saving, new terrains and a new campaign act.
 
 ## Repository layout

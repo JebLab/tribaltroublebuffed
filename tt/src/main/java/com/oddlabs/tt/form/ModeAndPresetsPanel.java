@@ -31,8 +31,9 @@ import static com.oddlabs.tt.gui.Placement.BOTTOM_LEFT;
 import static com.oddlabs.tt.gui.Placement.RIGHT_MID;
 
 /**
- * Tab 1 of the MP create-game dialog. Renders the mode pulldown (Standard only at v1), a banner showing which preset
- * (if any) is currently applied and whether the form has drifted from it, the grid of user-saved preset cards, and the
+ * Tab 1 of the create-game dialog, single-player and multiplayer. Renders the mode pulldown (Standard only at v1), a
+ * banner showing which preset (if any) is currently applied and whether the form has drifted from it, the grid of
+ * preset cards (built-in ruleset presets first in single player, then the user's), and the
  * {@code +Save current as preset} action card. {@link #refreshPresets} rebuilds the grid after the host saves or
  * deletes a preset; {@link #setPresetState} updates the banner.
  */
@@ -216,7 +217,8 @@ public final class ModeAndPresetsPanel extends Panel {
             preset_label.setText(i18n("banner_preset", preset != null ? preset.getName() : i18n("banner_no_preset")));
             boolean preset_dirty = preset != null && modified;
             reset_button.setDisabled(!preset_dirty);
-            update_button.setDisabled(!preset_dirty);
+            // Built-in presets are fixed; save the changes as a new preset instead.
+            update_button.setDisabled(!preset_dirty || preset.isBuiltIn());
             modified_label.setText(modified ? i18n("banner_modified") : "");
         }
     }

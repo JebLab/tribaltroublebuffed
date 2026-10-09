@@ -18,6 +18,8 @@ import com.oddlabs.tt.procedural.Landscape;
 import com.oddlabs.tt.render.RenderQueues;
 import com.oddlabs.tt.resource.FogInfo;
 import com.oddlabs.tt.resource.WorldInfo;
+import com.oddlabs.tt.ruleset.Ruleset;
+import com.oddlabs.tt.ruleset.RulesetStats;
 import org.joml.Vector4fc;
 
 import java.util.List;
@@ -61,6 +63,7 @@ public final class World {
     private int gamespeed;
     private int map_size;
     private final @NonNull GameMode mode;
+    private final @NonNull Ruleset ruleset;
 
     public static @NonNull LandscapeResources loadCommon(@NonNull RenderQueues queues) {
         LandscapeResources landscape_resources = new LandscapeResources(queues);
@@ -68,8 +71,8 @@ public final class World {
         return landscape_resources;
     }
 
-    public static @NonNull RacesResources loadInGame(@NonNull RenderQueues queues) {
-        return new RacesResources(queues);
+    public static @NonNull RacesResources loadInGame(@NonNull RenderQueues queues, @NonNull RulesetStats stats) {
+        return new RacesResources(queues, stats);
     }
 
     public static @NonNull World newWorld(@NonNull AudioImplementation audio_implementation,
@@ -139,6 +142,10 @@ public final class World {
         return mode;
     }
 
+    public @NonNull Ruleset getRuleset() {
+        return ruleset;
+    }
+
     public float getSecondsPerTick() {
         return GAMESPEEDS[gamespeed];
     }
@@ -197,6 +204,7 @@ public final class World {
         // Game mode is not carried over the wire yet (kept off WorldParameters for client compatibility); only
         // Standard exists, so resolve it directly here. Restore world_params.getMode() when modes ship.
         this.mode = GameMode.STANDARD;
+        this.ruleset = world_params.getRuleset();
         long time_start = System.currentTimeMillis();
 
         world = new HeightMap(this, world_info.meters_per_world(), world_info.sea_level_meters(),

@@ -45,6 +45,7 @@ import com.oddlabs.tt.net.Network;
 import com.oddlabs.tt.net.PlayerSlot;
 import com.oddlabs.tt.procedural.Landscape;
 import com.oddlabs.tt.render.Renderer;
+import com.oddlabs.tt.ruleset.Ruleset;
 import com.oddlabs.tt.util.ServerMessageBundler;
 import com.oddlabs.tt.util.Utils;
 import com.oddlabs.tt.util.WordsEncoding;
@@ -115,11 +116,12 @@ public final class TerrainMenu extends Group {
     private final @NonNull CheckBox cb_rated;
     private final boolean multiplayer;
     private final @NonNull PulldownMenu<Void> pm_gamespeed;
+    private final @NonNull PulldownMenu<Ruleset> pm_ruleset;
     private final @NonNull GUIRoot gui_root;
     private final @NonNull NetworkSelector network;
     private final @NonNull PresetLibrary preset_library = new PresetLibrary();
     private final @Nullable RosterPanel roster_panel;
-    private final @Nullable ModeAndPresetsPanel mode_and_presets;
+    private final @NonNull ModeAndPresetsPanel mode_and_presets;
     private final @NonNull ScrollablePulldownMenu<Void> pulldown_menu_slots;
     private static final int DEFAULT_PLAYER_COUNT = 6;
     private int player_count = DEFAULT_PLAYER_COUNT;
@@ -171,10 +173,11 @@ public final class TerrainMenu extends Group {
         // headline
         Label label_headline = new Label(i18n(multiplayer ? "new_game" : "skirmish"), Skin.getSkin().getHeadlineFont());
         addChild(label_headline);
-        if (multiplayer) {
-            preset_library.load(Renderer.getLocalInput().getGameDir().resolve(Globals.getPresetsFileName()));
+        preset_library.load(Renderer.getLocalInput().getGameDir().resolve(Globals.getPresetsFileName()));
+        if (!multiplayer) {
+            preset_library.addRulesetPresets();
         }
-        mode_and_presets = multiplayer ? new ModeAndPresetsPanel(gui_root, preset_library, new PresetsHandler()) : null;
+        mode_and_presets = new ModeAndPresetsPanel(gui_root, preset_library, new PresetsHandler());
         Panel standard = new Panel(i18n("standard_options"));
         Panel advanced = new Panel(i18n("advanced_options"));
         roster_panel = multiplayer ? new RosterPanel() : null;
@@ -275,6 +278,25 @@ public final class TerrainMenu extends Group {
         group_terrain_type.compileCanvas();
         pm_terrain_type.addItemChosenListener(new PulldownUpdateMapcodeListener());
         group_map_options.addChild(group_terrain_type);
+
+        // ruleset: single player only. Multiplayer always plays Resurrected's numbers, which every client and the
+        // servers expect.
+        Group group_ruleset = new Group();
+        Label label_ruleset = new Label(i18n("ruleset"), Skin.getSkin().getEditFont());
+        group_ruleset.addChild(label_ruleset);
+        pm_ruleset = new PulldownMenu<>();
+        for (Ruleset ruleset : Ruleset.values()) {
+            pm_ruleset.addItem(new PulldownItem<>(ruleset.getDisplayName(), ruleset));
+        }
+        var pb_ruleset = new PulldownButton<>(gui_root, pm_ruleset, Ruleset.SKIRMISH_DEFAULT.ordinal(), 150);
+        pm_ruleset.addItemChosenListener((_, _) -> markModified());
+        group_ruleset.addChild(pb_ruleset);
+        label_ruleset.place();
+        pb_ruleset.place(label_ruleset, RIGHT_MID);
+        group_ruleset.compileCanvas();
+        if (!multiplayer) {
+            group_map_options.addChild(group_ruleset);
+        }
 
         Group group_sliders = new Group();
         // hills
@@ -395,6 +417,9 @@ public final class TerrainMenu extends Group {
             group_size.place();
         }
         group_terrain_type.place(group_size, BOTTOM_RIGHT);
+        if (!multiplayer) {
+            group_ruleset.place(group_terrain_type, BOTTOM_RIGHT);
+        }
         group_map_options.compileCanvas();
         standard.addChild(group_map_options);
 
@@ -420,7 +445,7 @@ public final class TerrainMenu extends Group {
         advanced.compileCanvas();
 
         PanelGroup panel_group = multiplayer ? new PanelGroup(1, mode_and_presets, standard, advanced,
-                roster_panel) : new PanelGroup(standard, advanced);
+                roster_panel) : new PanelGroup(1, mode_and_presets, standard, advanced);
         addChild(panel_group);
         var playersChangedListener = new PulldownUpdatePlayersChangedListener(standard);
         playersChangedListener.setCurrentGroup(group_race_team);
@@ -481,9 +506,15 @@ public final class TerrainMenu extends Group {
     }
 
     private void updateBanner() {
-        if (mode_and_presets != null) {
-            mode_and_presets.setPresetState(current_preset, modified);
+        mode_and_presets.setPresetState(current_preset, modified);
+    }
+
+    private @NonNull Ruleset getChosenRuleset() {
+        if (multiplayer) {
+            return Ruleset.DEFAULT;
         }
+        Ruleset ruleset = pm_ruleset.getItem(pm_ruleset.getChosenItemIndex()).getAttachment();
+        return ruleset != null ? ruleset : Ruleset.DEFAULT;
     }
 
     private void setMapcode() {
@@ -857,8 +888,10 @@ public final class TerrainMenu extends Group {
                 .mapSize(size)
                 .maxBuildingCount(settings.maxBuildings())
                 .ships(ships)
+                .ruleset(getChosenRuleset())
                 .build();
         // spotless:on
+        IO.println("Ruleset: " + world_params.getRuleset().getId());
         GameNetwork game_network = Menu.startNewGame(network, gui_root,
                 menu,
                 world_params,
@@ -989,9 +1022,7 @@ public final class TerrainMenu extends Group {
         }
 
         private void revertSelection() {
-            if (mode_and_presets != null) {
-                mode_and_presets.refreshPresets();
-            }
+            mode_and_presets.refreshPresets();
         }
 
         @Override
@@ -1008,9 +1039,7 @@ public final class TerrainMenu extends Group {
                 modified = false;
                 updateBanner();
             }
-            if (mode_and_presets != null) {
-                mode_and_presets.refreshPresets();
-            }
+            mode_and_presets.refreshPresets();
         }
 
         @Override
@@ -1032,7 +1061,7 @@ public final class TerrainMenu extends Group {
 
         @Override
         public void updateClicked() {
-            if (current_preset == null) {
+            if (current_preset == null || current_preset.isBuiltIn()) {
                 return;
             }
             Preset updated = new Preset(current_preset.getId(), current_preset.getName(), snapshotWorldConfig(),
@@ -1043,9 +1072,7 @@ public final class TerrainMenu extends Group {
             current_preset = updated;
             modified = false;
             updateBanner();
-            if (mode_and_presets != null) {
-                mode_and_presets.refreshPresets();
-            }
+            mode_and_presets.refreshPresets();
         }
 
         private void saveNewPreset(@NonNull String name) {
@@ -1057,9 +1084,7 @@ public final class TerrainMenu extends Group {
             current_preset = preset;
             modified = false;
             updateBanner();
-            if (mode_and_presets != null) {
-                mode_and_presets.refreshPresets();
-            }
+            mode_and_presets.refreshPresets();
         }
     }
 
@@ -1080,6 +1105,7 @@ public final class TerrainMenu extends Group {
                 .startingUnits(advanced_settings.startingUnits())
                 .maxBuildings(advanced_settings.maxBuildings())
                 .ships(advanced_settings.ships())
+                .ruleset(getChosenRuleset().getId())
                 .build();
         // spotless:on
     }
@@ -1096,6 +1122,9 @@ public final class TerrainMenu extends Group {
         slider_supplies.setValue(world.getSupplies());
         advanced_settings = new AdvancedSettingsForm.Values(world.getMaxUnits(), world.getStartingUnits(),
                 world.getMaxBuildings(), world.isShips());
+        // Presets saved before rulesets existed played under Resurrected's numbers.
+        Ruleset ruleset = Ruleset.fromId(world.getRuleset());
+        pm_ruleset.chooseItem((ruleset != null ? ruleset : Ruleset.DEFAULT).ordinal());
         setMapcode();
     }
 

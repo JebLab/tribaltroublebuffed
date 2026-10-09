@@ -1,0 +1,56 @@
+package com.oddlabs.tt.ruleset;
+
+import org.jspecify.annotations.NonNull;
+
+/**
+ * Every gameplay number a {@link Ruleset} sets, read from its data file. Component names are the JSON keys. Numbers
+ * that are tied to the models (animation timings, attachment offsets, footprints, selection shapes) stay in
+ * {@code RacesResources}.
+ */
+public record RulesetStats(@NonNull RaceStats natives, @NonNull RaceStats vikings, @NonNull SpellStats spells) {
+
+    public @NonNull RaceStats race(boolean vikings) {
+        return vikings ? this.vikings : this.natives;
+    }
+
+    public record RaceStats(@NonNull UnitStats peon, @NonNull UnitStats rock_warrior, @NonNull UnitStats iron_warrior,
+                            @NonNull UnitStats chicken_warrior, @NonNull UnitStats chieftain,
+                            @NonNull BuildingStats quarters, @NonNull BuildingStats armory,
+                            @NonNull BuildingStats tower, @NonNull BuildingStats ship) {
+    }
+
+    /**
+     * @param hit_points     1 for everything but the chieftain: any hit kills
+     * @param speed          meters per second
+     * @param defense_chance chance that a hit aimed at the unit misses (dodge)
+     * @param hit_chance     base chance that the unit's own attack hits, before the target's defense chance
+     */
+    public record UnitStats(int hit_points, float speed, float defense_chance, float hit_chance) {
+    }
+
+    public record BuildingStats(int hit_points) {
+    }
+
+    /** The chieftains' spells, by their in-game names. */
+    public record SpellStats(@NonNull StinkingStewStats stinking_stew, @NonNull CracklingCloudStats crackling_cloud,
+                             @NonNull TerrifyingTootStats terrifying_toot,
+                             @NonNull RavagingRoarStats ravaging_roar) {
+    }
+
+    /** Native poison fog: every {@code interval} seconds for {@code seconds}, hits enemies within the radius. */
+    public record StinkingStewStats(float radius, float hit_chance, float interval, float seconds, int damage) {
+    }
+
+    /** Native lightning cloud: drifts at {@code speed}, striking once per {@code seconds_per_hit}. */
+    public record CracklingCloudStats(float seconds, float seconds_per_hit, float speed, float hit_chance, int damage) {
+    }
+
+    /** Viking stun: stuns enemies within the radius, longest for the closest. */
+    public record TerrifyingTootStats(float radius, float stun_seconds_closest, float stun_seconds_farthest) {
+    }
+
+    /** Viking sonic blast: damage and hit chance fall off from the closest to the farthest target. */
+    public record RavagingRoarStats(float radius, float hit_chance_closest, float hit_chance_farthest,
+                                    int damage_closest, int damage_farthest, float seconds) {
+    }
+}

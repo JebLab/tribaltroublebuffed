@@ -35,6 +35,13 @@ import com.oddlabs.tt.render.TextureKey;
 import com.oddlabs.tt.resource.Resources;
 import com.oddlabs.tt.resource.SpriteFile;
 import com.oddlabs.tt.resource.TextureFile;
+import com.oddlabs.tt.ruleset.RulesetStats;
+import com.oddlabs.tt.ruleset.RulesetStats.CracklingCloudStats;
+import com.oddlabs.tt.ruleset.RulesetStats.RaceStats;
+import com.oddlabs.tt.ruleset.RulesetStats.RavagingRoarStats;
+import com.oddlabs.tt.ruleset.RulesetStats.SpellStats;
+import com.oddlabs.tt.ruleset.RulesetStats.StinkingStewStats;
+import com.oddlabs.tt.ruleset.RulesetStats.TerrifyingTootStats;
 import com.oddlabs.tt.util.Utils;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.opengl.GL11;
@@ -53,12 +60,6 @@ public final class RacesResources {
     public static final int SHIP_SIZE = 12;
     public static final int MAX_BUILDING_SIZE = IntStream.of(QUARTERS_SIZE, ARMORY_SIZE,
             TOWER_SIZE).max().orElseThrow();
-    public static final int QUARTERS_HIT_POINTS = 200;
-    public static final int ARMORY_HIT_POINTS = 200;
-    public static final int TOWER_HIT_POINTS = 100;
-    public static final int SHIP_HIT_POINTS = 250;
-    public static final int VIKING_CHIEFTAIN_HIT_POINTS = 60;
-    public static final int NATIVE_CHIEFTAIN_HIT_POINTS = 40;
 
     public static final int RACE_NATIVES = 0;
     public static final int RACE_VIKINGS = 1;
@@ -195,7 +196,14 @@ public final class RacesResources {
                 name);
     }
 
-    public RacesResources(@NonNull RenderQueues queues) {
+    /**
+     * Gameplay numbers (hit points, speeds, hit and defense chances, spell strengths) come from {@code stats}; the
+     * numbers left inline here belong to the models: footprints, selection shapes, offsets and animation timings.
+     */
+    public RacesResources(@NonNull RenderQueues queues, @NonNull RulesetStats stats) {
+        RaceStats natives = stats.natives();
+        RaceStats vikings = stats.vikings();
+        SpellStats spells = stats.spells();
         int num_progress = 25;
         SpriteFile native_rock_sprite = new SpriteFile("/geometry/natives/rock_resource.binsprite",
                 Globals.NO_MIPMAP_CUTOFF,
@@ -371,7 +379,7 @@ public final class RacesResources {
                 3.5f, 6f,
                 "/geometry/vikings/quarters_start.binsprite",
                 5f, 1f,
-                22f, .001f, QUARTERS_SIZE, 6f, 9f, 30, QUARTERS_HIT_POINTS,
+                22f, .001f, QUARTERS_SIZE, 6f, 9f, 30, vikings.quarters().hit_points(),
                 new ReproduceUnitContainerFactory(),
                 new Abilities(Abilities.REPRODUCE | Abilities.RALLY_TO | Abilities.TARGET),
                 new float[]{0f, 1f, 3f}, 0f, 6f,
@@ -390,7 +398,7 @@ public final class RacesResources {
                 3.5f, 6f,
                 "/geometry/vikings/armory_start.binsprite",
                 5f, 1f,
-                22f, .001f, ARMORY_SIZE, 6f, 9f, 30, ARMORY_HIT_POINTS,
+                22f, .001f, ARMORY_SIZE, 6f, 9f, 30, vikings.armory().hit_points(),
                 new WorkerUnitContainerFactory(),
                 new Abilities(
                         Abilities.SUPPLY_CONTAINER | Abilities.BUILD_ARMIES | Abilities.RALLY_TO | Abilities.TARGET),
@@ -410,7 +418,7 @@ public final class RacesResources {
                 2f, 7f,
                 "/geometry/vikings/tower_start.binsprite",
                 2.5f, 1f,
-                10f, .009f, TOWER_SIZE, 3f, 12f, 20, TOWER_HIT_POINTS,
+                10f, .009f, TOWER_SIZE, 3f, 12f, 20, vikings.tower().hit_points(),
                 new MountUnitContainerFactory(),
                 new Abilities(Abilities.ATTACK | Abilities.RALLY_TO | Abilities.TARGET),
                 new float[]{0f, 2f, 7.5f}, 9.55f, 2.5f,
@@ -429,7 +437,7 @@ public final class RacesResources {
                 4f, 6f,
                 "/geometry/natives/quarters_start.binsprite",
                 5f, 1f,
-                16f, .004f, QUARTERS_SIZE, 6f, 9f, 30, QUARTERS_HIT_POINTS,
+                16f, .004f, QUARTERS_SIZE, 6f, 9f, 30, natives.quarters().hit_points(),
                 new ReproduceUnitContainerFactory(),
                 new Abilities(Abilities.REPRODUCE | Abilities.RALLY_TO | Abilities.TARGET),
                 new float[]{0f, 1f, 3f}, 0f, 6f,
@@ -448,7 +456,7 @@ public final class RacesResources {
                 4f, 6f,
                 "/geometry/natives/armory_start.binsprite",
                 5f, 1f,
-                16f, .004f, ARMORY_SIZE, 6f, 9f, 30, ARMORY_HIT_POINTS,
+                16f, .004f, ARMORY_SIZE, 6f, 9f, 30, natives.armory().hit_points(),
                 new WorkerUnitContainerFactory(),
                 new Abilities(
                         Abilities.SUPPLY_CONTAINER | Abilities.BUILD_ARMIES | Abilities.RALLY_TO | Abilities.TARGET),
@@ -468,7 +476,7 @@ public final class RacesResources {
                 1f, 14f,
                 "/geometry/natives/tower_start.binsprite",
                 1.5f, 2f,
-                5f, .025f, TOWER_SIZE, 3f, 12f, 20, TOWER_HIT_POINTS,
+                5f, .025f, TOWER_SIZE, 3f, 12f, 20, natives.tower().hit_points(),
                 new MountUnitContainerFactory(),
                 new Abilities(Abilities.ATTACK | Abilities.RALLY_TO | Abilities.TARGET),
                 new float[]{0f, 11.5f, 11.5f}, 13f, 2.5f,
@@ -497,7 +505,7 @@ public final class RacesResources {
                 6f,
                 9f,
                 100,
-                SHIP_HIT_POINTS,
+                natives.ship().hit_points(),
                 null,
                 new Abilities(
                         Abilities.SUPPLY_CONTAINER | Abilities.SAIL | Abilities.RALLY_TO | Abilities.TARGET),
@@ -533,7 +541,7 @@ public final class RacesResources {
                 6f,
                 9f,
                 100,
-                SHIP_HIT_POINTS,
+                vikings.ship().hit_points(),
                 null,
                 new Abilities(
                         Abilities.SUPPLY_CONTAINER | Abilities.SAIL | Abilities.RALLY_TO | Abilities.TARGET),
@@ -595,33 +603,35 @@ public final class RacesResources {
                                         "/sfx/impact_meat4.ogg")), Resources.findResource(new AudioFile(
                                                 "/sfx/impact_meat5.ogg"))
         };
-        WeaponFactory viking_warrior_rock_weapon = new ThrowingFactory<>(RockAxeWeapon.class, RockAxeWeapon::new, 0.5f,
+        WeaponFactory viking_warrior_rock_weapon = new ThrowingFactory<>(RockAxeWeapon.class, RockAxeWeapon::new,
+                vikings.rock_warrior().hit_chance(),
                 THROW_RANGE, 29f / 58f,
                 queues.register(viking_warrior_axe, Race.UNIT_WARRIOR_ROCK),
                 axe_throw_sound,
                 unit_hit_sounds);
-        WeaponFactory viking_warrior_iron_weapon = new ThrowingFactory<>(IronAxeWeapon.class, IronAxeWeapon::new, 0.75f,
+        WeaponFactory viking_warrior_iron_weapon = new ThrowingFactory<>(IronAxeWeapon.class, IronAxeWeapon::new,
+                vikings.iron_warrior().hit_chance(),
                 THROW_RANGE, 29f / 58f,
                 queues.register(viking_warrior_axe, Race.UNIT_WARRIOR_IRON),
                 axe_throw_sound,
                 unit_hit_sounds);
         WeaponFactory viking_warrior_rubber_weapon = new ThrowingFactory<>(RubberAxeWeapon.class, RubberAxeWeapon::new,
-                0.95f, THROW_RANGE, 29f / 58f,
+                vikings.chicken_warrior().hit_chance(), THROW_RANGE, 29f / 58f,
                 queues.register(viking_warrior_axe, Race.UNIT_WARRIOR_RUBBER),
                 axe_throw_sound,
                 unit_hit_sounds);
         WeaponFactory native_warrior_rock_weapon = new ThrowingFactory<>(RockSpearWeapon.class, RockSpearWeapon::new,
-                0.5f, THROW_RANGE, 46f / 100f,
+                natives.rock_warrior().hit_chance(), THROW_RANGE, 46f / 100f,
                 queues.register(native_warrior_spear, Race.UNIT_WARRIOR_ROCK),
                 spear_throw_sound,
                 unit_hit_sounds);
         WeaponFactory native_warrior_iron_weapon = new ThrowingFactory<>(IronSpearWeapon.class, IronSpearWeapon::new,
-                0.75f, THROW_RANGE, 46f / 100f,
+                natives.iron_warrior().hit_chance(), THROW_RANGE, 46f / 100f,
                 queues.register(native_warrior_spear, Race.UNIT_WARRIOR_IRON),
                 spear_throw_sound,
                 unit_hit_sounds);
         WeaponFactory native_warrior_rubber_weapon = new ThrowingFactory<>(RubberSpearWeapon.class,
-                RubberSpearWeapon::new, 0.95f, THROW_RANGE, 46f / 100f,
+                RubberSpearWeapon::new, natives.chicken_warrior().hit_chance(), THROW_RANGE, 46f / 100f,
                 queues.register(native_warrior_spear, Race.UNIT_WARRIOR_RUBBER),
                 spear_throw_sound,
                 unit_hit_sounds);
@@ -640,7 +650,7 @@ public final class RacesResources {
         UnitTemplate viking_warrior_rock_template = new UnitTemplate(.4f,
                 1.2f,
                 new Abilities(Abilities.ATTACK | Abilities.TARGET | Abilities.THROW),
-                4f,
+                vikings.rock_warrior().speed(),
                 viking_warrior_rock_weapon,
                 queues.register(sprite_list_warrior, Race.UNIT_WARRIOR_ROCK),
                 shadow_diameter_warrior,
@@ -650,15 +660,15 @@ public final class RacesResources {
                 .25f,
                 new float[]{1.2f},
                 1f,
-                .5f,
+                vikings.rock_warrior().defense_chance(),
                 i18n("rock_warrior"),
-                1,
+                vikings.rock_warrior().hit_points(),
                 0f, 0f, 2f,
                 3);
         UnitTemplate viking_warrior_iron_template = new UnitTemplate(.4f,
                 1.2f,
                 new Abilities(Abilities.ATTACK | Abilities.TARGET | Abilities.THROW),
-                4f,
+                vikings.iron_warrior().speed(),
                 viking_warrior_iron_weapon,
                 queues.register(sprite_list_warrior, Race.UNIT_WARRIOR_IRON),
                 shadow_diameter_warrior,
@@ -668,15 +678,15 @@ public final class RacesResources {
                 .25f,
                 new float[]{1.2f},
                 1f,
-                .7f,
+                vikings.iron_warrior().defense_chance(),
                 i18n("iron_warrior"),
-                1,
+                vikings.iron_warrior().hit_points(),
                 0f, 0f, 2f,
                 5);
         UnitTemplate viking_warrior_rubber_template = new UnitTemplate(.4f,
                 1.2f,
                 new Abilities(Abilities.ATTACK | Abilities.TARGET | Abilities.THROW),
-                4f,
+                vikings.chicken_warrior().speed(),
                 viking_warrior_rubber_weapon,
                 queues.register(sprite_list_warrior, Race.UNIT_WARRIOR_RUBBER),
                 shadow_diameter_warrior,
@@ -686,15 +696,15 @@ public final class RacesResources {
                 .25f,
                 new float[]{1.2f},
                 1f,
-                .7f,
+                vikings.chicken_warrior().defense_chance(),
                 i18n("chicken_warrior"),
-                1,
+                vikings.chicken_warrior().hit_points(),
                 0f, 0f, 2f,
                 10);
         UnitTemplate native_warrior_rock_template = new UnitTemplate(.4f,
                 1.2f,
                 new Abilities(Abilities.ATTACK | Abilities.TARGET | Abilities.THROW),
-                4f,
+                natives.rock_warrior().speed(),
                 native_warrior_rock_weapon,
                 queues.register(sprite_list_native_warrior, Race.UNIT_WARRIOR_ROCK),
                 shadow_diameter_warrior,
@@ -704,15 +714,15 @@ public final class RacesResources {
                 .25f,
                 new float[]{1.2f},
                 1f,
-                .5f,
+                natives.rock_warrior().defense_chance(),
                 i18n("rock_warrior"),
-                1,
+                natives.rock_warrior().hit_points(),
                 0f, 0f, 2f,
                 3);
         UnitTemplate native_warrior_iron_template = new UnitTemplate(.4f,
                 1.2f,
                 new Abilities(Abilities.ATTACK | Abilities.TARGET | Abilities.THROW),
-                4f,
+                natives.iron_warrior().speed(),
                 native_warrior_iron_weapon,
                 queues.register(sprite_list_native_warrior, Race.UNIT_WARRIOR_IRON),
                 shadow_diameter_warrior,
@@ -722,15 +732,15 @@ public final class RacesResources {
                 .25f,
                 new float[]{1.2f},
                 1f,
-                .7f,
+                natives.iron_warrior().defense_chance(),
                 i18n("iron_warrior"),
-                1,
+                natives.iron_warrior().hit_points(),
                 0f, 0f, 2f,
                 5);
         UnitTemplate native_warrior_rubber_template = new UnitTemplate(.4f,
                 1.2f,
                 new Abilities(Abilities.ATTACK | Abilities.TARGET | Abilities.THROW),
-                4f,
+                natives.chicken_warrior().speed(),
                 native_warrior_rubber_weapon,
                 queues.register(sprite_list_native_warrior, Race.UNIT_WARRIOR_RUBBER),
                 shadow_diameter_warrior,
@@ -740,16 +750,16 @@ public final class RacesResources {
                 .25f,
                 new float[]{1.2f},
                 1f,
-                .7f,
+                natives.chicken_warrior().defense_chance(),
                 i18n("chicken_warrior"),
-                1,
+                natives.chicken_warrior().hit_points(),
                 0f, 0f, 2f,
                 10);
         UnitTemplate viking_peon_template = new UnitTemplate(.4f,
                 1.1f,
                 new Abilities(Abilities.BUILD | Abilities.HARVEST | Abilities.ATTACK | Abilities.TARGET),
-                5f,
-                new InstantHitFactory(1 / 5f, 0f, 11f / 38f, unit_hit_sounds),
+                vikings.peon().speed(),
+                new InstantHitFactory(vikings.peon().hit_chance(), 0f, 11f / 38f, unit_hit_sounds),
                 queues.register(sprite_list_peon),
                 shadow_diameter_peon,
                 default_shadow_list,
@@ -758,16 +768,16 @@ public final class RacesResources {
                 .25f,
                 new float[]{.7f},
                 1f,
-                0f,
+                vikings.peon().defense_chance(),
                 i18n("peon"),
-                1,
+                vikings.peon().hit_points(),
                 .1f, 0f, 1.75f,
                 1);
         UnitTemplate native_peon_template = new UnitTemplate(.4f,
                 1.1f,
                 new Abilities(Abilities.BUILD | Abilities.HARVEST | Abilities.ATTACK | Abilities.TARGET),
-                5f,
-                new InstantHitFactory(1 / 5f, 0f, 51f / 83f, unit_hit_sounds),
+                natives.peon().speed(),
+                new InstantHitFactory(natives.peon().hit_chance(), 0f, 51f / 83f, unit_hit_sounds),
                 queues.register(sprite_list_native_peon),
                 shadow_diameter_peon,
                 default_shadow_list,
@@ -776,16 +786,16 @@ public final class RacesResources {
                 .25f,
                 new float[]{.7f},
                 1f,
-                0f,
+                natives.peon().defense_chance(),
                 i18n("peon"),
-                1,
+                natives.peon().hit_points(),
                 0f, 0f, 1.75f,
                 1);
         UnitTemplate viking_chieftain_template = new UnitTemplate(.4f,
                 1.4f,
                 new Abilities(Abilities.ATTACK | Abilities.TARGET | Abilities.MAGIC),
-                4f,
-                new InstantHitFactory(3 / 4f, 0f, 75f / 119f, viking_chieftain_hit_sounds),
+                vikings.chieftain().speed(),
+                new InstantHitFactory(vikings.chieftain().hit_chance(), 0f, 75f / 119f, viking_chieftain_hit_sounds),
                 queues.register(sprite_list_chieftain),
                 shadow_diameter_chieftain,
                 default_shadow_list,
@@ -794,16 +804,16 @@ public final class RacesResources {
                 .15f,
                 new float[]{1.7f},
                 1f,
-                0.5f,
+                vikings.chieftain().defense_chance(),
                 i18n("chieftain"),
-                VIKING_CHIEFTAIN_HIT_POINTS,
+                vikings.chieftain().hit_points(),
                 -.07f, .312f, 2.7f,
                 40);
         UnitTemplate native_chieftain_template = new UnitTemplate(.4f,
                 1.4f,
                 new Abilities(Abilities.ATTACK | Abilities.TARGET | Abilities.MAGIC),
-                4f,
-                new InstantHitFactory(3 / 4f, 0f, 75f / 129f, native_chieftain_hit_sounds),
+                natives.chieftain().speed(),
+                new InstantHitFactory(natives.chieftain().hit_chance(), 0f, 75f / 129f, native_chieftain_hit_sounds),
                 queues.register(sprite_list_native_chieftain),
                 shadow_diameter_chieftain,
                 default_shadow_list,
@@ -812,22 +822,29 @@ public final class RacesResources {
                 .15f,
                 new float[]{1.7f},
                 1f,
-                0.5f,
+                natives.chieftain().defense_chance(),
                 i18n("chieftain"),
-                NATIVE_CHIEFTAIN_HIT_POINTS,
+                natives.chieftain().hit_points(),
                 .878f, .151f, 2.8f,
                 40);
 
+        StinkingStewStats stew = spells.stinking_stew();
+        CracklingCloudStats cloud = spells.crackling_cloud();
+        TerrifyingTootStats toot = spells.terrifying_toot();
+        RavagingRoarStats roar = spells.ravaging_roar();
         MagicFactory[] native_magic = new MagicFactory[NUM_MAGIC];
-        native_magic[INDEX_MAGIC_POISON] = new PoisonFogFactory(0.9f, 0f, 0.55f, 26f, .5f, 2f, 20f, 10, 5f, 80f / 224f,
+        native_magic[INDEX_MAGIC_POISON] = new PoisonFogFactory(0.9f, 0f, 0.55f, stew.radius(), stew.hit_chance(),
+                stew.interval(), stew.seconds(), stew.damage(), 5f, 80f / 224f, 163f / 224f);
+        native_magic[INDEX_MAGIC_LIGHTNING] = new LightningCloudFactory(0.9f, 0f, 0.55f, cloud.seconds(),
+                cloud.seconds_per_hit(), cloud.speed(), cloud.hit_chance(), cloud.damage(), 18f, 5f, 80f / 224f,
                 163f / 224f);
-        native_magic[INDEX_MAGIC_LIGHTNING] = new LightningCloudFactory(0.9f, 0f, 0.55f, 22f, 1f, 8f, 1f, 30, 18f, 5f,
-                80f / 224f, 163f / 224f);
 
         MagicFactory[] viking_magic = new MagicFactory[NUM_MAGIC];
-        viking_magic[INDEX_MAGIC_STUN] = new StunFactory(2.57f, 0f, 3.8f, 36f, 30f, 10f, 6f, 57f / 159f, 100f / 159f);
-        viking_magic[INDEX_MAGIC_BLAST] = new SonicBlastFactory(2.57f, 0f, 3.8f, 36f, 17f, 2f, 150, 30, .8f, 6f,
-                57f / 159f, 100f / 159f);
+        viking_magic[INDEX_MAGIC_STUN] = new StunFactory(2.57f, 0f, 3.8f, toot.radius(), toot.stun_seconds_closest(),
+                toot.stun_seconds_farthest(), 6f, 57f / 159f, 100f / 159f);
+        viking_magic[INDEX_MAGIC_BLAST] = new SonicBlastFactory(2.57f, 0f, 3.8f, roar.radius(),
+                roar.hit_chance_closest(), roar.hit_chance_farthest(), roar.damage_closest(), roar.damage_farthest(),
+                roar.seconds(), 6f, 57f / 159f, 100f / 159f);
 
         ProgressForm.progress(1f / num_progress);
         GUIIcons icons = GUIIcons.getIcons();

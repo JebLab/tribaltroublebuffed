@@ -37,8 +37,10 @@ public final class PresetCard extends RadioButtonGroupElement {
         delete_button = new DeleteButton(this);
         delete_button.setPos(width - delete_button.getWidth() - DELETE_INSET,
                 height - delete_button.getHeight() - DELETE_INSET);
-        addChild(delete_button);
-        delete_button.addMouseClickListener((_, _, _, _) -> delete_listener.presetDeleted(preset));
+        if (!preset.isBuiltIn()) {
+            addChild(delete_button);
+            delete_button.addMouseClickListener((_, _, _, _) -> delete_listener.presetDeleted(preset));
+        }
 
         setCanFocus(true);
     }
