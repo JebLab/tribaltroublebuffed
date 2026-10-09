@@ -46,6 +46,7 @@ import com.oddlabs.tt.net.PlayerSlot;
 import com.oddlabs.tt.procedural.Landscape;
 import com.oddlabs.tt.render.Renderer;
 import com.oddlabs.tt.ruleset.Ruleset;
+import com.oddlabs.tt.ruleset.RulesetStats.Features;
 import com.oddlabs.tt.util.ServerMessageBundler;
 import com.oddlabs.tt.util.Utils;
 import com.oddlabs.tt.util.WordsEncoding;
@@ -123,6 +124,7 @@ public final class TerrainMenu extends Group {
     private final @Nullable RosterPanel roster_panel;
     private final @NonNull ModeAndPresetsPanel mode_and_presets;
     private final @NonNull ScrollablePulldownMenu<Void> pulldown_menu_slots;
+    private final @NonNull PulldownButton<Void> pb_player_slots;
     private static final int DEFAULT_PLAYER_COUNT = 6;
     private int player_count = DEFAULT_PLAYER_COUNT;
     private int seed;
@@ -289,7 +291,10 @@ public final class TerrainMenu extends Group {
             pm_ruleset.addItem(new PulldownItem<>(ruleset.getDisplayName(), ruleset));
         }
         var pb_ruleset = new PulldownButton<>(gui_root, pm_ruleset, Ruleset.SKIRMISH_DEFAULT.ordinal(), 150);
-        pm_ruleset.addItemChosenListener((_, _) -> markModified());
+        pm_ruleset.addItemChosenListener((_, _) -> {
+            enforceRulesetFeatures();
+            markModified();
+        });
         group_ruleset.addChild(pb_ruleset);
         label_ruleset.place();
         pb_ruleset.place(label_ruleset, RIGHT_MID);
@@ -359,10 +364,10 @@ public final class TerrainMenu extends Group {
         for (int i = DEFAULT_PLAYER_COUNT; i <= MatchmakingServerInterface.MAX_PLAYERS; i++) {
             pulldown_menu_slots.addItem(new PulldownItem<>(Integer.toString(i)));
         }
-        var pulldown_player_slots = new PulldownButton<>(gui_root, pulldown_menu_slots, 0, 150);
-        group_num_players.addChild(pulldown_player_slots);
+        pb_player_slots = new PulldownButton<>(gui_root, pulldown_menu_slots, 0, 150);
+        group_num_players.addChild(pb_player_slots);
         label_player_slots.place();
-        pulldown_player_slots.place(label_player_slots, RIGHT_MID);
+        pb_player_slots.place(label_player_slots, RIGHT_MID);
         group_num_players.compileCanvas();
         advanced.addChild(group_num_players);
 
@@ -392,7 +397,7 @@ public final class TerrainMenu extends Group {
         button_mapcode.addMouseClickListener(new MapcodeListener());
         button_advanced = new HorizButton(i18n("advanced"), 130);
         button_advanced.addMouseClickListener((_, _, _, _) -> gui_root.addModalForm(new AdvancedSettingsForm(
-                advanced_settings, Globals.SHIPS_ENABLED,
+                advanced_settings, Globals.SHIPS_ENABLED && getChosenRuleset().getStats().features().ships(),
                 Globals.SHIPS_ENABLED && ARCHIPELAGO[pulldown_size.getChosenItemIndex()],
                 this::applyAdvancedSettings)));
 
@@ -450,6 +455,7 @@ public final class TerrainMenu extends Group {
         var playersChangedListener = new PulldownUpdatePlayersChangedListener(standard);
         playersChangedListener.setCurrentGroup(group_race_team);
         pulldown_menu_slots.addItemChosenListener(playersChangedListener);
+        pulldown_menu_slots.addItemChosenListener((_, _) -> enforceRulesetFeatures());
 
         // Place objects
         label_headline.place();
@@ -464,6 +470,7 @@ public final class TerrainMenu extends Group {
 
         // set standard game
         pulldown_size.addItemChosenListener(new PulldownUpdateSizeListener());
+        pulldown_size.addItemChosenListener((_, _) -> enforceRulesetFeatures());
         pm_terrain_type.addItemChosenListener(new PulldownUpdateTerrainListener());
         for (int i = 0; i < player_count; i++) {
             difficulty_pulldown_menus[i].addItemChosenListener(new PulldownUpdateHardListener());
@@ -482,17 +489,48 @@ public final class TerrainMenu extends Group {
 
         cb_rated.addCheckBoxListener(marked -> {
             // Rated games play with the default limits so ratings stay comparable.
-            button_advanced.setDisabled(marked);
+            enforceRulesetFeatures();
             markModified();
         });
+        enforceRulesetFeatures();
         initialized = true;
     }
 
     private void applyAdvancedSettings(AdvancedSettingsForm.@NonNull Values values) {
         if (!values.equals(advanced_settings)) {
             advanced_settings = values;
+            enforceRulesetFeatures();
             markModified();
         }
+    }
+
+    /**
+     * Holds the world options to what the chosen ruleset offers; under Classic that is the 2004 game: no boats, no
+     * Enormous or Archipelago islands, six players, fixed limits. Runs after every change that could step outside them
+     * (ruleset, island size, player count, Advanced..., and through those a preset or a map code) and once more when
+     * the game starts. A choice the ruleset does not offer snaps back to the nearest one it does.
+     */
+    private void enforceRulesetFeatures() {
+        Features features = getChosenRuleset().getStats().features();
+        int size = pulldown_size.getChosenItemIndex();
+        if ((size == Game.SIZE_ENORMOUS && !features.enormous_islands())
+                || (size == Game.SIZE_ARCHIPELAGO && !features.archipelago())) {
+            pulldown_size.chooseItem(Game.SIZE_LARGE);
+        }
+        int max_players = Math.clamp(features.max_players(), DEFAULT_PLAYER_COUNT,
+                MatchmakingServerInterface.MAX_PLAYERS);
+        if (player_count > max_players) {
+            pulldown_menu_slots.chooseItem(max_players - DEFAULT_PLAYER_COUNT);
+        }
+        pb_player_slots.setDisabled(max_players == DEFAULT_PLAYER_COUNT);
+        AdvancedSettingsForm.Values defaults = AdvancedSettingsForm.Values.defaults();
+        boolean limits = features.adjustable_limits();
+        advanced_settings = new AdvancedSettingsForm.Values(
+                limits ? advanced_settings.maxUnits() : defaults.maxUnits(),
+                limits ? advanced_settings.startingUnits() : defaults.startingUnits(),
+                limits ? advanced_settings.maxBuildings() : defaults.maxBuildings(),
+                advanced_settings.ships() && features.ships());
+        button_advanced.setDisabled(cb_rated.isMarked() || (!limits && !features.ships()));
     }
 
     private void markModified() {
@@ -810,6 +848,7 @@ public final class TerrainMenu extends Group {
     }
 
     public boolean startGame() {
+        enforceRulesetFeatures();
         int hills = slider_hills.getValue();
         int vegetation_amount = slider_vegetation.getValue();
         int supplies_amount = slider_supplies.getValue();

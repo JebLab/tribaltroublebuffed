@@ -74,6 +74,14 @@ final class RulesetTest {
         assertEquals(new RulesetStats.RavagingRoarStats(36f, 17f, 2f, 150, 30, .8f), spells.ravaging_roar());
     }
 
+    /** 2004 had no boats, Small/Medium/Large islands only, six players (MAX_PLAYERS = 6) and fixed limits. */
+    @Test
+    void classicOffersOnly2004WorldOptions() {
+        assertEquals(new RulesetStats.Features(false, false, false, 6, false), Ruleset.CLASSIC.getStats().features());
+        assertEquals(new RulesetStats.Features(true, true, true, 12, true),
+                Ruleset.RESURRECTED.getStats().features());
+    }
+
     /** 2004's Player hard-coded 20 starting units, 250 units and 20 buildings; the Classic preset must keep them. */
     @Test
     void classicPresetUses2004Limits() {

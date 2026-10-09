@@ -10,11 +10,11 @@ A *ruleset* is the set of gameplay numbers a game is played with. Three ship wit
 
 The skirmish menu preselects Buffed. Everything else plays under **Resurrected**: the campaign and tutorials (their islands were tuned for those numbers) and multiplayer (every client and the inherited servers expect them, so the pulldown is hidden there). Presets saved before rulesets existed load as Resurrected.
 
-The ruleset only sets numbers. World options stay separate: island size, Archipelago, boats, 12 players and the unit/building limits under *Advanced...* work with any ruleset. The built-in presets pick a medium island, the default limits, no boats, and you against one Easy AI.
+A ruleset also decides which of Resurrected's world options the menu offers (the `features` block). **Classic is the 2004 game only**: no boats, no Enormous or Archipelago islands, six players, and the fixed limits of 20 starting units, 250 units and 20 buildings (the *Advanced...* button is greyed out). A choice Classic does not offer snaps back to the nearest one it does: Large island, six players. Resurrected and Buffed offer everything. Interface improvements (rebindable keys, accessibility options, control groups) are not rule changes and stay available under every ruleset. The built-in presets pick a medium island, the default limits, no boats, and you against one Easy AI.
 
 ## Classic and 2004
 
-Every unit, building, weapon and spell number in the 2004 source (`oddlabs/master`) was compared with this fork's base on 9 October 2026, along with every other gameplay constant in `model/`, `model/behaviour/`, `model/weapon/`, `player/` and `landscape/`: Armory recipes, build and deploy times, hit points per log, Quarters reproduction, spell charge times (40 s / 70 s), the tower's +8 range and triple hit, chicken bounce, harvest rates, resource node sizes and chicken flocks. **Resurrected changed none of them**, and its new limits default to the 2004 values (20 starting units, 250 units, 20 buildings). So `classic.json` overrides nothing today; `RulesetTest` pins it to the 2004 literals so it stays correct if the base file moves.
+Every unit, building, weapon and spell number in the 2004 source (`oddlabs/master`) was compared with this fork's base on 9 October 2026, along with every other gameplay constant in `model/`, `model/behaviour/`, `model/weapon/`, `player/` and `landscape/`: Armory recipes, build and deploy times, hit points per log, Quarters reproduction, spell charge times (40 s / 70 s), the tower's +8 range and triple hit, chicken bounce, harvest rates, resource node sizes and chicken flocks. **Resurrected changed none of them**, and its new limits default to the 2004 values (20 starting units, 250 units, 20 buildings). So `classic.json` overrides no number, only the `features` (above); `RulesetTest` pins it to the 2004 literals so it stays correct if the base file moves.
 
 What Classic does *not* restore is engine behaviour changed since 2004. These are code changes, not numbers, and most are fixes:
 
@@ -40,6 +40,8 @@ Reverting any of these behind Classic is possible later, per item, if it turns o
 - `RulesetTest` pins Resurrected to the literals `RacesResources` had at the fork point and Classic to the 2004 source, bit for bit.
 
 ## Fields
+
+**Features** (`features`): `ships`, `enormous_islands`, `archipelago` (true/false), `max_players` (6–12), `adjustable_limits` (false = the 2004 limits). `TerrainMenu.enforceRulesetFeatures()` applies them.
 
 Every number is per race (`natives`, `vikings`) except the spells, which belong to one race each.
 

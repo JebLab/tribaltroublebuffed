@@ -262,3 +262,9 @@ server/logs/
 !/assets/font/README
 /.gradle_local/
 **/steam_appid.txt
+
+# Claude Code: per-machine settings (chain mode, permissions), session worktrees, chain gate files
+.claude/settings.local.json
+.claude/worktrees/
+reports/STOP_CHAIN
+reports/REVIEW_DUE

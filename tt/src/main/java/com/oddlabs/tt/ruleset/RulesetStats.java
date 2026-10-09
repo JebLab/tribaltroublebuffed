@@ -7,10 +7,26 @@ import org.jspecify.annotations.NonNull;
  * that are tied to the models (animation timings, attachment offsets, footprints, selection shapes) stay in
  * {@code RacesResources}.
  */
-public record RulesetStats(@NonNull RaceStats natives, @NonNull RaceStats vikings, @NonNull SpellStats spells) {
+public record RulesetStats(@NonNull Features features, @NonNull RaceStats natives, @NonNull RaceStats vikings,
+                           @NonNull SpellStats spells) {
 
     public @NonNull RaceStats race(boolean vikings) {
         return vikings ? this.vikings : this.natives;
+    }
+
+    /**
+     * Which world options the skirmish menu offers under this ruleset. Classic turns off everything the 2004 game did
+     * not have.
+     *
+     * @param ships             boats (the Advanced... checkbox)
+     * @param enormous_islands  the 2048 m island size
+     * @param archipelago       the Archipelago island size (always plays with boats)
+     * @param max_players       player slots, 6 to 12
+     * @param adjustable_limits the starting units, unit and building limits under Advanced...; when false the game
+     *                          uses the 2004 values (20, 250, 20)
+     */
+    public record Features(boolean ships, boolean enormous_islands, boolean archipelago, int max_players,
+                           boolean adjustable_limits) {
     }
 
     public record RaceStats(@NonNull UnitStats peon, @NonNull UnitStats rock_warrior, @NonNull UnitStats iron_warrior,

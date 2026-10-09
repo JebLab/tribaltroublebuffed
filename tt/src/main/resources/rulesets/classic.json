@@ -1,4 +1,5 @@
 {
-  "description": "The numbers of the 2004 Oddlabs release. Every unit, building, weapon and spell number was checked against the Oddlabs source (oddlabs/master) and none was changed by Resurrected, so this file overrides nothing; RulesetTest pins it to the 2004 values in case the base ever moves. Engine changes since 2004 that this ruleset does not revert are listed in docs/rulesets.md.",
-  "extends": "resurrected"
+  "description": "The 2004 Oddlabs release: its numbers and only its world options. Every unit, building, weapon and spell number was checked against the Oddlabs source (oddlabs/master) and none was changed by Resurrected, so only Resurrected's additions are switched off here: boats, Enormous and Archipelago islands, more than 6 players, and adjustable limits. RulesetTest pins the numbers to the 2004 values in case the base ever moves. Engine changes since 2004 that this ruleset does not revert are listed in docs/rulesets.md.",
+  "extends": "resurrected",
+  "features": { "ships": false, "enormous_islands": false, "archipelago": false, "max_players": 6, "adjustable_limits": false }
 }

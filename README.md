@@ -56,7 +56,7 @@ Settings, campaign saves and per-run logs are written next to the game in portab
 | `common` | code shared by the client and the inherited servers |
 | `tools` | asset conversion tools and scripts |
 | `server`, `servlet`, `database` | Resurrected's multiplayer servers, inherited and unused |
-| `docs` | plan, milestones, design notes, inherited documentation |
+| `docs` | plan, milestones, session rules and decisions, next-session prompts, rulesets, inherited documentation |
 
 ## Credits and license
 
