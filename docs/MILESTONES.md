@@ -16,7 +16,7 @@ Definition of done for every milestone: it builds (`gradlew build`), the game ru
 | M6 | **Shield and Torch gear** ✅ | Two Armory recipes and the units they create; burning-building mechanic; AI deploy rules. | Units deploy from the Armory and behave per `docs/design/`. |
 | M7 | **Market and Palisade/Gate** ✅ | Resource conversion building; wall segments and gates with pathfinding support. | Walls block, gates admit allies, the Market converts. |
 | M8 | **Great Tower, Spirit Lodge / Mead Hall, Champion** | Three-thrower tower; the Lodge (shelter, spell charge bonus, trains the Champion); the Champion unit. | All buildable; Champion capped at five. |
-| M9 | **Drum/Horn and Net/Snare gear; neutral fauna** | Support aura unit; chicken-catching and snares; crabs, monkeys, boars/wolves. | In game under Buffed. |
+| M9 | **Drum/Horn and Net/Snare gear; neutral fauna** | First, Josh's balance answers D-09 and D-10: torch `building_damage` 4, shield `defense_chance` 0.7, in `buffed.json` and the numbers `resurrected.json` holds for it (`SIM_VERSION` bump; only the Buffed traces move). Then a support aura unit; chicken-catching and snares; crabs, monkeys, boars/wolves. | In game under Buffed. |
 | M10 | **New chieftain spells** | Two per race in a third slot; campaign-style unlock flag. | Castable; AI uses them on Hard. |
 | M11 | **Single-player game modes** | King of the Hill, Treasure Hunt, Hold Out (waves) and Chicken Rush via the mode registry, playable against AI. | Selectable in the Single-player menu with win conditions. |
 | M12 | **Minimap** | Real minimap with pings, alerts and click-to-move; replaces nothing (map mode stays). | Usable at Enormous size. |
@@ -29,7 +29,7 @@ Definition of done for every milestone: it builds (`gradlew build`), the game ru
 | M19 | **Accessibility: cognition and onboarding** | Tribalpedia, tutorial refresh with objectives panel, font-size tiers, dyslexia-friendly font. | Options present and working. |
 | M20 | **Gamepad** | Full controller scheme (cursor, radial menu, camera) with 16:10 layout checks. | A skirmish is playable without mouse or keyboard. |
 | M21 | **Display and QoL polish** | Desktop-resolution default, borderless, ultrawide menu art handling, select-all hotkeys, triple-click, zoom range. | Verified at 2560×1440 and 21:9. |
-| M22 | **Packaging and distribution** | Windows/macOS/Linux packages from CI, itch.io page, checksums, Flathub/winget manifests. | Downloads for all three platforms on the release page. |
+| M22 | **Packaging** | Private use (D-01, D-06): the Windows package from CI on GitHub releases, with SHA-256 checksums. No itch.io, Flathub, winget, macOS or Linux packages. | A tagged release carries the Windows package and its checksum. |
 | M23 | **Engine convergence I** | Port the restoration fork's module split and null-safety tooling. | Builds green; tests pass. |
 | M24 | **Engine convergence II** | Port its rendering performance work; profile 12 AI on an Enormous island. | Measurable frame-time improvement. |
 | M25 | **Mod support** | Mod folders overriding data files, assets and strings. | A sample mod changes a unit's stats and texture. |

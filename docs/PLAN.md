@@ -49,7 +49,7 @@ What our own Milestone 0 achieved (Java 21 + LWJGL 2.9.3 on the 2015 code, `tt.c
 Consequences that shape the rest of the plan:
 
 - Their matchmaking servers, Discord bot and Steam app are theirs, and a modified client would be refused by their server anyway (it checks `API_VERSION` and `SIM_VERSION`). **Buffed is a single-player project**: the inherited multiplayer code stays in the tree unmaintained, and LAN/direct-IP play and a self-hosted server are parked (M5, F2).
-- Our builds ship through GitHub Releases and itch.io. Steam integration is switched off in the code (`Globals.STEAM_ENABLED = false`).
+- Our builds ship only through GitHub Releases: the fork is for private use (Josh, 9 October 2026; DECISIONS.md D-01, D-06). Steam integration is switched off in the code (`Globals.STEAM_ENABLED = false`).
 - Their Google-Sheet translation workflow is theirs; we maintain the `.properties` files in-repo.
 
 Alternatives considered: contributing upstream (rejected — Josh prefers an independent project), and continuing from the 2015 code (two years and ~1,900 commits behind; not sensible).
@@ -59,7 +59,7 @@ Principles that apply to everything below:
 1. **Classic is sacred.** Every new unit, building, spell, mode or rule sits behind a flag and a *ruleset* preset chosen when starting a game: **Classic** (2004 numbers), **Resurrected** (their defaults as of our base), **Buffed** (our content).
 2. **Determinism is law.** The simulation is lockstep: every client runs the same world and compares checksums (Adler32 every 500 ticks). Any gameplay change must pass the headless simulation tests (Part 1, M4) before it merges.
 3. **Match the style.** Section 4.1 is a style guide derived from the original assets. New art and names should be indistinguishable in spirit from Oddlabs' work.
-4. **License clean.** Code GPL-2; new art and audio under CC-BY-SA 4.0 (or GPL-2) with attribution; no proprietary fonts or stock sounds of unknown origin. "Tribal Trouble" is an Oddlabs trademark that Resurrected uses with the original developers' blessing; *Tribal Trouble Buffed* should ask for the same (one email to the original developers) or be ready to rename. Credits to Oddlabs and to the Resurrected and restoration forks stay in the game.
+4. **License clean.** Code GPL-2; new art and audio under CC-BY-SA 4.0 (or GPL-2) with attribution; no proprietary fonts or stock sounds of unknown origin. "Tribal Trouble" is an Oddlabs trademark that Resurrected uses with the original developers' blessing; *Tribal Trouble Buffed* is for private use, so it does not ask (D-01); a public release would need that email or a rename first. Credits to Oddlabs and to the Resurrected and restoration forks stay in the game.
 5. **AI first-class.** No unit or building ships until the three AI difficulties know how to build and use it (the AI is table-driven per difficulty in `AdvancedAI`; extend the tables).
 6. **Design before code.** Each content item gets a one-page design note in `docs/design/` before implementation.
 
