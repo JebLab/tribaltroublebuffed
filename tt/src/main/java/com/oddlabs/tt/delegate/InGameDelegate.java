@@ -136,6 +136,14 @@ public abstract class InGameDelegate extends CameraDelegate<Camera> {
                 new Crab(world, cell.getGridX(), cell.getGridY());
             return true;
         }
+        // Shift+F1 charges the chieftain's spells where the ruleset has the third slot (Buffed).
+        if (actions.contains(GameAction.CHEAT_18) && viewer.getWorld().getRuleset().getStats().features().new_spells()
+                && viewer.getLocalPlayer().hasActiveChieftain()) {
+            Unit chieftain = viewer.getLocalPlayer().getChieftain();
+            for (int magic = 0; magic < RacesResources.NUM_MAGIC; magic++)
+                chieftain.increaseMagicEnergy(magic, 1000);
+            return true;
+        }
         if (actions.contains(GameAction.CHEAT_5)) {
             // F5 creates a chieftain at the center of the view unless the player already has one or is training one
             if (!viewer.getLocalPlayer().hasActiveChieftain() && !viewer.getLocalPlayer().isTrainingChieftain()) {

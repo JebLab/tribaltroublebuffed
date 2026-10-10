@@ -4,6 +4,7 @@ import com.oddlabs.geometry.AnimationInfo;
 import com.oddlabs.tt.audio.AudioParameters;
 import com.oddlabs.tt.audio.AudioPlayer;
 import com.oddlabs.tt.landscape.LandscapeTarget;
+import com.oddlabs.tt.model.behaviour.CastController;
 import com.oddlabs.tt.model.behaviour.DefendController;
 import com.oddlabs.tt.model.behaviour.DieBehaviour;
 import com.oddlabs.tt.model.behaviour.DieController;
@@ -23,7 +24,9 @@ import com.oddlabs.tt.model.behaviour.WalkController;
 import com.oddlabs.tt.model.weapon.Champion;
 import com.oddlabs.tt.model.weapon.Drum;
 import com.oddlabs.tt.model.weapon.GearFactory;
+import com.oddlabs.tt.model.weapon.MagicFactory;
 import com.oddlabs.tt.model.weapon.Net;
+import com.oddlabs.tt.model.weapon.TargetedMagicFactory;
 import com.oddlabs.tt.model.weapon.WeaponFactory;
 import com.oddlabs.tt.particle.BalancedParametricEmitter;
 import com.oddlabs.tt.particle.StunFunction;
@@ -74,10 +77,14 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
     private final @Nullable UnitSupplyContainer supply_container;
     private final @Nullable String name;
     private final @NonNull PathTracker path_tracker;
-    private final float[] magic_energy = new float[2];
+    // The 2004 spells' charges, then Buffed's third slot (two spells sharing one charge length).
+    private final float[] magic_energy = new float[RacesResources.NUM_MAGIC];
     private int last_magic_index = -1;
 
     private @Nullable BalancedParametricEmitter stun_marker;
+    // Buffed: seconds left before Jolly Jungle's vines let the unit walk again.
+    private float root_seconds;
+    private @Nullable BalancedParametricEmitter root_marker;
     private int hit_points;
     private @NonNull int animation = Animation.IDLING;
     private float anim_speed;
@@ -435,6 +442,9 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
         if (isDead() || mounted)
             reinsert();
         getOwner().getWorld().updateGlobalChecksum(animation);
+        // Buffed: Jolly Jungle's vines let go.
+        if (root_seconds > 0f)
+            root_seconds -= t;
 
         if (getAbilities().hasAbilities(Abilities.MAGIC)) {
             // Buffed: a Lodge of the chieftain's team nearby charges the spells faster; without one, exactly as before.
@@ -448,9 +458,17 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
 
     public final void increaseMagicEnergy(int index, float amount) {
         magic_energy[index] += amount;
-        if (magic_energy[index] > MAX_MAGIC_ENERGY[index]) {
-            magic_energy[index] = MAX_MAGIC_ENERGY[index];
+        float max = maxMagicEnergy(index);
+        if (magic_energy[index] > max) {
+            magic_energy[index] = max;
         }
+    }
+
+    /** Seconds a spell takes to charge: 40 and 70 for the 2004 spells, the ruleset's third slot for Buffed's. */
+    private float maxMagicEnergy(int index) {
+        if (index < MAX_MAGIC_ENERGY.length)
+            return MAX_MAGIC_ENERGY[index];
+        return getOwner().getWorld().getRuleset().getStats().spells().third_slot_seconds();
     }
 
     @Override
@@ -486,6 +504,10 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
         if (stun_marker != null) {
             stun_marker.done();
             stun_marker = null;
+        }
+        if (root_marker != null) {
+            root_marker.done();
+            root_marker = null;
         }
         // Buffed: a drummer's aura and a catcher's snares end with it (in the world: dead, or gone into a building).
         if (isDrummer())
@@ -622,6 +644,35 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
         stun_marker = createStunStar(x, y, z, time, (float) Math.PI / 2);
         pushController(new StunController(this, time));
         forceDecide();
+    }
+
+    /**
+     * Buffed's Jolly Jungle (docs/design/spells.md): for {@code seconds} the unit cannot walk, but still fights,
+     * gathers and builds within reach and keeps its dodge. Rooting a rooted unit keeps the longer time.
+     */
+    public final void root(float seconds) {
+        assert !isDead();
+        if (seconds <= root_seconds)
+            return;
+        root_seconds = seconds;
+        if (root_marker != null)
+            root_marker.done();
+        // Leaves circling the unit's feet while the vines hold it.
+        float z = getOwner().getWorld().getHeightMap().getNearestHeight(getPositionX(), getPositionY()) + .3f;
+        root_marker = new BalancedParametricEmitter(getOwner().getWorld(),
+                new StunFunction(.7f, .1f), new Vector3f(getPositionX(), getPositionY(), z),
+                (float) Math.PI / 3, 5f, (float) Math.PI * 2, (float) Math.PI * 2,
+                6, 0f, 2f,
+                new Vector4f(1f, 1f, 1f, 1f), new Vector4f(0f, 0f, 0f, 0f),
+                new Vector3f(.22f, .22f, .22f), new Vector3f(0f, 0f, 0f), seconds,
+                GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA,
+                getOwner().getWorld().getRacesResources().getLeafTextures(),
+                getOwner().getWorld().getAnimationManagerGameTime());
+    }
+
+    /** Whether Jolly Jungle's vines hold the unit where it stands (Buffed). */
+    public final boolean isRooted() {
+        return root_seconds > 0f;
     }
 
     /** Whether the unit carries a weapon from the Armory: a thrown one, or Buffed's gear. */
@@ -801,6 +852,19 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
                 if (isNetter())
                     pushController(new SnareController(this, target));
                 break;
+            case THOR:
+                // Buffed: the chieftain casts Hammer of Thor at an enemy; the rest of a selection attacks it.
+                if (isChieftain()) {
+                    int magic_index = getTargetedMagicIndex();
+                    if (magic_index >= 0 && canDoMagic(magic_index) && target instanceof Selectable<?> selectable
+                            && getOwner().isEnemy(selectable.getOwner()))
+                        pushController(new CastController(this, magic_index, selectable));
+                } else if (canAttack(target, true)) {
+                    pushController(new HuntController(this, (Hittable) target));
+                } else {
+                    walkToTarget(target, true);
+                }
+                break;
             default:
                 IO.println("Invalid action: " + action);
                 break;
@@ -820,20 +884,47 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
 
     public final boolean canDoMagic(int magic_index) {
         return !isDead() && magic_index >= 0 && magic_index < RacesResources.NUM_MAGIC && getOwner().canDoMagic(
-                magic_index) && magic_energy[magic_index] == MAX_MAGIC_ENERGY[magic_index];
+                magic_index) && magic_energy[magic_index] == maxMagicEnergy(magic_index);
     }
 
+    /**
+     * Casts a spell around the chieftain. A spell cast at a target (Buffed's Hammer of Thor) needs {@link #doMagicAt}.
+     */
     public final void doMagic(int magic_index, boolean clear_stack) {
         if (canDoMagic(magic_index)) {
-            if (clear_stack)
-                clearControllerStack();
-            pushController(new MagicController(this, getOwner().getRace().getMagicFactory(magic_index)));
-            Arrays.fill(magic_energy, 0f);
-            last_magic_index = magic_index;
-
-            // stats
-            getOwner().magicCast();
+            MagicFactory factory = getOwner().getRace().getMagicFactory(magic_index);
+            if (factory instanceof TargetedMagicFactory)
+                return;
+            cast(magic_index, factory, clear_stack);
         }
+    }
+
+    /** Buffed's Hammer of Thor: casts a spell at a target in its range (CastController walks there first). */
+    public final void doMagicAt(int magic_index, @NonNull Selectable<?> target) {
+        if (canDoMagic(magic_index)
+                && getOwner().getRace().getMagicFactory(magic_index) instanceof TargetedMagicFactory factory) {
+            cast(magic_index, factory.aimedAt(target), false);
+        }
+    }
+
+    private void cast(int magic_index, @NonNull MagicFactory factory, boolean clear_stack) {
+        if (clear_stack)
+            clearControllerStack();
+        pushController(new MagicController(this, factory));
+        Arrays.fill(magic_energy, 0f);
+        last_magic_index = magic_index;
+
+        // stats
+        getOwner().magicCast(magic_index);
+    }
+
+    /** The spell this chieftain casts at a target (Buffed's Hammer of Thor), or -1 when its race has none. */
+    public final int getTargetedMagicIndex() {
+        for (int i = 0; i < RacesResources.NUM_MAGIC; i++) {
+            if (getOwner().getRace().getMagicFactory(i) instanceof TargetedMagicFactory)
+                return i;
+        }
+        return -1;
     }
 
     public final int getLastMagicIndex() {
@@ -841,7 +932,7 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
     }
 
     public final float getMagicProgress(int magic_index) {
-        return magic_energy[magic_index] / MAX_MAGIC_ENERGY[magic_index];
+        return magic_energy[magic_index] / maxMagicEnergy(magic_index);
     }
 
     public final void switchAnimation(float anim_speed, @NonNull int animation) {

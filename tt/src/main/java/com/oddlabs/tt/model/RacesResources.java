@@ -9,14 +9,18 @@ import com.oddlabs.tt.gui.GUIIcons;
 import com.oddlabs.tt.landscape.TreeSupply;
 import com.oddlabs.tt.model.weapon.Champion;
 import com.oddlabs.tt.model.weapon.Drum;
+import com.oddlabs.tt.model.weapon.FjordFogFactory;
 import com.oddlabs.tt.model.weapon.GearFactory;
+import com.oddlabs.tt.model.weapon.HammerOfThorFactory;
 import com.oddlabs.tt.model.weapon.InstantHitFactory;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.IronSpearWeapon;
+import com.oddlabs.tt.model.weapon.JollyJungleFactory;
 import com.oddlabs.tt.model.weapon.LightningCloudFactory;
 import com.oddlabs.tt.model.weapon.MagicFactory;
 import com.oddlabs.tt.model.weapon.Net;
 import com.oddlabs.tt.model.weapon.PoisonFogFactory;
+import com.oddlabs.tt.model.weapon.PoultryPanicFactory;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockSpearWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
@@ -44,8 +48,12 @@ import com.oddlabs.tt.resource.SpriteFile;
 import com.oddlabs.tt.resource.TextureFile;
 import com.oddlabs.tt.ruleset.RulesetStats;
 import com.oddlabs.tt.ruleset.RulesetStats.CracklingCloudStats;
+import com.oddlabs.tt.ruleset.RulesetStats.FjordFogStats;
 import com.oddlabs.tt.ruleset.RulesetStats.GreatTowerStats;
+import com.oddlabs.tt.ruleset.RulesetStats.HammerOfThorStats;
+import com.oddlabs.tt.ruleset.RulesetStats.JollyJungleStats;
 import com.oddlabs.tt.ruleset.RulesetStats.LodgeStats;
+import com.oddlabs.tt.ruleset.RulesetStats.PoultryPanicStats;
 import com.oddlabs.tt.ruleset.RulesetStats.RaceStats;
 import com.oddlabs.tt.ruleset.RulesetStats.RavagingRoarStats;
 import com.oddlabs.tt.ruleset.RulesetStats.SpellStats;
@@ -87,11 +95,17 @@ public final class RacesResources {
     public static final int RACE_NATIVES = 0;
     public static final int RACE_VIKINGS = 1;
 
-    public static final int NUM_MAGIC = 2;
+    // The 2004 spells, then Buffed's third slot (docs/design/spells.md): two spells per race sharing one charge length.
+    public static final int NUM_MAGIC = 4;
     public static final int INDEX_MAGIC_POISON = 0;
     public static final int INDEX_MAGIC_LIGHTNING = 1;
     public static final int INDEX_MAGIC_STUN = 0;
     public static final int INDEX_MAGIC_BLAST = 1;
+    public static final int FIRST_THIRD_SLOT_MAGIC = 2;
+    public static final int INDEX_MAGIC_JUNGLE = 2;
+    public static final int INDEX_MAGIC_PANIC = 3;
+    public static final int INDEX_MAGIC_HAMMER = 2;
+    public static final int INDEX_MAGIC_FOG = 3;
     public static final float THROW_RANGE = 6f;
 
     public static final GeneratorHalos DEFAULT_SHADOW_DESC = new GeneratorHalos(128,
@@ -114,12 +128,15 @@ public final class RacesResources {
     private final @NonNull TextureKey lightning_texture;
     private final @NonNull TextureKey[] note_textures = new TextureKey[8];
     private final @NonNull TextureKey[] star_textures = new TextureKey[1];
+    private final @NonNull TextureKey[] leaf_textures = new TextureKey[1];
+    private final @NonNull TextureKey[] feather_textures = new TextureKey[1];
     private final @NonNull Audio @NonNull [] tree_fall_sound;
     private final @NonNull Audio @NonNull [] building_hit_sound;
     private final @NonNull Audio gas_sound;
     private final @NonNull Audio bubbling_sound;
     private final @NonNull Audio lightning_sound;
     private final @NonNull Audio cloud_sound;
+    private final @NonNull Audio fog_sound;
     private final @NonNull Audio @NonNull [] stun_sound;
     private final @NonNull Audio @NonNull [] blast_lur_sound;
     private final @NonNull Audio blast_rumble_sound;
@@ -533,6 +550,19 @@ public final class RacesResources {
                 GL11.GL_LINEAR,
                 org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE,
                 org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE));
+        // Buffed's third-slot spells: Jolly Jungle's leaves and Poultry Panic's feathers.
+        leaf_textures[0] = queues.registerTexture(new TextureFile("/textures/effects/leaf",
+                Globals.COMPRESSED_RGBA_FORMAT,
+                GL11.GL_LINEAR_MIPMAP_LINEAR,
+                GL11.GL_LINEAR,
+                org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE,
+                org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE));
+        feather_textures[0] = queues.registerTexture(new TextureFile("/textures/effects/feather",
+                Globals.COMPRESSED_RGBA_FORMAT,
+                GL11.GL_LINEAR_MIPMAP_LINEAR,
+                GL11.GL_LINEAR,
+                org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE,
+                org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE));
 
         Audio death_peon_sound = Resources.findResource(new AudioFile("/sfx/death_peon.ogg"));
         Audio death_viking1_sound = Resources.findResource(new AudioFile("/sfx/death_viking_warrior1.ogg"));
@@ -560,6 +590,7 @@ public final class RacesResources {
         bubbling_sound = Resources.findResource(new AudioFile("/sfx/bubbling.ogg"));
         lightning_sound = Resources.findResource(new AudioFile("/sfx/flash.ogg"));
         cloud_sound = Resources.findResource(new AudioFile("/sfx/crackling_cloud.ogg"));
+        fog_sound = Resources.findResource(new AudioFile("/sfx/ambient_wind.ogg"));
 
         armory_sound = Resources.findResource(new AudioFile("/sfx/armory.ogg"));
 
@@ -1164,6 +1195,19 @@ public final class RacesResources {
         viking_magic[INDEX_MAGIC_BLAST] = new SonicBlastFactory(2.57f, 0f, 3.8f, roar.radius(),
                 roar.hit_chance_closest(), roar.hit_chance_farthest(), roar.damage_closest(), roar.damage_farthest(),
                 roar.seconds(), 6f, 57f / 159f, 100f / 159f);
+        // Buffed's third slot, on the old spells' animation timings; the Hammer raises the thor pose (75 frames)
+        // and strikes half way. Every ruleset has the factories; only features.new_spells lets a player cast them.
+        JollyJungleStats jungle = spells.jolly_jungle();
+        PoultryPanicStats panic = spells.poultry_panic();
+        HammerOfThorStats hammer = spells.hammer_of_thor();
+        FjordFogStats fog = spells.fjord_fog();
+        native_magic[INDEX_MAGIC_JUNGLE] = new JollyJungleFactory(jungle.radius(), jungle.seconds(), 5f, 80f / 224f,
+                163f / 224f);
+        native_magic[INDEX_MAGIC_PANIC] = new PoultryPanicFactory(panic.radius(), panic.stun_seconds(),
+                panic.chickens(), 5f, 80f / 224f, 163f / 224f);
+        viking_magic[INDEX_MAGIC_HAMMER] = new HammerOfThorFactory(hammer.range(), hammer.damage(), 2.5f, .3f, .5f);
+        viking_magic[INDEX_MAGIC_FOG] = new FjordFogFactory(fog.radius(), fog.seconds(), fog.hit_penalty(), 6f,
+                57f / 159f, 100f / 159f);
 
         ProgressForm.progress(1f / num_progress);
         // The race icons are only drawn; a headless world (no context to load their atlas into) has none.
@@ -1298,6 +1342,19 @@ public final class RacesResources {
 
     public @NonNull TextureKey @NonNull [] getStarTextures() {
         return star_textures;
+    }
+
+    public @NonNull TextureKey @NonNull [] getLeafTextures() {
+        return leaf_textures;
+    }
+
+    public @NonNull TextureKey @NonNull [] getFeatherTextures() {
+        return feather_textures;
+    }
+
+    /** The wind of Buffed's Fjord Fog (the ambient wind clip). */
+    public @NonNull Audio getFogSound() {
+        return fog_sound;
     }
 
     public @NonNull Audio getHarvestSound(Class<? extends Supply> key, @NonNull Random random) {

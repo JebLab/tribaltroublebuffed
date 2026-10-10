@@ -167,6 +167,9 @@ public enum GameAction {
     // Magic
     MAGIC_1,
     MAGIC_2,
+    // Buffed's third slot: Jolly Jungle or Hammer of Thor, Poultry Panic or Fjord Fog
+    MAGIC_3,
+    MAGIC_4,
 
     // Misc
     GAME_SPEED_UP,
@@ -191,6 +194,7 @@ public enum GameAction {
     CHEAT_15,
     CHEAT_16,
     CHEAT_17,
+    CHEAT_18,
 
     // Observer mode
     SPECTATOR_NEXT_PLAYER,

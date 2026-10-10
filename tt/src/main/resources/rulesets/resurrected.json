@@ -1,6 +1,6 @@
 {
-  "description": "Tribal Trouble: Resurrected's numbers at the time of the fork (October 2026). The complete base the other rulesets extend; campaign, tutorials and multiplayer play under it. The chicken_coop, totem, shield_warrior, torch_warrior, torch, market, palisade, gate, champion, great_tower, lodge, drum_warrior, net_warrior, drum and net numbers belong to buildings and units Resurrected does not have: they are here because the base must be complete, and their features flags keep them out of the game. Field reference: docs/rulesets.md.",
-  "features": { "ships": true, "enormous_islands": true, "archipelago": true, "max_players": 12, "adjustable_limits": true, "chicken_coop": false, "totem": false, "shield": false, "torch": false, "market": false, "palisade": false, "great_tower": false, "lodge": false, "drum": false, "net": false, "fauna": false },
+  "description": "Tribal Trouble: Resurrected's numbers at the time of the fork (October 2026). The complete base the other rulesets extend; campaign, tutorials and multiplayer play under it. The chicken_coop, totem, shield_warrior, torch_warrior, torch, market, palisade, gate, champion, great_tower, lodge, drum_warrior, net_warrior, drum and net numbers belong to buildings and units Resurrected does not have, and the spells from third_slot_seconds on to the chieftains' third slot, which it does not have either: they are here because the base must be complete, and their features flags keep them out of the game. Field reference: docs/rulesets.md.",
+  "features": { "ships": true, "enormous_islands": true, "archipelago": true, "max_players": 12, "adjustable_limits": true, "chicken_coop": false, "totem": false, "shield": false, "torch": false, "market": false, "palisade": false, "great_tower": false, "lodge": false, "drum": false, "net": false, "fauna": false, "new_spells": false },
   "natives": {
     "peon": { "hit_points": 1, "speed": 5.0, "defense_chance": 0.0, "hit_chance": 0.2 },
     "rock_warrior": { "hit_points": 1, "speed": 4.0, "defense_chance": 0.5, "hit_chance": 0.5 },
@@ -59,6 +59,11 @@
     "stinking_stew": { "radius": 26.0, "hit_chance": 0.5, "interval": 2.0, "seconds": 20.0, "damage": 10 },
     "crackling_cloud": { "seconds": 22.0, "seconds_per_hit": 1.0, "speed": 8.0, "hit_chance": 1.0, "damage": 30 },
     "terrifying_toot": { "radius": 36.0, "stun_seconds_closest": 30.0, "stun_seconds_farthest": 10.0 },
-    "ravaging_roar": { "radius": 36.0, "hit_chance_closest": 17.0, "hit_chance_farthest": 2.0, "damage_closest": 150, "damage_farthest": 30, "seconds": 0.8 }
+    "ravaging_roar": { "radius": 36.0, "hit_chance_closest": 17.0, "hit_chance_farthest": 2.0, "damage_closest": 150, "damage_farthest": 30, "seconds": 0.8 },
+    "third_slot_seconds": 100.0,
+    "jolly_jungle": { "radius": 20.0, "seconds": 8.0 },
+    "poultry_panic": { "radius": 30.0, "stun_seconds": 3.0, "chickens": 5 },
+    "hammer_of_thor": { "range": 20.0, "damage": 40 },
+    "fjord_fog": { "radius": 30.0, "seconds": 20.0, "hit_penalty": 0.2 }
   }
 }

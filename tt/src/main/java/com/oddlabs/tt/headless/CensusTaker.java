@@ -3,12 +3,14 @@ package com.oddlabs.tt.headless;
 import com.oddlabs.tt.model.ChickenCoop;
 import com.oddlabs.tt.model.LandBuilding;
 import com.oddlabs.tt.model.Race;
+import com.oddlabs.tt.model.RacesResources;
 import com.oddlabs.tt.model.Selectable;
 import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.player.Player;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -29,6 +31,7 @@ final class CensusTaker {
     private final int[] units_lost_to_animals;
     private final int[] loads_stolen;
     private final int[] animals_killed;
+    private final int[][] spells_cast;
 
     CensusTaker(int num_players) {
         for (int i = 0; i < num_players; i++) {
@@ -44,6 +47,7 @@ final class CensusTaker {
         units_lost_to_animals = new int[num_players];
         loads_stolen = new int[num_players];
         animals_killed = new int[num_players];
+        spells_cast = new int[num_players][RacesResources.NUM_MAGIC];
     }
 
     void update(@NonNull Player @NonNull [] players) {
@@ -71,6 +75,8 @@ final class CensusTaker {
             units_lost_to_animals[i] = players[i].getUnitsLostToAnimals();
             loads_stolen[i] = players[i].getLoadsStolen();
             animals_killed[i] = players[i].getAnimalsKilled();
+            for (int magic = 0; magic < RacesResources.NUM_MAGIC; magic++)
+                spells_cast[i][magic] = players[i].getMagics(magic);
         }
     }
 
@@ -80,7 +86,8 @@ final class CensusTaker {
         for (int i = 0; i < chicken_coop_bred.length; i++)
             census.add(new HeadlessMatchResult.Census(completed_buildings.get(i), chicken_coop_bred[i],
                     unit_types.get(i), fires_lit[i], trades_made[i], great_tower_throwers[i], snares_laid[i],
-                    snares_sprung[i], units_lost_to_animals[i], loads_stolen[i], animals_killed[i]));
+                    snares_sprung[i], units_lost_to_animals[i], loads_stolen[i], animals_killed[i],
+                    Arrays.stream(spells_cast[i]).boxed().toList()));
         return census;
     }
 }

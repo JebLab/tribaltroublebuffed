@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
- * M8's and M9's strings exist in all six languages and format with the arguments the game passes (the tooltips are
+ * M8's to M10's strings exist in all six languages and format with the arguments the game passes (the tooltips are
  * built on
  * hover, so a missing key or a broken pattern would only show in game).
  */
@@ -32,9 +32,13 @@ final class BuffedStringsTest {
             Map.entry("net_weapons_tip", new Object[]{}),
             Map.entry("build_drum_tip", new Object[]{"Hornblower", 12f}),
             Map.entry("build_net_tip", new Object[]{"Fowler"}),
-            Map.entry("lay_snare_tip", new Object[]{"D", 3, 4f}));
+            Map.entry("lay_snare_tip", new Object[]{"D", 3, 4f}),
+            Map.entry("jolly_jungle_tip", new Object[]{"V", 20f, 8f, 100f}),
+            Map.entry("poultry_panic_tip", new Object[]{"B", 30f, 3f, 5, 100f}),
+            Map.entry("hammer_of_thor_tip", new Object[]{"V", 20f, 40, 100f}),
+            Map.entry("fjord_fog_tip", new Object[]{"B", 30f, 20f, .2f, 100f}));
     private static final String[] NAMES = {"great_tower", "lodge_natives", "lodge_vikings", "champion_natives", "champion_vikings", "drum_warrior_natives", "drum_warrior_vikings", "net_warrior_natives", "net_warrior_vikings", "snare", "crab", "monkey", "boar", "wolf"};
-    private static final String[] ACTIONS = {"UNIT_BUILD_GREAT_TOWER", "UNIT_BUILD_LODGE", "TRAIN_CHAMPION", "TRAIN_CHAMPION_DEC", "TRAIN_CHAMPION_BATCH", "TRAIN_CHAMPION_BATCH_DEC", "CHEAT_12", "RES_DRUM", "RES_DRUM_DEC", "RES_DRUM_BATCH", "RES_DRUM_BATCH_DEC", "RES_NET", "RES_NET_DEC", "RES_NET_BATCH", "RES_NET_BATCH_DEC", "UNIT_LAY_SNARE", "CHEAT_13", "CHEAT_14", "CHEAT_15", "CHEAT_16", "CHEAT_17"};
+    private static final String[] ACTIONS = {"UNIT_BUILD_GREAT_TOWER", "UNIT_BUILD_LODGE", "TRAIN_CHAMPION", "TRAIN_CHAMPION_DEC", "TRAIN_CHAMPION_BATCH", "TRAIN_CHAMPION_BATCH_DEC", "CHEAT_12", "RES_DRUM", "RES_DRUM_DEC", "RES_DRUM_BATCH", "RES_DRUM_BATCH_DEC", "RES_NET", "RES_NET_DEC", "RES_NET_BATCH", "RES_NET_BATCH_DEC", "UNIT_LAY_SNARE", "CHEAT_13", "CHEAT_14", "CHEAT_15", "CHEAT_16", "CHEAT_17", "MAGIC_3", "MAGIC_4", "CHEAT_18"};
 
     @ParameterizedTest
     @ValueSource(strings = {"en", "da", "de", "es", "it", "pt"})

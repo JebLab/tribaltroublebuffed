@@ -35,11 +35,13 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
      * @param drum              the Armory makes Drums and Horns (the Drummer / Hornblower)
      * @param net               the Armory makes Nets (the Chicken Catcher / Fowler), which lay snares
      * @param fauna             wild animals live on the island (crabs, monkeys, boars or wolves; docs/design/fauna.md)
+     * @param new_spells        chieftains have the third slot's spells: Jolly Jungle and Poultry Panic, Hammer of
+     *                          Thor and Fjord Fog (docs/design/spells.md)
      */
     public record Features(boolean ships, boolean enormous_islands, boolean archipelago, int max_players,
                            boolean adjustable_limits, boolean chicken_coop, boolean totem, boolean shield,
                            boolean torch, boolean market, boolean palisade, boolean great_tower, boolean lodge,
-                           boolean drum, boolean net, boolean fauna) {
+                           boolean drum, boolean net, boolean fauna, boolean new_spells) {
     }
 
     /**
@@ -234,10 +236,15 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
         }
     }
 
-    /** The chieftains' spells, by their in-game names. */
+    /**
+     * The chieftains' spells, by their in-game names. The third slot's four (Buffed, docs/design/spells.md) share one
+     * charge of {@code third_slot_seconds}; the old ones charge in 40 s and 70 s.
+     */
     public record SpellStats(@NonNull StinkingStewStats stinking_stew, @NonNull CracklingCloudStats crackling_cloud,
                              @NonNull TerrifyingTootStats terrifying_toot,
-                             @NonNull RavagingRoarStats ravaging_roar) {
+                             @NonNull RavagingRoarStats ravaging_roar, float third_slot_seconds,
+                             @NonNull JollyJungleStats jolly_jungle, @NonNull PoultryPanicStats poultry_panic,
+                             @NonNull HammerOfThorStats hammer_of_thor, @NonNull FjordFogStats fjord_fog) {
     }
 
     /** Native poison fog: every {@code interval} seconds for {@code seconds}, hits enemies within the radius. */
@@ -255,5 +262,30 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
     /** Viking sonic blast: damage and hit chance fall off from the closest to the farthest target. */
     public record RavagingRoarStats(float radius, float hit_chance_closest, float hit_chance_farthest,
                                     int damage_closest, int damage_farthest, float seconds) {
+    }
+
+    /** Native vines (Buffed): enemies on the ground within the radius cannot walk for {@code seconds}. */
+    public record JollyJungleStats(float radius, float seconds) {
+    }
+
+    /**
+     * Native chicken stampede (Buffed): enemies on the ground within the radius are stunned for {@code stun_seconds},
+     * and {@code chickens} chickens are left that anyone may catch.
+     */
+    public record PoultryPanicStats(float radius, float stun_seconds, int chickens) {
+    }
+
+    /**
+     * Viking bolt (Buffed): the chieftain strikes one enemy unit or building within {@code range}, which loses
+     * {@code damage} hit points without a roll.
+     */
+    public record HammerOfThorStats(float range, int damage) {
+    }
+
+    /**
+     * Viking mist (Buffed): for {@code seconds}, enemies whose throw or blow starts within the radius of where it was
+     * cast hit with {@code hit_penalty} less chance.
+     */
+    public record FjordFogStats(float radius, float seconds, float hit_penalty) {
     }
 }

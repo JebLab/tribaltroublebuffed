@@ -229,6 +229,8 @@ public final class InputManager {
         // Magic
         def(GameAction.MAGIC_1, Key.S);
         def(GameAction.MAGIC_2, Key.C);
+        def(GameAction.MAGIC_3, Key.V);
+        def(GameAction.MAGIC_4, Key.B);
 
         // Misc
         def(GameAction.GAME_SPEED_UP, Key.EQUALS, Modifier.SHIFT);
@@ -255,6 +257,7 @@ public final class InputManager {
         def(GameAction.CHEAT_15, Key.F7, Modifier.SHIFT);
         def(GameAction.CHEAT_16, Key.F8, Modifier.SHIFT);
         def(GameAction.CHEAT_17, Key.F9, Modifier.SHIFT);
+        def(GameAction.CHEAT_18, Key.F1, Modifier.SHIFT);
 
         // Observer mode
         def(GameAction.SPECTATOR_NEXT_PLAYER, Key.RBRACKET);

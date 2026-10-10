@@ -52,6 +52,10 @@ public abstract class WeaponFactory {
         float drum_bonus = DrumAura.getHitBonus(src);
         if (drum_bonus != 0f)
             chance += drum_bonus;
+        /* GAMEPLAY: an enemy's Fjord Fog around the attacker (Buffed); without one, as above */
+        float fog_penalty = FjordFog.getHitPenalty(src);
+        if (fog_penalty != 0f)
+            chance -= fog_penalty;
         boolean hit = src.getOwner().getWorld().getRandom().nextFloat() < factor * chance * (1 - target.getDefenseChance());
         doAttack(hit, src, target);
     }

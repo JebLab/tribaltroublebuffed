@@ -20,8 +20,9 @@ public final class MagicTrigger extends TutorialTrigger {
         int last = chieftain.getLastMagicIndex();
         if (last != -1)
             magic_used[last] = true;
-        for (boolean b : magic_used) {
-            if (!b)
+        // Every spell the player has (Buffed's third slot is not in the tutorials).
+        for (int i = 0; i < magic_used.length; i++) {
+            if (!magic_used[i] && chieftain.getOwner().canDoMagic(i))
                 return;
         }
         tutorial.done(TutorialForm.TUTORIAL_CHIEFTAIN);

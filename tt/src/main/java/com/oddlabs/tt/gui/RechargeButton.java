@@ -13,6 +13,8 @@ public class RechargeButton extends NonFocusIconButton {
     private final @NonNull PlayerInterface player_interface;
     private final int magic_index;
     private Unit unit;
+    // Buffed's Hammer of Thor: a click picks the target first (a TargetDelegate) instead of casting at once.
+    private @Nullable Runnable aim;
 
     public RechargeButton(@NonNull PlayerInterface player_interface, @NonNull ModeIconQuads icon,
             @Nullable GameAction action, @NonNull Supplier<@NonNull String> tool_tip, int magic_index) {
@@ -28,9 +30,18 @@ public class RechargeButton extends NonFocusIconButton {
         this.unit = unit;
     }
 
+    /** Makes a click ask for the spell's target instead of casting (a spell cast at a target), or not (null). */
+    public final void setAim(@Nullable Runnable aim) {
+        this.aim = aim;
+    }
+
     @Override
     public final void mouseClicked(@NonNull MouseButton button, int x, int y, int clicks) {
-        if (unit.canDoMagic(magic_index))
+        if (!unit.canDoMagic(magic_index))
+            return;
+        if (aim != null)
+            aim.run();
+        else
             player_interface.doMagic(unit, magic_index);
     }
 

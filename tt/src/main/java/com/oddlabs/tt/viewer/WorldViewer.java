@@ -393,8 +393,8 @@ public final class WorldViewer implements Animated, AutoCloseable {
                                     "native_chieftain_name"), false);
                 else
                     throw new RuntimeException("Unknown chieftain AI");
-                chieftain.increaseMagicEnergy(0, 1000);
-                chieftain.increaseMagicEnergy(1, 1000);
+                for (int magic = 0; magic < RacesResources.NUM_MAGIC; magic++)
+                    chieftain.increaseMagicEnergy(magic, 1000);
                 player.setActiveChieftain(chieftain);
                 i++;
             }

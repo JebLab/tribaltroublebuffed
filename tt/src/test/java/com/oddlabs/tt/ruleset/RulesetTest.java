@@ -16,12 +16,16 @@ import com.oddlabs.tt.ruleset.RulesetStats.CountBySize;
 import com.oddlabs.tt.ruleset.RulesetStats.CrabStats;
 import com.oddlabs.tt.ruleset.RulesetStats.DrumStats;
 import com.oddlabs.tt.ruleset.RulesetStats.FaunaStats;
+import com.oddlabs.tt.ruleset.RulesetStats.FjordFogStats;
 import com.oddlabs.tt.ruleset.RulesetStats.GreatTowerStats;
+import com.oddlabs.tt.ruleset.RulesetStats.HammerOfThorStats;
+import com.oddlabs.tt.ruleset.RulesetStats.JollyJungleStats;
 import com.oddlabs.tt.ruleset.RulesetStats.LodgeStats;
 import com.oddlabs.tt.ruleset.RulesetStats.MarketStats;
 import com.oddlabs.tt.ruleset.RulesetStats.MonkeyStats;
 import com.oddlabs.tt.ruleset.RulesetStats.NetStats;
 import com.oddlabs.tt.ruleset.RulesetStats.PalisadeStats;
+import com.oddlabs.tt.ruleset.RulesetStats.PoultryPanicStats;
 import com.oddlabs.tt.ruleset.RulesetStats.PredatorStats;
 import com.oddlabs.tt.ruleset.RulesetStats.RaceStats;
 import com.oddlabs.tt.ruleset.RulesetStats.SpellStats;
@@ -101,25 +105,25 @@ final class RulesetTest {
     /**
      * 2004 had no boats, Small/Medium/Large islands only, six players (MAX_PLAYERS = 6) and fixed limits. Neither
      * 2004 nor Resurrected has the Chicken Coop, the Totem, the Shield, the Torch, the Market, the Palisade, the Great
-     * Tower, the Lodge, the Drum or the Net, nor wild animals.
+     * Tower, the Lodge, the Drum or the Net, nor wild animals, nor the chieftains' third slot.
      */
     @Test
     void classicOffersOnly2004WorldOptions() {
         assertEquals(new RulesetStats.Features(false, false, false, 6, false, false, false, false, false, false, false,
                 false,
-                false, false, false, false),
+                false, false, false, false, false),
                 Ruleset.CLASSIC.getStats().features());
         assertEquals(new RulesetStats.Features(true, true, true, 12, true, false, false, false, false, false, false,
                 false,
-                false, false, false, false),
+                false, false, false, false, false),
                 Ruleset.RESURRECTED.getStats().features());
     }
 
-    /** Buffed offers Resurrected's world options and every one of its own buildings and pieces of gear. */
+    /** Buffed offers Resurrected's world options and every one of its own buildings, pieces of gear and spells. */
     @Test
     void buffedOffersItsBuildings() {
         assertEquals(new RulesetStats.Features(true, true, true, 12, true, true, true, true, true, true, true, true,
-                true, true, true, true),
+                true, true, true, true, true),
                 Ruleset.BUFFED.getStats().features());
     }
 
@@ -223,6 +227,26 @@ final class RulesetTest {
         CountBySize monkeys = expected.monkey().count();
         assertEquals(List.of(3, 5, 8, 12, 12), List.of(monkeys.forMetersPerWorld(256), monkeys.forMetersPerWorld(512),
                 monkeys.forMetersPerWorld(1024), monkeys.forMetersPerWorld(2048), monkeys.forMetersPerWorld(4096)));
+    }
+
+    /**
+     * docs/design/spells.md (PLAN.md section 4.4): the third slot charges in 100 s; Jolly Jungle roots within 20 m for
+     * 8 s, Poultry Panic knocks flat within 30 m for 3 s and leaves 5 chickens, Hammer of Thor strikes within 20 m for
+     * 40, Fjord Fog lasts 20 s over 30 m and takes 0.2 from enemies' hit chance. Resurrected holds the same numbers
+     * with
+     * the feature off.
+     */
+    @Test
+    void buffedSpellsMatchThePlan() {
+        for (Ruleset ruleset : new Ruleset[]{Ruleset.BUFFED, Ruleset.RESURRECTED}) {
+            SpellStats spells = ruleset.getStats().spells();
+            assertAll(
+                    () -> assertEquals(100f, spells.third_slot_seconds(), "third_slot_seconds"),
+                    () -> assertEquals(new JollyJungleStats(20f, 8f), spells.jolly_jungle(), "jolly_jungle"),
+                    () -> assertEquals(new PoultryPanicStats(30f, 3f, 5), spells.poultry_panic(), "poultry_panic"),
+                    () -> assertEquals(new HammerOfThorStats(20f, 40), spells.hammer_of_thor(), "hammer_of_thor"),
+                    () -> assertEquals(new FjordFogStats(30f, 20f, .2f), spells.fjord_fog(), "fjord_fog"));
+        }
     }
 
     /** The Drum's and the Net's recipes: 3 wood + 1 iron, and 2 wood + 1 chicken. */

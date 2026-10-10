@@ -46,7 +46,8 @@ public final class WalkBehaviour implements Behaviour {
 
     @Override
     public boolean isBlocking() {
-        return state == PathTracker.State.BLOCKED;
+        // A rooted unit (Buffed) stands like an idle one: others path around it.
+        return state == PathTracker.State.BLOCKED || unit.isRooted();
     }
 
     public void appendToolTip(@NonNull ToolTipBox tool_tip_box) {
@@ -70,6 +71,16 @@ public final class WalkBehaviour implements Behaviour {
         boolean blocker_moved = blocking_movable != null && (blocking_movable.getGridX() != blocker_x
                 || blocking_movable.getGridY() != blocker_y);
         if (retry_delay_counter > 0 && !blocker_moved) {
+            return State.INTERRUPTIBLE;
+        }
+        if (unit.isRooted()) {
+            // Buffed's Jolly Jungle: stand until the vines let go, but stop when the walk's end comes within reach
+            // (a target walking into range) and fight what comes near on an aggressive walk.
+            if (tracker_algorithm.isDone(unit.getGridX(), unit.getGridY()))
+                return State.DONE;
+            scan();
+            retry_delay_counter = WAIT_RETRY_DELAY;
+            unit.switchToIdleAnimation();
             return State.INTERRUPTIBLE;
         }
         retry_delay_counter = 0;

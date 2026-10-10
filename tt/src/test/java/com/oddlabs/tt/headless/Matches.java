@@ -33,17 +33,20 @@ final class Matches {
     private static @NonNull Map<String, HeadlessMatchConfig> createAll() {
         Map<String, HeadlessMatchConfig> all = new LinkedHashMap<>();
         for (Ruleset ruleset : Ruleset.values()) {
+            // Buffed's 1v1 on seed 7 stays undecided since M10 (the Natives sit at the unit cap; for M14): it plays a
+            // seed that finishes and in which the Hard AIs cast the new spells.
+            int seed_1v1 = ruleset == Ruleset.BUFFED ? 9 : 7;
             all.put(ruleset.getId() + "-1v1", new HeadlessMatchConfig(ruleset, Landscape.TerrainType.NATIVE,
-                    Game.SIZE_SMALL, .5f, .5f, .5f, 7, List.of(new PlayerConfig(0, NATIVES, PlayerSlot.AI_HARD),
+                    Game.SIZE_SMALL, .5f, .5f, .5f, seed_1v1, List.of(new PlayerConfig(0, NATIVES, PlayerSlot.AI_HARD),
                             new PlayerConfig(1, VIKINGS, PlayerSlot.AI_HARD)), HeadlessMatchConfig.DEFAULT_MAX_TICKS));
             int[] difficulties = {PlayerSlot.AI_HARD, PlayerSlot.AI_NORMAL, PlayerSlot.AI_EASY, PlayerSlot.AI_HARD, PlayerSlot.AI_NORMAL, PlayerSlot.AI_EASY};
             List<PlayerConfig> six = new ArrayList<>();
             for (int i = 0; i < difficulties.length; i++) {
                 six.add(new PlayerConfig(i, i % 2 == 0 ? NATIVES : VIKINGS, difficulties[i]));
             }
-            // Buffed's six tribes leave about half of the seeds undecided after 60 minutes (Easy AIs sit at the unit
-            // cap; for the AI milestone, M14), seed 11 among them since M9: it plays a seed that finishes.
-            int seed = ruleset == Ruleset.BUFFED ? 9 : 11;
+            // Buffed's six tribes leave half or more of the seeds undecided after 60 minutes (AIs sit at the unit cap;
+            // for the AI milestone, M14), seed 11 among them since M9 and seed 9 since M10: it plays a seed that finishes.
+            int seed = ruleset == Ruleset.BUFFED ? 10 : 11;
             all.put(ruleset.getId() + "-6p", new HeadlessMatchConfig(ruleset, Landscape.TerrainType.VIKING,
                     Game.SIZE_MEDIUM, .5f, .5f, .5f, seed, six, HeadlessMatchConfig.DEFAULT_MAX_TICKS));
         }

@@ -11,11 +11,34 @@ import java.util.stream.StreamSupport;
 public final class NativeChieftainAI extends ChieftainAI {
     private static final int NUM_UNITS_FOR_LIGHTNING = 2;
     private static final int NUM_UNITS_FOR_POISON = 5;
+    // Buffed's third slot (docs/design/spells.md): enemy units within Jolly Jungle's radius that open with it, or
+    // with Poultry Panic when this many are within its radius.
+    private static final int NUM_UNITS_FOR_THIRD_SLOT = 2;
+    private static final int NUM_UNITS_FOR_PANIC = 6;
 
     @Override
-    public void decide(@NonNull Unit chieftain) {
+    public void decide(@NonNull Unit chieftain, boolean new_spells) {
+        // Buffed: a full third slot (the longest charge, which any cast empties) opens the next fight, and the 2004
+        // spells follow as they charge again.
+        if (new_spells && chieftain.getMagicProgress(RacesResources.INDEX_MAGIC_JUNGLE) >= 1) {
+            nodeThirdSlot(chieftain);
+            return;
+        }
         nodeLightningCloud(chieftain);
         nodePoisonFog(chieftain);
+    }
+
+    private void nodeThirdSlot(@NonNull Unit chieftain) {
+        float jungle_radius = chieftain.getOwner().getRace().getMagicFactory(
+                RacesResources.INDEX_MAGIC_JUNGLE).getHitRadius();
+        if (countClose(chieftain, jungle_radius, Unit.class, true) < NUM_UNITS_FOR_THIRD_SLOT)
+            return;
+        float panic_radius = chieftain.getOwner().getRace().getMagicFactory(
+                RacesResources.INDEX_MAGIC_PANIC).getHitRadius();
+        if (countClose(chieftain, panic_radius, Unit.class, true) >= NUM_UNITS_FOR_PANIC)
+            chieftain.doMagic(RacesResources.INDEX_MAGIC_PANIC, false);
+        else
+            chieftain.doMagic(RacesResources.INDEX_MAGIC_JUNGLE, false);
     }
 
     private void nodeLightningCloud(@NonNull Unit chieftain) {

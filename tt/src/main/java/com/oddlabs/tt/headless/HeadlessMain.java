@@ -41,7 +41,7 @@ public final class HeadlessMain {
         for (int i = 0; i < result.census().size(); i++) {
             HeadlessMatchResult.Census census = result.census().get(i);
             IO.println(
-                    "census player=" + i + " buildings=" + census.completedBuildings() + " coop_bred=" + census.chickenCoopBred() + " units=" + census.unitTypes() + " fires=" + census.firesLit() + " snares=" + census.snaresLaid() + "/" + census.snaresSprung() + " lost_to_animals=" + census.unitsLostToAnimals() + " loads_stolen=" + census.loadsStolen() + " animals_killed=" + census.animalsKilled());
+                    "census player=" + i + " buildings=" + census.completedBuildings() + " coop_bred=" + census.chickenCoopBred() + " units=" + census.unitTypes() + " fires=" + census.firesLit() + " snares=" + census.snaresLaid() + "/" + census.snaresSprung() + " lost_to_animals=" + census.unitsLostToAnimals() + " loads_stolen=" + census.loadsStolen() + " animals_killed=" + census.animalsKilled() + " spells=" + census.spellsCast());
         }
     }
 }

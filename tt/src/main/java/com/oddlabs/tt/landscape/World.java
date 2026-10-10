@@ -15,6 +15,7 @@ import com.oddlabs.tt.model.Supply;
 import com.oddlabs.tt.model.SupplyManager;
 import com.oddlabs.tt.model.SupplyManagers;
 import com.oddlabs.tt.model.Unit;
+import com.oddlabs.tt.model.weapon.FjordFog;
 import com.oddlabs.tt.pathfinder.RegionBuilder;
 import com.oddlabs.tt.pathfinder.UnitGrid;
 import com.oddlabs.tt.player.Player;
@@ -75,6 +76,7 @@ public final class World {
     private final @NonNull List<@NonNull Unit> drummers = new ArrayList<>();
     private final @NonNull List<@NonNull Snare> snares = new ArrayList<>();
     private final @NonNull List<@NonNull Animal> animals = new ArrayList<>();
+    private final @NonNull List<@NonNull FjordFog> mists = new ArrayList<>();
     private final Landscape.@NonNull TerrainType terrain;
 
     public static @NonNull LandscapeResources loadCommon(@NonNull RenderQueues queues) {
@@ -338,6 +340,11 @@ public final class World {
     /** Buffed's wild animals alive in the world, in the order they were placed (see {@code Fauna}). */
     public @NonNull List<@NonNull Animal> getAnimals() {
         return animals;
+    }
+
+    /** Buffed's Fjord Fogs lasting in the world, in the order they were cast (see {@code FjordFog}). */
+    public @NonNull List<@NonNull FjordFog> getMists() {
+        return mists;
     }
 
     /** Tropical (Native) or northern (Viking). */

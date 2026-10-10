@@ -87,6 +87,7 @@ public final class Player implements PlayerInterface {
     private int animals_killed;
     private int trades_made;
     private int magics;
+    private final int[] magics_by_index = new int[RacesResources.NUM_MAGIC];
 
     private int tree_harvested;
     private int rock_harvested;
@@ -134,6 +135,9 @@ public final class Player implements PlayerInterface {
         can_build_torches = features.torch();
         can_build_drums = features.drum();
         can_build_nets = features.net();
+        // Buffed's third-slot spells: unlocked from the start where the ruleset has them, as a campaign island may do.
+        Arrays.fill(can_do_magic, RacesResources.FIRST_THIRD_SLOT_MAGIC, RacesResources.NUM_MAGIC,
+                features.new_spells());
         this.player_info = player_info;
         this.unit_count = new SupplyContainer(world.getMaxUnitCount());
         this.building_count = new SupplyContainer(world.getMaxBuildingCount());
@@ -855,8 +859,14 @@ public final class Player implements PlayerInterface {
         return List.copyOf(groups.values());
     }
 
-    public void magicCast() {
+    public void magicCast(int magic_index) {
         magics++;
+        magics_by_index[magic_index]++;
+    }
+
+    /** Spells this player's chieftains cast, by spell (for the match census). */
+    public int getMagics(int magic_index) {
+        return magics_by_index[magic_index];
     }
 
     public int getMagics() {

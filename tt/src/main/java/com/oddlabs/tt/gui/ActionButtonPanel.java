@@ -32,6 +32,7 @@ import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
 import com.oddlabs.tt.model.weapon.Shield;
+import com.oddlabs.tt.model.weapon.TargetedMagicFactory;
 import com.oddlabs.tt.model.weapon.Drum;
 import com.oddlabs.tt.model.weapon.Net;
 import com.oddlabs.tt.model.weapon.Torch;
@@ -51,6 +52,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public final class ActionButtonPanel extends GUIObject implements Animated {
     private static final int GROUP_LEFT_OFFSET = 10;
@@ -105,6 +107,10 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
     //	private boolean quarters_button_disabled;
     private final @NonNull RechargeButton magic1_button;
     private final @NonNull RechargeButton magic2_button;
+    // Buffed's third slot (M10, docs/design/spells.md): a column left of the 2004 spells.
+    private final @NonNull RechargeButton magic3_button;
+    private final @NonNull RechargeButton magic4_button;
+    private final boolean new_spells_enabled;
     private final @NonNull NonFocusIconButton armory_button;
     //	private boolean armory_button_disabled;
     private final @NonNull NonFocusIconButton tower_button;
@@ -455,6 +461,34 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
 //		magic2_button.addMouseClickListener(new MagicListener(1));
         magic1_button.place();
         magic2_button.place(magic1_button, Placement.BOTTOM_MID);
+        new_spells_enabled = stats.features().new_spells();
+        RulesetStats.SpellStats spells = stats.spells();
+        boolean viking_spells = player.getPlayerInfo().getRace() == RacesResources.RACE_VIKINGS;
+        Supplier<String> magic3_tip = viking_spells ? () -> i18n("hammer_of_thor_tip", getBinding(GameAction.MAGIC_3),
+                spells.hammer_of_thor().range(),
+                spells.hammer_of_thor().damage(), spells.third_slot_seconds()) : () -> i18n("jolly_jungle_tip",
+                        getBinding(GameAction.MAGIC_3), spells.jolly_jungle().radius(),
+                        spells.jolly_jungle().seconds(), spells.third_slot_seconds());
+        Supplier<String> magic4_tip = viking_spells ? () -> i18n("fjord_fog_tip", getBinding(GameAction.MAGIC_4),
+                spells.fjord_fog().radius(),
+                spells.fjord_fog().seconds(), spells.fjord_fog().hit_penalty(),
+                spells.third_slot_seconds()) : () -> i18n("poultry_panic_tip", getBinding(GameAction.MAGIC_4),
+                        spells.poultry_panic().radius(),
+                        spells.poultry_panic().stun_seconds(), spells.poultry_panic().chickens(),
+                        spells.third_slot_seconds());
+        magic3_button = new RechargeButton(player_interface, race_icons.magic3Icon(), GameAction.MAGIC_3, magic3_tip,
+                RacesResources.FIRST_THIRD_SLOT_MAGIC);
+        magic4_button = new RechargeButton(player_interface, race_icons.magic4Icon(), GameAction.MAGIC_4, magic4_tip,
+                RacesResources.FIRST_THIRD_SLOT_MAGIC + 1);
+        // Hammer of Thor is cast at an enemy: the click (or key) asks for it first.
+        if (player.getRace().getMagicFactory(RacesResources.INDEX_MAGIC_HAMMER) instanceof TargetedMagicFactory)
+            magic3_button.setAim(() -> pushDelegate(new TargetDelegate(viewer, camera, Action.THOR)));
+        if (new_spells_enabled) {
+            chieftain_group.addChild(magic3_button);
+            chieftain_group.addChild(magic4_button);
+            magic3_button.place(magic1_button, Placement.LEFT_MID);
+            magic4_button.place(magic3_button, Placement.BOTTOM_MID);
+        }
         chieftain_group.compileCanvas(GROUP_LEFT_OFFSET, GROUP_BOTTOM_OFFSET, GROUP_RIGHT_OFFSET, 0);
 
         tower_attack_button = new NonFocusIconButton(race_icons.attackIcon(), GameAction.UNIT_ATTACK,
@@ -1008,6 +1042,18 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                     chieftain_group.addChild(magic2_button);
                 } else
                     magic2_button.remove();
+                if (new_spells_enabled) {
+                    for (int i = 0; i < 2; i++) {
+                        int magic = RacesResources.FIRST_THIRD_SLOT_MAGIC + i;
+                        RechargeButton button = i == 0 ? magic3_button : magic4_button;
+                        if (player.canDoMagic(magic)) {
+                            button.setUnit(current_chieftain);
+                            button.setIconDisabler(() -> !current_chieftain.canDoMagic(magic));
+                            chieftain_group.addChild(button);
+                        } else
+                            button.remove();
+                    }
+                }
             }
             if (current_tower) {
                 addChild(tower_group);
@@ -1219,6 +1265,10 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         if (current_chieftain != null) {
             magic1_button.doUpdate();
             magic2_button.doUpdate();
+            if (new_spells_enabled) {
+                magic3_button.doUpdate();
+                magic4_button.doUpdate();
+            }
         }
     }
 
@@ -1689,6 +1739,16 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                                                                                                                                                                 magic1_button);
                                                                                                                                                     }
                                                                                                                                                 }
+                // Buffed's third slot (V and B).
+                if (!event.isConsumed() && current_chieftain != null && new_spells_enabled) {
+                    if (event.consumeAction(GameAction.MAGIC_3)) {
+                        if (player.canDoMagic(RacesResources.FIRST_THIRD_SLOT_MAGIC))
+                            activate(event, magic3_button);
+                    } else if (event.consumeAction(GameAction.MAGIC_4)) {
+                        if (player.canDoMagic(RacesResources.FIRST_THIRD_SLOT_MAGIC + 1))
+                            activate(event, magic4_button);
+                    }
+                }
 
                 if (event.isConsumed()) return;
             }

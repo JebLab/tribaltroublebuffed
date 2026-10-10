@@ -52,5 +52,7 @@ public record RaceIcons(@NonNull IconQuad unitStatusIcon,
                         @NonNull ModeIconQuads buildWeaponNetIcon,
                         @NonNull ModeIconQuads warriorDrumIcon,
                         @NonNull ModeIconQuads warriorNetIcon,
-                        @NonNull ModeIconQuads laySnareIcon) {
+                        @NonNull ModeIconQuads laySnareIcon,
+                        @NonNull ModeIconQuads magic3Icon,
+                        @NonNull ModeIconQuads magic4Icon) {
 }

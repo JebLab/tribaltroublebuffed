@@ -136,7 +136,9 @@ public class GUIIcons {
                 Icons.getNamedIconQuads(n, head + "_build_weapon_net_icon", texture),
                 Icons.getNamedIconQuads(n, head + "_warrior_drum_icon", texture),
                 Icons.getNamedIconQuads(n, head + "_warrior_net_icon", texture),
-                Icons.getNamedIconQuads(n, head + "_lay_snare_icon", texture));
+                Icons.getNamedIconQuads(n, head + "_lay_snare_icon", texture),
+                Icons.getNamedIconQuads(n, head + "_magic3_icon", texture),
+                Icons.getNamedIconQuads(n, head + "_magic4_icon", texture));
     }
 
     private static @NonNull IconQuad @NonNull [] generateWatchIcons() {

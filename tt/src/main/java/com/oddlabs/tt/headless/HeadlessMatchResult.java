@@ -43,12 +43,16 @@ public record HeadlessMatchResult(int winningTeam, int finalTick, int finalCheck
      * @param unitsLostToAnimals its units that boars or wolves killed
      * @param loadsStolen        loads that monkeys took from its units
      * @param animalsKilled      wild animals its units killed
+     * @param spellsCast         spells its chieftains cast, by spell index ({@code RacesResources.INDEX_MAGIC_*}; the
+     *                           third
+     *                           slot from {@code FIRST_THIRD_SLOT_MAGIC} on)
      */
     public record Census(@NonNull Set<@NonNull Integer> completedBuildings, boolean chickenCoopBred,
                          @NonNull Set<@NonNull Integer> unitTypes, int firesLit, int tradesMade,
                          int greatTowerThrowers, int snaresLaid, int snaresSprung, int unitsLostToAnimals,
-                         int loadsStolen, int animalsKilled) {
+                         int loadsStolen, int animalsKilled, @NonNull List<@NonNull Integer> spellsCast) {
         public Census {
+            spellsCast = List.copyOf(spellsCast);
             completedBuildings = Collections.unmodifiableSortedSet(new TreeSet<>(completedBuildings));
             unitTypes = Collections.unmodifiableSortedSet(new TreeSet<>(unitTypes));
         }

@@ -217,7 +217,10 @@ public final class AdvancedAI extends AI {
                 NUM_WARRIORS[difficulty] >= NUM_WARRIORS_FOR_CHIEFTAIN[difficulty]);
         nodeAssignIdlePeons();
         if (getOwner().hasActiveChieftain()) {
-            getOwner().getRace().getChieftainAI().decide(getOwner().getChieftain());
+            // Buffed's third slot: Normal and Hard (only Hard fields a chieftain in a skirmish), where the player has it.
+            boolean new_spells = difficulty != DIFFICULTY_EASY
+                    && getOwner().canDoMagic(RacesResources.FIRST_THIRD_SLOT_MAGIC);
+            getOwner().getRace().getChieftainAI().decide(getOwner().getChieftain(), new_spells);
         }
     }
 
