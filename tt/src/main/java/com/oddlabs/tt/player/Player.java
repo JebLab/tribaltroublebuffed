@@ -10,6 +10,7 @@ import com.oddlabs.tt.model.Action;
 import com.oddlabs.tt.model.Army;
 import com.oddlabs.tt.model.LandBuilding;
 import com.oddlabs.tt.model.Building;
+import com.oddlabs.tt.model.BuildingTemplate;
 import com.oddlabs.tt.model.DeployType;
 import com.oddlabs.tt.model.IronSupply;
 import com.oddlabs.tt.model.Race;
@@ -20,6 +21,7 @@ import com.oddlabs.tt.model.Selectable;
 import com.oddlabs.tt.model.Supply;
 import com.oddlabs.tt.model.SupplyContainer;
 import com.oddlabs.tt.model.Unit;
+import com.oddlabs.tt.model.WallLine;
 import com.oddlabs.tt.model.behaviour.GatherController;
 import com.oddlabs.tt.model.behaviour.NullController;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
@@ -33,6 +35,7 @@ import org.joml.Vector4fc;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -51,6 +54,8 @@ public final class Player implements PlayerInterface {
     private final Army units = new Army();
     private final @NonNull SupplyContainer unit_count;
     private final SupplyContainer building_count;
+    // Buffed's Palisade segments and Gates count against a limit of their own, not the building limit.
+    private final @NonNull SupplyContainer wall_count;
 
     private final @NonNull Vector4fc color;
 
@@ -71,6 +76,7 @@ public final class Player implements PlayerInterface {
     private int units_moved;
     private int weapons_thrown;
     private int fires_lit;
+    private int trades_made;
     private int magics;
 
     private int tree_harvested;
@@ -108,11 +114,16 @@ public final class Player implements PlayerInterface {
         RulesetStats.Features features = world.getRuleset().getStats().features();
         can_build[Race.BUILDING_CHICKEN_COOP] = features.chicken_coop();
         can_build[Race.BUILDING_TOTEM] = features.totem();
+        can_build[Race.BUILDING_MARKET] = features.market();
+        can_build[Race.BUILDING_PALISADE] = features.palisade();
+        can_build[Race.BUILDING_GATE] = features.palisade();
         can_build_shields = features.shield();
         can_build_torches = features.torch();
         this.player_info = player_info;
         this.unit_count = new SupplyContainer(world.getMaxUnitCount());
         this.building_count = new SupplyContainer(world.getMaxBuildingCount());
+        this.wall_count = new SupplyContainer(world.getRuleset().getStats().race(
+                player_info.getRace() == RacesResources.RACE_VIKINGS).palisade().max_segments());
 //		this.team_tip = i18n("team", new Object[]{Integer.toString(player_info.getTeam() + 1)});
     }
 
@@ -300,6 +311,8 @@ public final class Player implements PlayerInterface {
     }
 
     public boolean canBuild(int building) {
+        if (Race.isWall(building))
+            return can_build[building] && !wall_count.isSupplyFull();
         return can_build[building] && getBuildingCountContainer().getNumSupplies() < world.getMaxBuildingCount();
     }
 
@@ -406,8 +419,9 @@ public final class Player implements PlayerInterface {
         return best_target;
     }
 
+    /** The nearest enemy land building worth attacking: not a Palisade segment or a Gate (Buffed). */
     public @Nullable Selectable<?> findNearestEnemyBuilding(int start_x, int start_y) {
-        return findNearestEnemy(start_x, start_y, null, LandBuilding.class);
+        return findNearestEnemy(start_x, start_y, s -> s instanceof LandBuilding building && !building.isWall());
     }
 
     public @NonNull Race getRace() {
@@ -420,6 +434,11 @@ public final class Player implements PlayerInterface {
 
     public @NonNull SupplyContainer getBuildingCountContainer() {
         return building_count;
+    }
+
+    /** The count a building of {@code template_id} adds to: the walls' own, or the building count. */
+    public @NonNull SupplyContainer getBuildingCountContainer(int template_id) {
+        return Race.isWall(template_id) ? wall_count : building_count;
     }
 
     public void setActiveChieftain(Unit chieftain) {
@@ -592,6 +611,45 @@ public final class Player implements PlayerInterface {
                 selection1.initTarget(building, Action.DEFAULT, false);
             }
         }
+    }
+
+    /**
+     * Lays a line of Palisade segments, or one Gate, as construction sites at once (Buffed): every free cell of the
+     * staircase from the first cell to the second, at most {@link WallLine#MAX_SEGMENTS}, while the wall limit allows.
+     * The peons are spread along the line; a peon whose segment is finished moves on to the next (RepairController).
+     */
+    @Override
+    public void placePalisade(Selectable<?> @NonNull [] selection, int template_id, int grid_x1, int grid_y1,
+            int grid_x2, int grid_y2) {
+        if (!Race.isWall(template_id) || !can_build[template_id])
+            return;
+        int max = template_id == Race.BUILDING_GATE ? 1 : WallLine.MAX_SEGMENTS;
+        BuildingTemplate template = getRace().getBuildingTemplate(template_id);
+        List<Building> sites = new ArrayList<>();
+        for (WallLine.Cell cell : WallLine.cells(grid_x1, grid_y1, grid_x2, grid_y2, max)) {
+            if (!canBuild(template_id))
+                break;
+            if (!template.isPlacingLegal(world.getUnitGrid(), cell.x(), cell.y()))
+                continue;
+            Building site = template.create(this, cell.x(), cell.y());
+            site.place();
+            sites.add(site);
+        }
+        if (sites.isEmpty())
+            return;
+        notifyOrder(sites.getFirst());
+        List<Selectable<?>> builders = Arrays.stream(selection).filter(
+                s -> isValid(s) && s.getAbilities().hasAbilities(Abilities.BUILD)).toList();
+        for (int i = 0; i < builders.size(); i++) {
+            Building site = sites.get(i * sites.size() / builders.size());
+            builders.get(i).initTarget(site, Action.DEFAULT, false);
+        }
+    }
+
+    @Override
+    public void setTrade(@NonNull Building building, int give, int get) {
+        if (isValid(building))
+            building.setTrade(give, get);
     }
 
     @Override
@@ -786,6 +844,15 @@ public final class Player implements PlayerInterface {
 
     public int getFiresLit() {
         return fires_lit;
+    }
+
+    public void tradeMade() {
+        trades_made++;
+    }
+
+    /** Trades this player's Markets made (Buffed). */
+    public int getTradesMade() {
+        return trades_made;
     }
 
     public int getBuildingsDestroyed() {

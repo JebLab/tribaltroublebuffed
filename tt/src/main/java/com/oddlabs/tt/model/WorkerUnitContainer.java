@@ -5,10 +5,12 @@ import org.jspecify.annotations.Nullable;
 
 public final class WorkerUnitContainer extends UnitContainer {
     private final @NonNull Building building;
+    private final boolean peons_only;
 
-    public WorkerUnitContainer(@NonNull Building building) {
+    public WorkerUnitContainer(@NonNull Building building, boolean peons_only) {
         super(building.getOwner().getWorld().getMaxUnitCount());
         this.building = building;
+        this.peons_only = peons_only;
     }
 
     @Override
@@ -20,7 +22,8 @@ public final class WorkerUnitContainer extends UnitContainer {
 
     @Override
     public boolean canEnter(@NonNull Unit unit) {
-        return getTotalSupplies() != getMaxSupplyCount();
+        return getTotalSupplies() != getMaxSupplyCount()
+                && (!peons_only || unit.getAbilities().hasAbilities(Abilities.BUILD));
     }
 
     private int getTotalSupplies() {

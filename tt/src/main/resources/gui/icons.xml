@@ -45,6 +45,9 @@
                 vikings_build_weapon_torch_icon,
                 vikings_warrior_shield_icon,
                 vikings_warrior_torch_icon,
+                vikings_market_icon,
+                vikings_palisade_icon,
+                vikings_gate_icon,
                 natives_unit_status_icon,
                 natives_weapon_rock_status_icon,
                 natives_weapon_iron_status_icon,
@@ -79,6 +82,9 @@
                 natives_build_weapon_torch_icon,
                 natives_warrior_shield_icon,
                 natives_warrior_torch_icon,
+                natives_market_icon,
+                natives_palisade_icon,
+                natives_gate_icon,
                 watch,
                 infinite,
                 notify_arrow
@@ -138,6 +144,9 @@
         <!ELEMENT vikings_build_weapon_torch_icon      (normal, active, disabled)>
         <!ELEMENT vikings_warrior_shield_icon          (normal, active, disabled)>
         <!ELEMENT vikings_warrior_torch_icon           (normal, active, disabled)>
+        <!ELEMENT vikings_market_icon                (normal, active, disabled)>
+        <!ELEMENT vikings_palisade_icon              (normal, active, disabled)>
+        <!ELEMENT vikings_gate_icon                  (normal, active, disabled)>
 
         <!ELEMENT natives_unit_status_icon            (quad)>
         <!ELEMENT natives_weapon_rock_status_icon    (quad)>
@@ -173,6 +182,9 @@
         <!ELEMENT natives_build_weapon_torch_icon      (normal, active, disabled)>
         <!ELEMENT natives_warrior_shield_icon          (normal, active, disabled)>
         <!ELEMENT natives_warrior_torch_icon           (normal, active, disabled)>
+        <!ELEMENT natives_market_icon                (normal, active, disabled)>
+        <!ELEMENT natives_palisade_icon              (normal, active, disabled)>
+        <!ELEMENT natives_gate_icon                  (normal, active, disabled)>
 
         <!ELEMENT watch                                (quad+)>
 
@@ -584,6 +596,39 @@
             <quad left="320" top="832" right="384" bottom="896"/>
         </disabled>
     </vikings_warrior_torch_icon>
+    <vikings_market_icon>
+        <normal>
+            <quad left="704" top="704" right="768" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="704" top="768" right="768" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="704" top="832" right="768" bottom="896"/>
+        </disabled>
+    </vikings_market_icon>
+    <vikings_palisade_icon>
+        <normal>
+            <quad left="768" top="704" right="832" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="768" top="768" right="832" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="768" top="832" right="832" bottom="896"/>
+        </disabled>
+    </vikings_palisade_icon>
+    <vikings_gate_icon>
+        <normal>
+            <quad left="832" top="704" right="896" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="832" top="768" right="896" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="832" top="832" right="896" bottom="896"/>
+        </disabled>
+    </vikings_gate_icon>
 
     <!-- NATIVES -->
     <natives_unit_status_icon>
@@ -912,6 +957,39 @@
             <quad left="448" top="832" right="512" bottom="896"/>
         </disabled>
     </natives_warrior_torch_icon>
+    <natives_market_icon>
+        <normal>
+            <quad left="512" top="704" right="576" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="512" top="768" right="576" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="512" top="832" right="576" bottom="896"/>
+        </disabled>
+    </natives_market_icon>
+    <natives_palisade_icon>
+        <normal>
+            <quad left="576" top="704" right="640" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="576" top="768" right="640" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="576" top="832" right="640" bottom="896"/>
+        </disabled>
+    </natives_palisade_icon>
+    <natives_gate_icon>
+        <normal>
+            <quad left="640" top="704" right="704" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="640" top="768" right="704" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="640" top="832" right="704" bottom="896"/>
+        </disabled>
+    </natives_gate_icon>
 
     <!-- Watch icons -->
     <watch>

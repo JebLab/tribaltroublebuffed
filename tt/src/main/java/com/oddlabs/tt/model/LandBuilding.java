@@ -22,6 +22,8 @@ import com.oddlabs.tt.model.weapon.Torch;
 import com.oddlabs.tt.particle.LinearEmitter;
 import com.oddlabs.tt.particle.RandomAccelerationEmitter;
 import com.oddlabs.tt.particle.RandomVelocityEmitter;
+import com.oddlabs.tt.pathfinder.Gate;
+import com.oddlabs.tt.pathfinder.Movable;
 import com.oddlabs.tt.pathfinder.Occupant;
 import com.oddlabs.tt.pathfinder.UnitGrid;
 import com.oddlabs.tt.player.Player;
@@ -41,7 +43,7 @@ import java.util.Map;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public final class LandBuilding extends Building {
+public final class LandBuilding extends Building implements Gate {
     private static final float REMOVE_DELAY = 1f / 10f;
 
     private static final int PLACING_BORDER = 1;
@@ -78,6 +80,7 @@ public final class LandBuilding extends Building {
     private @Nullable ChieftainContainer chieftain_container = null;
     private @Nullable WeaponsProducer weapons_producer = null;
     private @Nullable ChickenCoop chicken_coop = null;
+    private @Nullable Market market = null;
     private int rocks_delivered = 0;
     private float remove_delay = 0;
     private int hit_points = 1;
@@ -173,6 +176,9 @@ public final class LandBuilding extends Building {
                 unit_container.animate(t);
             if (weapons_producer != null) {
                 weapons_producer.animate(t);
+            }
+            if (market != null) {
+                market.animate(t);
             }
             if (chicken_coop != null) {
                 chicken_coop.animate(t);
@@ -526,6 +532,9 @@ public final class LandBuilding extends Building {
                     supply_containers.put(RubberSupply.class, chicken_coop.getStock());
                 } else if (getAbilities().hasAbilities(Abilities.AURA)) {
                     getOwner().getWorld().getTotems().add(this);
+                } else if (getAbilities().hasAbilities(Abilities.TRADE)) {
+                    market = new Market(this, getRaceStats().market(), production_emitter);
+                    deploy_containers.put(DeployType.PEON, new DeployContainer(this, .5f, DeployType.PEON, null));
                 }
             }
         }
@@ -551,6 +560,21 @@ public final class LandBuilding extends Building {
     /** The finished Chicken Coop's breeding, or null for any other building or an unfinished coop. */
     public @Nullable ChickenCoop getChickenCoop() {
         return chicken_coop;
+    }
+
+    /** The finished Market's trade, or null for any other building or an unfinished Market. */
+    public @Nullable Market getMarket() {
+        return market;
+    }
+
+    @Override
+    public void setTrade(int give, int get) {
+        assert !isDead();
+        if (market == null || !Market.isValidTrade(give, get))
+            return;
+        getOwner().getWorld().updateGlobalChecksum(give);
+        getOwner().getWorld().updateGlobalChecksum(get);
+        market.setTrade(give, get);
     }
 
     @Override
@@ -586,7 +610,17 @@ public final class LandBuilding extends Building {
 
     public static boolean isPlacingLegal(@NonNull UnitGrid unit_grid, @NonNull BuildingTemplate template, int grid_x,
             int grid_y) {
-        return doIsPlacingLegal(unit_grid, grid_x, grid_y, template.getPlacingSize());
+        // Walls need no free border: segments touch each other and other buildings (docs/design/palisade.md).
+        int size = Race.isWall(
+                template.getTemplateID()) ? template.getPlacingSize() - PLACING_BORDER : template.getPlacingSize();
+        return doIsPlacingLegal(unit_grid, grid_x, grid_y, size);
+    }
+
+    /** A Gate (Buffed) lets units of its owner's team through, from the moment it is laid out. */
+    @Override
+    public boolean admits(@NonNull Movable movable) {
+        return movable instanceof Unit unit && !unit.isDead()
+                && unit.getOwner().getPlayerInfo().getTeam() == getOwner().getPlayerInfo().getTeam();
     }
 
     public boolean isPlacingLegal() {
@@ -622,6 +656,9 @@ public final class LandBuilding extends Building {
                 if (cx >= gsize || cy >= gsize || cx < 0 || cy < 0) {
                     return false;
                 }
+                // A gate's cell is never free, even with a unit of its side passing (Buffed).
+                if (unit_grid.getGate(cx, cy) != null)
+                    return false;
                 var occ = unit_grid.getOccupant(cx, cy);
                 if (occ != null) {
                     if (occ instanceof Unit unit) {
@@ -663,8 +700,10 @@ public final class LandBuilding extends Building {
         assert isPlacingLegal();
         register();
         occupy();
-        flattenLandscape();
-        int result = getOwner().getBuildingCountContainer().increaseSupply(1);
+        // Walls keep the ground as it is: neighbouring segments would undo each other's flattening.
+        if (!isWall())
+            flattenLandscape();
+        int result = getOwner().getBuildingCountContainer(getTemplate().getTemplateID()).increaseSupply(1);
         assert (result == 1) : "Too many buildings";
         build_points = 1;
         reinsert();
@@ -724,7 +763,7 @@ public final class LandBuilding extends Building {
             extinguish();
             fire_emitter.done();
         }
-        int result = getOwner().getBuildingCountContainer().increaseSupply(-1);
+        int result = getOwner().getBuildingCountContainer(getTemplate().getTemplateID()).increaseSupply(-1);
         assert result == -1;
         super.removeDying();
     }
@@ -788,6 +827,8 @@ public final class LandBuilding extends Building {
     }
 
     private void undoLandscape() {
+        if (old_landscape_heights == null)
+            return;
         int size = getTemplate().getPlacingSize();
         int offset_x = getGridX() - (size - 1);
         int offset_y = getGridY() - (size - 1);
@@ -815,6 +856,8 @@ public final class LandBuilding extends Building {
                     unit.free();
                 }
                 grid.occupyGrid(cx, cy, this);
+                if (getTemplate().getTemplateID() == Race.BUILDING_GATE)
+                    grid.addGate(cx, cy, this);
             }
         }
         for (Unit unit : trappedUnits) {
@@ -829,7 +872,13 @@ public final class LandBuilding extends Building {
         int size = getTemplate().getPlacingSize() * 2 - 1;
         for (int y = PLACING_BORDER; y < size - PLACING_BORDER; y++) {
             for (int x = PLACING_BORDER; x < size - PLACING_BORDER; x++) {
-                grid.freeGrid(getGridX() - size / 2 + x, getGridY() - size / 2 + y, this);
+                int cx = getGridX() - size / 2 + x;
+                int cy = getGridY() - size / 2 + y;
+                // A gate leaves its cell to a unit passing it, if one stands there.
+                if (grid.getGate(cx, cy) == this)
+                    grid.removeGate(cx, cy, this);
+                else
+                    grid.freeGrid(cx, cy, this);
             }
         }
     }
@@ -950,8 +999,8 @@ public final class LandBuilding extends Building {
 
     @Override
     public int getStatusValue() {
-        return getAbilities().hasAbilities(
-                Abilities.REPRODUCE) ? getUnitContainer().getNumSupplies() : getAbilities().hasAbilities(
+        return getAbilities().hasAbilities(Abilities.REPRODUCE) || getAbilities().hasAbilities(
+                Abilities.TRADE) ? getUnitContainer().getNumSupplies() : getAbilities().hasAbilities(
                         Abilities.BUILD_ARMIES) ? getUnitContainer().getNumSupplies() + getSupplyContainer(
                                 RockAxeWeapon.class).getNumSupplies() + getSupplyContainer(
                                         IronAxeWeapon.class).getNumSupplies() * 3 + getSupplyContainer(

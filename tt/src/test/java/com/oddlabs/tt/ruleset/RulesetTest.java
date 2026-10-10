@@ -10,6 +10,8 @@ import com.oddlabs.tt.model.RockSupply;
 import com.oddlabs.tt.model.behaviour.RepairBehaviour;
 import com.oddlabs.tt.ruleset.RulesetStats.BuildingStats;
 import com.oddlabs.tt.ruleset.RulesetStats.ChickenCoopStats;
+import com.oddlabs.tt.ruleset.RulesetStats.MarketStats;
+import com.oddlabs.tt.ruleset.RulesetStats.PalisadeStats;
 import com.oddlabs.tt.ruleset.RulesetStats.RaceStats;
 import com.oddlabs.tt.ruleset.RulesetStats.SpellStats;
 import com.oddlabs.tt.ruleset.RulesetStats.TotemStats;
@@ -87,20 +89,20 @@ final class RulesetTest {
 
     /**
      * 2004 had no boats, Small/Medium/Large islands only, six players (MAX_PLAYERS = 6) and fixed limits. Neither
-     * 2004 nor Resurrected has the Chicken Coop, the Totem, the Shield or the Torch.
+     * 2004 nor Resurrected has the Chicken Coop, the Totem, the Shield, the Torch, the Market or the Palisade.
      */
     @Test
     void classicOffersOnly2004WorldOptions() {
-        assertEquals(new RulesetStats.Features(false, false, false, 6, false, false, false, false, false),
+        assertEquals(new RulesetStats.Features(false, false, false, 6, false, false, false, false, false, false, false),
                 Ruleset.CLASSIC.getStats().features());
-        assertEquals(new RulesetStats.Features(true, true, true, 12, true, false, false, false, false),
+        assertEquals(new RulesetStats.Features(true, true, true, 12, true, false, false, false, false, false, false),
                 Ruleset.RESURRECTED.getStats().features());
     }
 
-    /** Buffed offers Resurrected's world options plus its own buildings and gear. */
+    /** Buffed offers Resurrected's world options plus its own buildings, gear, Market and walls. */
     @Test
     void buffedOffersItsBuildings() {
-        assertEquals(new RulesetStats.Features(true, true, true, 12, true, true, true, true, true),
+        assertEquals(new RulesetStats.Features(true, true, true, 12, true, true, true, true, true, true, true),
                 Ruleset.BUFFED.getStats().features());
     }
 
@@ -138,6 +140,21 @@ final class RulesetTest {
         assertArrayEquals(new int[]{2, 1, 1}, LandBuilding.COST_TORCH_WEAPON.getSupplyAmounts());
     }
 
+    /**
+     * PLAN.md section 4.5, docs/design/market.md and palisade.md: the Market trades 3 for 1 in 20 man-seconds; a
+     * Palisade segment has 40 hit points and a Gate 120; a player may have 100 of them. The same for both races.
+     */
+    @Test
+    void buffedMarketAndWallsMatchThePlan() {
+        for (boolean vikings : new boolean[]{false, true}) {
+            RaceStats race = Ruleset.BUFFED.getStats().race(vikings);
+            assertAll(
+                    () -> assertEquals(new MarketStats(150, 3, 1, 20f), race.market(), "market"),
+                    () -> assertEquals(new PalisadeStats(40, 100), race.palisade(), "palisade"),
+                    () -> assertEquals(new BuildingStats(120), race.gate(), "gate"));
+        }
+    }
+
     /** A building's hit points are built 5 per log, so the plan's wood cost is its hit points over 5. */
     @Test
     void buffedBuildingsCostWhatThePlanSays() {
@@ -146,6 +163,10 @@ final class RulesetTest {
         assertEquals(5,
                 (race.totem().hit_points() - race.totem().rock() * RepairBehaviour.REPAIRS_PER_SUPPLY) / RepairBehaviour.REPAIRS_PER_SUPPLY,
                 "totem wood");
+        assertEquals(30, race.market().hit_points() / RepairBehaviour.REPAIRS_PER_SUPPLY, "market wood");
+        assertEquals(8, race.palisade().hit_points() / RepairBehaviour.REPAIRS_PER_SUPPLY, "palisade wood");
+        // The plan's "8 wood" is the segment's; the gate keeps 5 hit points a log (R-29).
+        assertEquals(24, race.gate().hit_points() / RepairBehaviour.REPAIRS_PER_SUPPLY, "gate wood");
     }
 
     /** 2004's Player hard-coded 20 starting units, 250 units and 20 buildings; the Classic preset must keep them. */

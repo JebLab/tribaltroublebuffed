@@ -4,14 +4,18 @@ import com.oddlabs.tt.landscape.LandscapeTarget;
 import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.Action;
 import com.oddlabs.tt.model.Building;
+import com.oddlabs.tt.model.BuildingTemplate;
 import com.oddlabs.tt.model.ChickenCoop;
 import com.oddlabs.tt.model.DeployType;
 import com.oddlabs.tt.model.LandBuilding;
+import com.oddlabs.tt.model.Market;
 import com.oddlabs.tt.model.Race;
 import com.oddlabs.tt.model.Selectable;
 import com.oddlabs.tt.model.Ship;
 import com.oddlabs.tt.model.Unit;
+import com.oddlabs.tt.model.WallLine;
 import com.oddlabs.tt.model.behaviour.Controller;
+import com.oddlabs.tt.model.behaviour.EnterController;
 import com.oddlabs.tt.model.behaviour.IdleController;
 import com.oddlabs.tt.model.behaviour.PlaceBuildingController;
 import com.oddlabs.tt.model.behaviour.RepairController;
@@ -72,6 +76,24 @@ public final class AdvancedAI extends AI {
     private static final int[] CHICKEN_COOP_GATHERERS = new int[]{0, 2, 2};
     private static final int CHICKEN_COOP_BUILDERS = 6;
     private static final int TOTEM_BUILDERS = 3;
+
+    // Buffed's Market (docs/design/market.md): one, above this many units, or above MARKET_UNITS_LOPSIDED when the
+    // home island lacks rock or iron; this many peons trade inside. It asks for the scarcer of rock and iron and gives
+    // the most plentiful other resource while that store holds twice as much plus TRADE_MARGIN.
+    private static final int[] MAX_MARKETS = new int[]{0, 1, 1};
+    private static final int[] UNITS_FOR_MARKET = new int[]{1000, 60, 45};
+    private static final int MARKET_UNITS_LOPSIDED = 20;
+    private static final int[] MARKET_TRADERS = new int[]{0, 2, 3};
+    private static final int MARKET_BUILDERS = 6;
+    private static final int TRADE_MARGIN = 6;
+    // Buffed's walls (docs/design/palisade.md): a line about 2 * WALL_HALF_LENGTH + 1 cells long with a Gate in the
+    // middle, across the direction from the Quarters to the island's centre, at the first of WALL_DISTANCES (cells)
+    // where the gate and at least MIN_WALL_SEGMENTS segments fit. A third of the builders build the gate.
+    private static final int[] UNITS_FOR_WALL = new int[]{1000, 55, 40};
+    private static final int WALL_BUILDERS = 9;
+    private static final float WALL_HALF_LENGTH = 4f;
+    private static final float[] WALL_DISTANCES = new float[]{13f, 11f, 15f, 9f, 17f};
+    private static final int MIN_WALL_SEGMENTS = 5;
 
     // Buffed's gear (docs/design/gear.md): the Armory keeps up to this many in stock, and an attack takes one shield
     // per SHIELD_SHARE warriors and one torch per TORCH_SHARE, as far as the stock goes.
@@ -342,13 +364,28 @@ public final class AdvancedAI extends AI {
     private void nodeBuildBuffedBuildings() {
         boolean chicken_coop = getOwner().canBuild(Race.BUILDING_CHICKEN_COOP);
         boolean totem = getOwner().canBuild(Race.BUILDING_TOTEM);
-        if (!chicken_coop && !totem)
+        boolean market = getOwner().canBuild(Race.BUILDING_MARKET);
+        boolean palisade = getOwner().canBuild(Race.BUILDING_PALISADE) && getOwner().canBuild(Race.BUILDING_GATE);
+        if (!chicken_coop && !totem && !market && !palisade && getMarkets() == null)
             return;
         reclassify();
         if (!baseBuildingsDone())
             return;
         nodeStockChickenCoops();
+        nodeRunMarkets();
         int units = getOwner().getUnitCountContainer().getNumSupplies();
+        if (market && !marketUnderConstruction() && count(getMarkets()) < MAX_MARKETS[difficulty]
+                && units > (homeIslandLacksRockOrIron() ? MARKET_UNITS_LOPSIDED : UNITS_FOR_MARKET[difficulty])) {
+            Selectable<?>[] builders = firstN(getPeons(MARKET_BUILDERS), MARKET_BUILDERS);
+            Building armory = (Building) getArmory()[0];
+            setMarketUnderConstruction(buildBuilding(Race.BUILDING_MARKET, builders, armory.getGridX(),
+                    armory.getGridY()));
+            reclassify();
+        }
+        if (palisade && getWalls() == null && units > UNITS_FOR_WALL[difficulty]) {
+            nodeBuildWall();
+            reclassify();
+        }
         if (chicken_coop && !chickenCoopUnderConstruction() && count(getChickenCoops()) < MAX_CHICKEN_COOPS[difficulty]
                 && units > UNITS_FOR_CHICKEN_COOP[difficulty]) {
             Selectable<?>[] builders = firstN(getPeons(CHICKEN_COOP_BUILDERS), CHICKEN_COOP_BUILDERS);
@@ -366,6 +403,121 @@ public final class AdvancedAI extends AI {
                     origin.getGridY()));
             reclassify();
         }
+    }
+
+    /** The plan's lopsided case: the home island has no rock or no iron to gather. */
+    private boolean homeIslandLacksRockOrIron() {
+        int island = homeIsland();
+        return island != -1 && (getUnitGrid().getIslandRockCount(island) == 0
+                || getUnitGrid().getIslandIronCount(island) == 0);
+    }
+
+    /**
+     * Keeps its traders in each finished Market and picks what it trades: the scarcer of rock and iron in the Armory it
+     * trades with, for the most plentiful other resource, while that store holds twice as much plus a margin.
+     */
+    private void nodeRunMarkets() {
+        if (getMarkets() == null)
+            return;
+        for (Selectable<?> s : getMarkets()) {
+            LandBuilding building = (LandBuilding) s;
+            Market market = building.getMarket();
+            if (market == null)
+                continue;
+            int missing = MARKET_TRADERS[difficulty] - building.getUnitContainer().getNumSupplies() - countEntering(
+                    building);
+            if (missing > 0) {
+                Selectable<?>[] peons = firstN(getPeons(missing), missing);
+                if (peons.length > 0)
+                    getOwner().setTarget(peons, building, Action.DEFAULT, false);
+            }
+            LandBuilding armory = market.findArmory();
+            if (armory == null)
+                continue;
+            int[] stock = new int[Market.numResources()];
+            for (int i = 0; i < stock.length; i++)
+                stock[i] = armory.getSupplyContainer(Market.getResource(i)).getNumSupplies();
+            int get = stock[Market.ROCK] <= stock[Market.IRON] ? Market.ROCK : Market.IRON;
+            int give = -1;
+            for (int resource : new int[]{Market.WOOD, Market.ROCK, Market.IRON}) {
+                if (resource != get && (give == -1 || stock[resource] > stock[give]))
+                    give = resource;
+            }
+            if (stock[give] >= 2 * stock[get] + TRADE_MARGIN && (give != market.getGive() || get != market.getGet()))
+                getOwner().setTrade(building, give, get);
+        }
+    }
+
+    /** Peons walking into {@code building}. */
+    private int countEntering(@NonNull Building building) {
+        int entering = 0;
+        for (Selectable<?> s : getOwner().getUnits().getSet()) {
+            if (!s.isDead() && s.getPrimaryController() instanceof EnterController enter
+                    && enter.getBuilding() == building)
+                entering++;
+        }
+        return entering;
+    }
+
+    /**
+     * Lays one line of Palisade with a Gate in the middle, in front of the Quarters towards the island's centre and
+     * across that direction: a screen that funnels attackers without closing the base in.
+     */
+    private void nodeBuildWall() {
+        Selectable<?>[] builders = firstN(getPeons(WALL_BUILDERS), WALL_BUILDERS);
+        if (builders.length < WALL_BUILDERS)
+            return;
+        Building quarters = (Building) getQuarters()[0];
+        int ox = quarters.getGridX();
+        int oy = quarters.getGridY();
+        int center = getOwner().getWorld().getHeightMap().getGridUnitsPerWorld() / 2;
+        int dx = center - ox;
+        int dy = center - oy;
+        if (dx == 0 && dy == 0)
+            return;
+        float inv_dist = 1f / (float) Math.sqrt(dx * dx + dy * dy);
+        // The first distance where the gate and most of the line fit: forest, water and steep ground are skipped.
+        for (float distance : WALL_DISTANCES) {
+            int gate_x = (int) (ox + distance * dx * inv_dist);
+            int gate_y = (int) (oy + distance * dy * inv_dist);
+            int x1 = (int) (gate_x - WALL_HALF_LENGTH * dy * inv_dist);
+            int y1 = (int) (gate_y + WALL_HALF_LENGTH * dx * inv_dist);
+            int x2 = (int) (gate_x + WALL_HALF_LENGTH * dy * inv_dist);
+            int y2 = (int) (gate_y - WALL_HALF_LENGTH * dx * inv_dist);
+            if (!isWallSite(Race.BUILDING_GATE, gate_x, gate_y, gate_x, gate_y)
+                    || countWallSites(x1, y1, gate_x, gate_y) + countWallSites(x2, y2, gate_x,
+                            gate_y) < MIN_WALL_SEGMENTS)
+                continue;
+            // Two halves that end in the gate's cell, so the gate stands in the line; each has its own builders.
+            int third = builders.length / 3;
+            getOwner().placePalisade(firstN(builders, third), Race.BUILDING_GATE, gate_x, gate_y, gate_x, gate_y);
+            Selectable<?>[] palisade_builders = lastN(builders, builders.length - third);
+            int half = palisade_builders.length / 2;
+            getOwner().placePalisade(firstN(palisade_builders, half), Race.BUILDING_PALISADE, x1, y1, gate_x,
+                    gate_y);
+            getOwner().placePalisade(lastN(palisade_builders, palisade_builders.length - half),
+                    Race.BUILDING_PALISADE, x2, y2, gate_x, gate_y);
+            return;
+        }
+    }
+
+    private boolean isWallSite(int building, int x1, int y1, int x2, int y2) {
+        return countWallSites(building, x1, y1, x2, y2) > 0;
+    }
+
+    /** Palisade segments that would be laid from one cell to the other: those in free cells. */
+    private int countWallSites(int x1, int y1, int x2, int y2) {
+        return countWallSites(Race.BUILDING_PALISADE, x1, y1, x2, y2);
+    }
+
+    private int countWallSites(int building, int x1, int y1, int x2, int y2) {
+        BuildingTemplate template = getOwner().getRace().getBuildingTemplate(building);
+        int count = 0;
+        for (WallLine.Cell cell : WallLine.cells(x1, y1, x2, y2, WallLine.MAX_SEGMENTS)) {
+            if (template.isPlacingLegal(getUnitGrid(), cell.x(), cell.y()))
+                count++;
+        }
+        return count;
     }
 
     /** Sends peons to a finished coop that still lacks its first chickens: they catch them and bring them in. */
@@ -418,7 +570,7 @@ public final class AdvancedAI extends AI {
                 getOwner().setTarget(getIdlePeons(), getConstructionSites()[0], Action.DEFAULT, false);
             } else if (shipUnderConstruction() && getConstructionSites() != null) {
                 getOwner().setTarget(getIdlePeons(), getConstructionSites()[0], Action.DEFAULT, false);
-            } else if ((chickenCoopUnderConstruction() || totemUnderConstruction())
+            } else if ((chickenCoopUnderConstruction() || totemUnderConstruction() || marketUnderConstruction())
                     && getConstructionSites() != null) {
                         getOwner().setTarget(getIdlePeons(), getConstructionSites()[0], Action.DEFAULT, false);
                     } else if (getQuarters() != null && !getQuarters()[0].isDead()) {
@@ -1213,8 +1365,10 @@ public final class AdvancedAI extends AI {
     }
 
     private @Nullable Target findTarget(int start_x, int start_y) {
+        // Buffed's walls are obstacles, not objectives: units blocked by one attack what is in reach.
         Target best_building = getOwner().findNearestEnemyBuilding(start_x, start_y);
-        Target best_target = getOwner().findNearestEnemy(start_x, start_y);
+        Target best_target = getOwner().findNearestEnemy(start_x, start_y,
+                s -> !(s instanceof Building building && building.isWall()));
         if (best_building == null) {
             return best_target;
         }

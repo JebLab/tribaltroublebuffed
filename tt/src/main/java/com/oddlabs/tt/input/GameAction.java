@@ -60,6 +60,9 @@ public enum GameAction {
     UNIT_BUILD_SHIP,
     UNIT_BUILD_CHICKEN_COOP,
     UNIT_BUILD_TOTEM,
+    UNIT_BUILD_MARKET,
+    UNIT_BUILD_PALISADE,
+    UNIT_BUILD_GATE,
     UNIT_EXIT_TOWER,
     UNIT_BEACON,
     UNIT_NEXT_IDLE,
@@ -128,6 +131,10 @@ public enum GameAction {
     RES_TORCH_BATCH_DEC,
 
     DEPLOY_CHIEFTAIN,
+
+    // Buffed's Market: the resource it sells and the one it buys
+    MARKET_SELL,
+    MARKET_BUY,
 
     // Unit Specific
     TRAIN_PEON,

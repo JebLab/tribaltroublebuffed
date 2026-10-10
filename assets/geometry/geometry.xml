@@ -346,6 +346,96 @@
                 <texture name="viking_runestone" team="viking_building_lookout_team"/>
             </model>
         </sprite>
+        <sprite name="market">
+            <model r="90" g="60" b="30">
+                vikings/market/viking_market_built_hi.xml
+                <texture name="viking_market_hi" team="viking_buildings_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/market/viking_market_built_lo.xml
+                <texture name="viking_market_lo2" team="viking_buildings_lo2_team"/>
+            </model>
+        </sprite>
+        <sprite name="market_halfbuilt">
+            <model r="90" g="60" b="30">
+                vikings/market/viking_market_build_hi.xml
+                <texture name="viking_market_hi" team="viking_buildings_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/market/viking_market_build_lo.xml
+                <texture name="viking_market_lo" team="viking_buildings_lo_team"/>
+            </model>
+        </sprite>
+        <sprite name="market_start">
+            <model r="90" g="60" b="30">
+                vikings/market/viking_market_start_hi.xml
+                <texture name="viking_market_hi" team="viking_buildings_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/market/viking_market_start_lo.xml
+                <texture name="viking_market_hi" team="viking_buildings_hi_team"/>
+            </model>
+        </sprite>
+        <sprite name="palisade">
+            <model r="90" g="60" b="30">
+                vikings/palisade/viking_palisade_built_hi.xml
+                <texture name="viking_palisade" team="viking_palisade_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/palisade/viking_palisade_built_lo.xml
+                <texture name="viking_palisade" team="viking_palisade_team"/>
+            </model>
+        </sprite>
+        <sprite name="palisade_halfbuilt">
+            <model r="90" g="60" b="30">
+                vikings/palisade/viking_palisade_build_hi.xml
+                <texture name="viking_palisade" team="viking_palisade_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/palisade/viking_palisade_build_lo.xml
+                <texture name="viking_palisade" team="viking_palisade_team"/>
+            </model>
+        </sprite>
+        <sprite name="palisade_start">
+            <model r="90" g="60" b="30">
+                vikings/palisade/viking_palisade_start_hi.xml
+                <texture name="viking_palisade" team="viking_palisade_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/palisade/viking_palisade_start_lo.xml
+                <texture name="viking_palisade" team="viking_palisade_team"/>
+            </model>
+        </sprite>
+        <sprite name="gate">
+            <model r="90" g="60" b="30">
+                vikings/gate/viking_gate_built_hi.xml
+                <texture name="viking_palisade" team="viking_palisade_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/gate/viking_gate_built_lo.xml
+                <texture name="viking_palisade" team="viking_palisade_team"/>
+            </model>
+        </sprite>
+        <sprite name="gate_halfbuilt">
+            <model r="90" g="60" b="30">
+                vikings/gate/viking_gate_build_hi.xml
+                <texture name="viking_palisade" team="viking_palisade_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/gate/viking_gate_build_lo.xml
+                <texture name="viking_palisade" team="viking_palisade_team"/>
+            </model>
+        </sprite>
+        <sprite name="gate_start">
+            <model r="90" g="60" b="30">
+                vikings/gate/viking_gate_start_hi.xml
+                <texture name="viking_palisade" team="viking_palisade_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/gate/viking_gate_start_lo.xml
+                <texture name="viking_palisade" team="viking_palisade_team"/>
+            </model>
+        </sprite>
         <sprite name="rally_point">
             <model r="90" g="60" b="30">
                 vikings/misc/vikings_rally_point.xml
@@ -695,6 +785,96 @@
             <model r="90" g="60" b="30">
                 natives/totem/native_totem_start_lo.xml
                 <texture name="native_totem" team="native_tower_team"/>
+            </model>
+        </sprite>
+        <sprite name="market">
+            <model r="90" g="60" b="30">
+                natives/market/native_market_built_hi.xml
+                <texture name="native_market_hi" team="native_building_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/market/native_market_built_lo.xml
+                <texture name="native_market_lo" team="native_armoury_lo_team"/>
+            </model>
+        </sprite>
+        <sprite name="market_halfbuilt">
+            <model r="90" g="60" b="30">
+                natives/market/native_market_build_hi.xml
+                <texture name="native_market_hi" team="native_building_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/market/native_market_build_lo.xml
+                <texture name="native_market_lo" team="native_armoury_lo_team"/>
+            </model>
+        </sprite>
+        <sprite name="market_start">
+            <model r="90" g="60" b="30">
+                natives/market/native_market_start_hi.xml
+                <texture name="native_market_hi" team="native_building_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/market/native_market_start_lo.xml
+                <texture name="native_market_hi" team="native_building_hi_team"/>
+            </model>
+        </sprite>
+        <sprite name="palisade">
+            <model r="90" g="60" b="30">
+                natives/palisade/native_palisade_built_hi.xml
+                <texture name="native_palisade" team="native_palisade_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/palisade/native_palisade_built_lo.xml
+                <texture name="native_palisade" team="native_palisade_team"/>
+            </model>
+        </sprite>
+        <sprite name="palisade_halfbuilt">
+            <model r="90" g="60" b="30">
+                natives/palisade/native_palisade_build_hi.xml
+                <texture name="native_palisade" team="native_palisade_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/palisade/native_palisade_build_lo.xml
+                <texture name="native_palisade" team="native_palisade_team"/>
+            </model>
+        </sprite>
+        <sprite name="palisade_start">
+            <model r="90" g="60" b="30">
+                natives/palisade/native_palisade_start_hi.xml
+                <texture name="native_palisade" team="native_palisade_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/palisade/native_palisade_start_lo.xml
+                <texture name="native_palisade" team="native_palisade_team"/>
+            </model>
+        </sprite>
+        <sprite name="gate">
+            <model r="90" g="60" b="30">
+                natives/gate/native_gate_built_hi.xml
+                <texture name="native_palisade" team="native_palisade_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/gate/native_gate_built_lo.xml
+                <texture name="native_palisade" team="native_palisade_team"/>
+            </model>
+        </sprite>
+        <sprite name="gate_halfbuilt">
+            <model r="90" g="60" b="30">
+                natives/gate/native_gate_build_hi.xml
+                <texture name="native_palisade" team="native_palisade_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/gate/native_gate_build_lo.xml
+                <texture name="native_palisade" team="native_palisade_team"/>
+            </model>
+        </sprite>
+        <sprite name="gate_start">
+            <model r="90" g="60" b="30">
+                natives/gate/native_gate_start_hi.xml
+                <texture name="native_palisade" team="native_palisade_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/gate/native_gate_start_lo.xml
+                <texture name="native_palisade" team="native_palisade_team"/>
             </model>
         </sprite>
         <sprite name="rally_point">

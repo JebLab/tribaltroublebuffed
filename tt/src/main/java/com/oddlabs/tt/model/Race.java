@@ -15,7 +15,18 @@ public final class Race {
     // Buffed only: the ruleset's features decide whether a player may build these (Player.canBuild).
     public static final int BUILDING_CHICKEN_COOP = 4;
     public static final int BUILDING_TOTEM = 5;
-    public static final int NUM_BUILDINGS = 6;
+    public static final int BUILDING_MARKET = 6;
+    public static final int BUILDING_PALISADE = 7;
+    public static final int BUILDING_GATE = 8;
+    public static final int NUM_BUILDINGS = 9;
+
+    /**
+     * Palisade segments and Gates: one cell each, laid out at once, outside the building limit
+     * (docs/design/palisade.md).
+     */
+    public static boolean isWall(int building) {
+        return building == BUILDING_PALISADE || building == BUILDING_GATE;
+    }
 
     public static final int UNIT_WARRIOR_ROCK = 0;
     public static final int UNIT_WARRIOR_IRON = 1;
@@ -44,6 +55,9 @@ public final class Race {
             @NonNull BuildingTemplate ship,
             @NonNull BuildingTemplate chicken_coop,
             @NonNull BuildingTemplate totem,
+            @NonNull BuildingTemplate market,
+            @NonNull BuildingTemplate palisade,
+            @NonNull BuildingTemplate gate,
             @NonNull UnitTemplate warrior_rock,
             @NonNull UnitTemplate warrior_iron,
             @NonNull UnitTemplate warrior_rubber,
@@ -64,6 +78,9 @@ public final class Race {
         buildings[BUILDING_SHIP] = ship;
         buildings[BUILDING_CHICKEN_COOP] = chicken_coop;
         buildings[BUILDING_TOTEM] = totem;
+        buildings[BUILDING_MARKET] = market;
+        buildings[BUILDING_PALISADE] = palisade;
+        buildings[BUILDING_GATE] = gate;
         for (int i = 0; i < buildings.length; i++) {
             assert buildings[i].getTemplateID() == i;
         }

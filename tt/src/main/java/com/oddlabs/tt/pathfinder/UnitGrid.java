@@ -27,6 +27,9 @@ public final class UnitGrid {
     }
 
     private final @NonNull Layer[] layers;
+    // Buffed's gates on the land layer, by cell; null until the first gate is placed, so that worlds without gates
+    // (every Classic and Resurrected game) take exactly the old paths.
+    private @Nullable Gate @Nullable [] @NonNull [] gates;
 
     public UnitGrid(@NonNull HeightMap heightmap) {
         this.heightmap = heightmap;
@@ -146,8 +149,38 @@ public final class UnitGrid {
     }
 
     public void occupyGrid(int grid_x, int grid_y, Occupant occupant, int layer) {
-        assert !isGridOccupied(grid_x, grid_y, layer);
+        // A mover passing a gate takes the cell from the gate (see Gate).
+        assert !isGridOccupied(grid_x, grid_y, layer)
+                || (layer == LAND && getGate(grid_x, grid_y) == layers[layer].occupants[grid_y][grid_x]);
         layers[layer].occupants[grid_y][grid_x] = occupant;
+    }
+
+    /** The gate in a land cell, or null. */
+    public @Nullable Gate getGate(int grid_x, int grid_y) {
+        return gates == null ? null : gates[grid_y][grid_x];
+    }
+
+    /** Whether a land cell holds a gate that admits {@code movable}. */
+    public boolean isGateOpen(int grid_x, int grid_y, @Nullable Movable movable) {
+        Gate gate = getGate(grid_x, grid_y);
+        return gate != null && movable != null && gate.admits(movable);
+    }
+
+    /** Makes {@code gate}, which already occupies the cell, a gate. */
+    public void addGate(int grid_x, int grid_y, @NonNull Gate gate) {
+        assert getOccupant(grid_x, grid_y) == gate;
+        if (gates == null)
+            gates = new Gate[getGridSize()][getGridSize()];
+        assert gates[grid_y][grid_x] == null;
+        gates[grid_y][grid_x] = gate;
+    }
+
+    /** Removes a gate: it leaves its cell, unless a mover stands there, which keeps it. */
+    public void removeGate(int grid_x, int grid_y, @NonNull Gate gate) {
+        assert getGate(grid_x, grid_y) == gate;
+        gates[grid_y][grid_x] = null;
+        if (getOccupant(grid_x, grid_y) == gate)
+            layers[LAND].occupants[grid_y][grid_x] = null;
     }
 
     public final boolean isWater(int grid_x, int grid_y) {
@@ -194,7 +227,8 @@ public final class UnitGrid {
 
     public void freeGrid(int grid_x, int grid_y, Occupant occupant, int layer) {
         assert layers[layer].occupants[grid_y][grid_x] == occupant : occupant + " trying to free " + grid_x + " " + grid_y + " where " + layers[layer].occupants[grid_y][grid_x] + " is.";
-        layers[layer].occupants[grid_y][grid_x] = null;
+        // A mover leaving a gate hands the cell back to it.
+        layers[layer].occupants[grid_y][grid_x] = layer == LAND ? getGate(grid_x, grid_y) : null;
     }
 
     public void debugRenderRegions(float landscape_x, float landscape_y) {

@@ -126,6 +126,9 @@ public final class InputManager {
         def(GameAction.UNIT_BUILD_SHIP, Key.S);
         def(GameAction.UNIT_BUILD_CHICKEN_COOP, Key.K);
         def(GameAction.UNIT_BUILD_TOTEM, Key.Y);
+        def(GameAction.UNIT_BUILD_MARKET, Key.E);
+        def(GameAction.UNIT_BUILD_PALISADE, Key.P);
+        def(GameAction.UNIT_BUILD_GATE, Key.O);
         def(GameAction.UNIT_EXIT_TOWER, Key.X);
         def(GameAction.UNIT_BEACON, Key.B, Modifier.CONTROL);
         def(GameAction.UNIT_NEXT_IDLE, Key.N);
@@ -193,6 +196,9 @@ public final class InputManager {
         def(GameAction.RES_TORCH_BATCH_DEC, Key.E, Modifier.SHIFT, Modifier.CONTROL);
 
         def(GameAction.DEPLOY_CHIEFTAIN, Key.H);
+
+        def(GameAction.MARKET_SELL, Key.S);
+        def(GameAction.MARKET_BUY, Key.B);
 
         // Units
         def(GameAction.TRAIN_PEON, Key.P);

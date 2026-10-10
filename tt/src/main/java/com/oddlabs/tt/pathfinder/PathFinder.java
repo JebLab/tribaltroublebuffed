@@ -12,6 +12,8 @@ public final class PathFinder {
     private static final PocketList<@NonNull Node> open_list = new PocketList<>(RegionBuilder.MAX_PATH_COST);
     private static final List<@NonNull Node> visited_list = new ArrayList<>();
     public static int stat_pathfinder_per_frame = 0;
+    // The mover the grid searches run for, so that they pass the gates that admit it (Buffed); null for none.
+    static @Nullable Movable passer;
 
     public static Region findPathRegion(@NonNull UnitGrid unit_grid, @NonNull Region src_region,
             @NonNull Region dst_region) {

@@ -39,5 +39,8 @@ public record RaceIcons(@NonNull IconQuad unitStatusIcon,
                         @NonNull ModeIconQuads buildWeaponShieldIcon,
                         @NonNull ModeIconQuads buildWeaponTorchIcon,
                         @NonNull ModeIconQuads warriorShieldIcon,
-                        @NonNull ModeIconQuads warriorTorchIcon) {
+                        @NonNull ModeIconQuads warriorTorchIcon,
+                        @NonNull ModeIconQuads marketIcon,
+                        @NonNull ModeIconQuads palisadeIcon,
+                        @NonNull ModeIconQuads gateIcon) {
 }

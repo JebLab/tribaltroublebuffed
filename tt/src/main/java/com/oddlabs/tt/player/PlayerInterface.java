@@ -29,6 +29,12 @@ public interface PlayerInterface {
 
     void buildTorchWeapons(@NonNull Building building, int num_weapons, boolean infinite);
 
+    // Buffed's Market and walls; ignored unless the ruleset offers them.
+    void setTrade(@NonNull Building building, int give, int get);
+
+    void placePalisade(Selectable<?> @NonNull [] selection, int template_id, int grid_x1, int grid_y1, int grid_x2,
+            int grid_y2);
+
     void doMagic(@NonNull Unit chieftain, int magic);
 
     void exitTower(@NonNull Building building);

@@ -32,6 +32,8 @@ public final class Abilities {
     public static final int BREED = 2048;
     // Raises friendly hit chance nearby (the Totem)
     public static final int AURA = 4096;
+    // Trades resources (the Market)
+    public static final int TRADE = 8192;
 
     private int abilities;
 

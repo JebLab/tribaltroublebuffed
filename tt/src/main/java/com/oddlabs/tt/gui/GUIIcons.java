@@ -123,7 +123,10 @@ public class GUIIcons {
                 Icons.getNamedIconQuads(n, head + "_build_weapon_shield_icon", texture),
                 Icons.getNamedIconQuads(n, head + "_build_weapon_torch_icon", texture),
                 Icons.getNamedIconQuads(n, head + "_warrior_shield_icon", texture),
-                Icons.getNamedIconQuads(n, head + "_warrior_torch_icon", texture));
+                Icons.getNamedIconQuads(n, head + "_warrior_torch_icon", texture),
+                Icons.getNamedIconQuads(n, head + "_market_icon", texture),
+                Icons.getNamedIconQuads(n, head + "_palisade_icon", texture),
+                Icons.getNamedIconQuads(n, head + "_gate_icon", texture));
     }
 
     private static @NonNull IconQuad @NonNull [] generateWatchIcons() {

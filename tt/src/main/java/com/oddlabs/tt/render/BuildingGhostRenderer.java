@@ -4,6 +4,7 @@ import com.oddlabs.tt.landscape.HeightMap;
 import com.oddlabs.tt.landscape.LandscapeTarget;
 import com.oddlabs.tt.landscape.World;
 import com.oddlabs.tt.model.BuildingTemplate;
+import com.oddlabs.tt.model.WallLine;
 import com.oddlabs.tt.pathfinder.UnitGrid;
 import com.oddlabs.tt.player.BuildingSiteScanFilter;
 import com.oddlabs.tt.render.shader.SpriteShader;
@@ -41,6 +42,27 @@ public final class BuildingGhostRenderer {
                 2 * GRID_RADIUS);
         com.oddlabs.tt.util.GLUtils.checkGLError("Placing: After renderSites");
 
+        renderGhost(context, world, template, center_x, center_y,
+                template.isPlacingLegal(unit_grid, placing_center_grid_x, placing_center_grid_y), queues,
+                modelViewStack);
+    }
+
+    /** A line of Buffed's Palisade segments being dragged: one ghost per cell, red where the cell is not free. */
+    public void renderLine(@NonNull World world, @NonNull BuildingTemplate template,
+            @NonNull List<WallLine.@NonNull Cell> cells, @NonNull LandscapeRenderer renderer,
+            @NonNull RenderQueues queues, @NonNull MatrixStack modelViewStack, @NonNull MatrixStack projectionStack) {
+        UnitGrid unit_grid = world.getUnitGrid();
+        RenderContext context = Renderer.getRenderer().getRenderContext();
+        for (WallLine.Cell cell : cells) {
+            renderGhost(context, world, template, UnitGrid.coordinateFromGrid(cell.x()),
+                    UnitGrid.coordinateFromGrid(cell.y()), template.isPlacingLegal(unit_grid, cell.x(), cell.y()),
+                    queues, modelViewStack);
+        }
+    }
+
+    private void renderGhost(@NonNull RenderContext context, @NonNull World world, @NonNull BuildingTemplate template,
+            float center_x, float center_y, boolean legal, @NonNull RenderQueues queues,
+            @NonNull MatrixStack modelViewStack) {
         SpriteRenderer built_renderer = queues.getRenderer(template.getBuiltRenderer());
         Sprite sprite = built_renderer.getSpriteList().getSprite(0);
 
@@ -51,7 +73,7 @@ public final class BuildingGhostRenderer {
             spriteShader.setUniform(SpriteShader.Uniforms.MODULATE_COLOR, true);
             spriteShader.setUniform(SpriteShader.Uniforms.ALPHA_TEST_VALUE, 0.5f);
 
-            if (template.isPlacingLegal(unit_grid, placing_center_grid_x, placing_center_grid_y))
+            if (legal)
                 spriteShader.setUniform(SpriteShader.Uniforms.COLOR, 1f, 1f, 1f, .8f);
             else
                 spriteShader.setUniform(SpriteShader.Uniforms.COLOR, 1f, 0f, 0f, .8f);

@@ -48,6 +48,8 @@ public abstract class AI implements Animated {
     private int INDEX_SHIPS;
     private int INDEX_CHICKEN_COOPS;
     private int INDEX_TOTEMS;
+    private int INDEX_MARKETS;
+    private int INDEX_WALLS;
     private int INDEX_CONSTRUCTION_SITES;
     private int INDEX_PLACE_BUILDING_PEONS;
     private int INDEX_DEFENDING_UNITS;
@@ -59,6 +61,7 @@ public abstract class AI implements Animated {
     private boolean ship_under_construction = false;
     private boolean chicken_coop_under_construction = false;
     private boolean totem_under_construction = false;
+    private boolean market_under_construction = false;
     private boolean found_island = false;
     private float sleep_time;
 
@@ -243,6 +246,16 @@ public abstract class AI implements Animated {
         return INDEX_TOTEMS == -1 ? null : lists[INDEX_TOTEMS];
     }
 
+    /** Finished Markets (Buffed). */
+    protected final @NonNull Selectable<?> @Nullable [] getMarkets() {
+        return INDEX_MARKETS == -1 ? null : lists[INDEX_MARKETS];
+    }
+
+    /** Palisade segments and Gates, finished or not (Buffed). */
+    protected final @NonNull Selectable<?> @Nullable [] getWalls() {
+        return INDEX_WALLS == -1 ? null : lists[INDEX_WALLS];
+    }
+
     protected final @NonNull Selectable<?> @Nullable [] getConstructionSites() {
         return INDEX_CONSTRUCTION_SITES == -1 ? null : lists[INDEX_CONSTRUCTION_SITES];
     }
@@ -269,6 +282,8 @@ public abstract class AI implements Animated {
         INDEX_SHIPS = -1;
         INDEX_CHICKEN_COOPS = -1;
         INDEX_TOTEMS = -1;
+        INDEX_MARKETS = -1;
+        INDEX_WALLS = -1;
         INDEX_CONSTRUCTION_SITES = -1;
         INDEX_PLACE_BUILDING_PEONS = -1;
         INDEX_DEFENDING_UNITS = -1;
@@ -314,6 +329,11 @@ public abstract class AI implements Animated {
                     chicken_coop_under_construction = false;
                 } else if (s.getAbilities().hasAbilities(Abilities.AURA)) {
                     INDEX_TOTEMS = i;
+                } else if (s.getAbilities().hasAbilities(Abilities.TRADE)) {
+                    INDEX_MARKETS = i;
+                    market_under_construction = false;
+                } else if (s instanceof Building building && building.isWall()) {
+                    INDEX_WALLS = i;
                 } else {
                     INDEX_CONSTRUCTION_SITES = i;
                 }
@@ -330,6 +350,7 @@ public abstract class AI implements Animated {
             ship_under_construction = false;
             chicken_coop_under_construction = false;
             totem_under_construction = false;
+            market_under_construction = false;
         }
     }
 
@@ -379,6 +400,14 @@ public abstract class AI implements Animated {
 
     protected final void setTotemUnderConstruction(boolean totem_under_construction) {
         this.totem_under_construction = totem_under_construction;
+    }
+
+    protected final boolean marketUnderConstruction() {
+        return market_under_construction;
+    }
+
+    protected final void setMarketUnderConstruction(boolean market_under_construction) {
+        this.market_under_construction = market_under_construction;
     }
 
     private void reset() {

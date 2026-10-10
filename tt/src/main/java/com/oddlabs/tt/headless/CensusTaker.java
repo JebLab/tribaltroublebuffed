@@ -22,6 +22,7 @@ final class CensusTaker {
     private final List<Set<Integer>> unit_types = new ArrayList<>();
     private final boolean[] chicken_coop_bred;
     private final int[] fires_lit;
+    private final int[] trades_made;
 
     CensusTaker(int num_players) {
         for (int i = 0; i < num_players; i++) {
@@ -30,6 +31,7 @@ final class CensusTaker {
         }
         chicken_coop_bred = new boolean[num_players];
         fires_lit = new int[num_players];
+        trades_made = new int[num_players];
     }
 
     void update(@NonNull Player @NonNull [] players) {
@@ -48,6 +50,7 @@ final class CensusTaker {
                 }
             }
             fires_lit[i] = players[i].getFiresLit();
+            trades_made[i] = players[i].getTradesMade();
         }
     }
 
@@ -56,7 +59,7 @@ final class CensusTaker {
         List<HeadlessMatchResult.Census> census = new ArrayList<>();
         for (int i = 0; i < chicken_coop_bred.length; i++)
             census.add(new HeadlessMatchResult.Census(completed_buildings.get(i), chicken_coop_bred[i],
-                    unit_types.get(i), fires_lit[i]));
+                    unit_types.get(i), fires_lit[i], trades_made[i]));
         return census;
     }
 }

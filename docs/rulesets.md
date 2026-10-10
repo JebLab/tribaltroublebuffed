@@ -6,7 +6,7 @@ A *ruleset* is the set of gameplay numbers a game is played with. Three ship wit
 |---|---|---|
 | **Classic (2004)** | [`classic.json`](../tt/src/main/resources/rulesets/classic.json) | The numbers of the 2004 Oddlabs release. |
 | **Resurrected** | [`resurrected.json`](../tt/src/main/resources/rulesets/resurrected.json) | Tribal Trouble: Resurrected's numbers when this fork was made (October 2026). The complete base file. |
-| **Buffed** | [`buffed.json`](../tt/src/main/resources/rulesets/buffed.json) | This fork's new content on top of Resurrected's numbers, which it keeps: so far the Chicken Coop / Henhouse and the Totem / Runestone (M5), and the Shield and Torch gear (M6). |
+| **Buffed** | [`buffed.json`](../tt/src/main/resources/rulesets/buffed.json) | This fork's new content on top of Resurrected's numbers, which it keeps: so far the Chicken Coop / Henhouse and the Totem / Runestone (M5), the Shield and Torch gear (M6), and the Trading Post / Market, Palisade and Gate (M7). |
 
 The skirmish menu preselects Buffed. Everything else plays under **Resurrected**: the campaign and tutorials (their islands were tuned for those numbers) and multiplayer (every client and the inherited servers expect them, so the pulldown is hidden there). Presets saved before rulesets existed load as Resurrected.
 
@@ -41,7 +41,7 @@ Reverting any of these behind Classic is possible later, per item, if it turns o
 
 ## Fields
 
-**Features** (`features`): `ships`, `enormous_islands`, `archipelago` (true/false), `max_players` (6–12), `adjustable_limits` (false = the 2004 limits). `TerrainMenu.enforceRulesetFeatures()` applies them. `chicken_coop` and `totem` say whether peons may build Buffed's buildings: `Player` sets its build permissions from them, and the peon panel shows their buttons only when they are on. `shield` and `torch` say whether the Armory makes Buffed's gear (`Player.canBuildShields` / `canBuildTorches`; the Armory's submenus show their buttons only when they are on).
+**Features** (`features`): `ships`, `enormous_islands`, `archipelago` (true/false), `max_players` (6–12), `adjustable_limits` (false = the 2004 limits). `TerrainMenu.enforceRulesetFeatures()` applies them. `chicken_coop` and `totem` say whether peons may build Buffed's buildings: `Player` sets its build permissions from them, and the peon panel shows their buttons only when they are on. `shield` and `torch` say whether the Armory makes Buffed's gear (`Player.canBuildShields` / `canBuildTorches`; the Armory's submenus show their buttons only when they are on). `market` and `palisade` say whether peons may build the Market, and Palisade segments and Gates (both behind the one flag).
 
 Every number is per race (`natives`, `vikings`) except the spells, which belong to one race each.
 
@@ -69,6 +69,12 @@ Every number is per race (`natives`, `vikings`) except the spells, which belong 
 | | `hit_bonus` | added to the hit chance of a unit within `radius` of a finished totem of its own team (0.05), inside the hit chance, so a tower triples it too. It counts for thrown weapons and blows, not for spells. |
 | | `radius` | meters (10). |
 | | `max_stacking` | at most this many totems add up (2). |
+| Trading Post / Market (`market`, [design/market.md](design/market.md)) | `hit_points` | 150: 30 logs. |
+| | `give`, `get` | a trade takes `give` of one resource (3) from the owner's nearest Armory and puts back `get` of another (1). The player picks the two among wood, rock, iron and chickens. |
+| | `seconds` | man-seconds a trade takes (20): the peons inside share the work, as in the Armory. |
+| Palisade (`palisade`, [design/palisade.md](design/palisade.md)) | `hit_points` | 40: 8 logs. One grid cell. |
+| | `max_segments` | Palisade segments and Gates a player may have at a time (100); they do not count against the building limit. |
+| Gate (`gate`) | `hit_points` | 120: 24 logs (every building is built at 5 hit points a log). One grid cell; lets its owner's team through. |
 
 **The torch** (`torch`, Buffed's): `building_damage`, what its blow takes from any building, always (6); `fire_seconds` (15) and `fire_damage` (2 per second): the fire it lights, which takes its `fire_seconds × fire_damage` hit points one at a time, is started again by another blow, and goes out when a peon repairs the building. The gear's recipes (Shield: 2 wood + 1 rock in 40 man-seconds; Torch: 2 wood + 1 rock + 1 iron in 80) and deploy times (1 s, 1.5 s) are constants in `LandBuilding`, as the 2004 weapons' are.
 

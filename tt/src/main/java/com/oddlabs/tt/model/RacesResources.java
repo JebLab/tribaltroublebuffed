@@ -66,8 +66,11 @@ public final class RacesResources {
     // A building of size n covers (2n - 3) x (2n - 3) grid cells of 2 m: the coop 3 x 3 like the tower, the totem one.
     public static final int CHICKEN_COOP_SIZE = 3;
     public static final int TOTEM_SIZE = 2;
+    // The Market covers 3 x 3 cells like the coop; a Palisade segment or a Gate one cell like the totem.
+    public static final int MARKET_SIZE = 3;
+    public static final int WALL_SIZE = 2;
     public static final int MAX_BUILDING_SIZE = IntStream.of(QUARTERS_SIZE, ARMORY_SIZE,
-            TOWER_SIZE, CHICKEN_COOP_SIZE, TOTEM_SIZE).max().orElseThrow();
+            TOWER_SIZE, CHICKEN_COOP_SIZE, TOTEM_SIZE, MARKET_SIZE, WALL_SIZE).max().orElseThrow();
 
     public static final int RACE_NATIVES = 0;
     public static final int RACE_VIKINGS = 1;
@@ -254,6 +257,54 @@ public final class RacesResources {
                 stats.hit_points(),
                 0f, 0f, 2f,
                 status_value);
+    }
+
+    private static @NonNull BuildingTemplate createMarketTemplate(@NonNull RenderQueues queues, @NonNull String race,
+            int max_hit_points, boolean is_vikings, @NonNull String name) {
+        String path = "/geometry/" + race + "/market";
+        return createBuildingTemplate(
+                queues,
+                Race.BUILDING_MARKET,
+                BuildingTemplate.TYPE_BUILDING,
+                path + ".binsprite",
+                2.5f, 4.5f,
+                path + "_halfbuilt.binsprite",
+                2.5f, 3.5f,
+                path + "_start.binsprite",
+                2.5f, 1f,
+                8f, .009f, MARKET_SIZE, 3f, 5f, 20, max_hit_points,
+                new WorkerUnitContainerFactory(true),
+                new Abilities(Abilities.TRADE | Abilities.RALLY_TO),
+                new float[]{0f, 1f, 2f}, 0f, 4f,
+                0f, 0f, 0f,
+                0f, 0f, 3f,
+                is_vikings,
+                name);
+    }
+
+    /** A Palisade segment or a Gate: one cell, no job, nobody inside. */
+    private static @NonNull BuildingTemplate createWallTemplate(@NonNull RenderQueues queues, @NonNull String race,
+            int template_id, @NonNull String sprite, float height, int max_hit_points, boolean is_vikings,
+            @NonNull String name) {
+        String path = "/geometry/" + race + "/" + sprite;
+        return createBuildingTemplate(
+                queues,
+                template_id,
+                BuildingTemplate.TYPE_BUILDING,
+                path + ".binsprite",
+                1.4f, height,
+                path + "_halfbuilt.binsprite",
+                1.4f, height / 2,
+                path + "_start.binsprite",
+                1.4f, .6f,
+                3f, .04f, WALL_SIZE, 1f, 3f, 6, max_hit_points,
+                new EmptyUnitContainerFactory(),
+                new Abilities(Abilities.NONE),
+                new float[]{0f, .7f, 1.5f}, 0f, 2f,
+                0f, 0f, 0f,
+                0f, 0f, 0f,
+                is_vikings,
+                name);
     }
 
     private static @NonNull BuildingTemplate createTotemTemplate(@NonNull RenderQueues queues, @NonNull String race,
@@ -650,6 +701,19 @@ public final class RacesResources {
                 false, i18n("totem_natives"));
         BuildingTemplate viking_totem_template = createTotemTemplate(queues, "vikings", vikings.totem().hit_points(),
                 true, i18n("totem_vikings"));
+        // M7. Placeholder models: the race's Armory scaled down and recoloured; stakes and posts for the walls.
+        BuildingTemplate native_market_template = createMarketTemplate(queues, "natives",
+                natives.market().hit_points(), false, i18n("market_natives"));
+        BuildingTemplate viking_market_template = createMarketTemplate(queues, "vikings",
+                vikings.market().hit_points(), true, i18n("market_vikings"));
+        BuildingTemplate native_palisade_template = createWallTemplate(queues, "natives", Race.BUILDING_PALISADE,
+                "palisade", 3f, natives.palisade().hit_points(), false, i18n("palisade_natives"));
+        BuildingTemplate viking_palisade_template = createWallTemplate(queues, "vikings", Race.BUILDING_PALISADE,
+                "palisade", 3f, vikings.palisade().hit_points(), true, i18n("palisade_vikings"));
+        BuildingTemplate native_gate_template = createWallTemplate(queues, "natives", Race.BUILDING_GATE, "gate",
+                3.5f, natives.gate().hit_points(), false, i18n("gate_natives"));
+        BuildingTemplate viking_gate_template = createWallTemplate(queues, "vikings", Race.BUILDING_GATE, "gate",
+                3.5f, vikings.gate().hit_points(), true, i18n("gate_vikings"));
 
         final float shadow_diameter_warrior = 1.9f;
         final float shadow_diameter_peon = 1.6f;
@@ -966,6 +1030,9 @@ public final class RacesResources {
                 native_ship_template,
                 native_chicken_coop_template,
                 native_totem_template,
+                native_market_template,
+                native_palisade_template,
+                native_gate_template,
                 native_warrior_rock_template,
                 native_warrior_iron_template,
                 native_warrior_rubber_template,
@@ -988,6 +1055,9 @@ public final class RacesResources {
                 viking_ship_template,
                 viking_chicken_coop_template,
                 viking_totem_template,
+                viking_market_template,
+                viking_palisade_template,
+                viking_gate_template,
                 viking_warrior_rock_template,
                 viking_warrior_iron_template,
                 viking_warrior_rubber_template,

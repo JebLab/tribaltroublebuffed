@@ -1,19 +1,25 @@
 {
-  "description": "Tribal Trouble Buffed: this fork's new content, layered on Resurrected, whose numbers it keeps. New buildings: the Chicken Coop / Henhouse and the Totem / Runestone (milestone M5, PLAN.md section 4.5). New gear from the Armory: the Shield (Bark-Shield Bearer / Round-Shield Carl) and the Torch (Firebrand / Torchbearer), which fight hand to hand; a torch sets buildings on fire (milestone M6, PLAN.md section 4.4, docs/design/gear.md). Their numbers are repeated here so Buffed's balance reads in one file. Field reference: docs/rulesets.md.",
+  "description": "Tribal Trouble Buffed: this fork's new content, layered on Resurrected, whose numbers it keeps. New buildings: the Chicken Coop / Henhouse and the Totem / Runestone (milestone M5, PLAN.md section 4.5). New gear from the Armory: the Shield (Bark-Shield Bearer / Round-Shield Carl) and the Torch (Firebrand / Torchbearer), which fight hand to hand; a torch sets buildings on fire (milestone M6, PLAN.md section 4.4, docs/design/gear.md). More buildings: the Trading Post / Market, where peons trade 3 of one resource for 1 of another (docs/design/market.md), and Palisade segments and Gates, walls that block movement and gates that let their own side through (docs/design/palisade.md; milestone M7). Their numbers are repeated here so Buffed's balance reads in one file. Field reference: docs/rulesets.md.",
   "extends": "resurrected",
-  "features": { "chicken_coop": true, "totem": true, "shield": true, "torch": true },
+  "features": { "chicken_coop": true, "totem": true, "shield": true, "torch": true, "market": true, "palisade": true },
   "natives": {
     "shield_warrior": { "hit_points": 1, "speed": 3.5, "defense_chance": 0.85, "hit_chance": 0.3 },
     "torch_warrior": { "hit_points": 1, "speed": 4.0, "defense_chance": 0.3, "hit_chance": 0.5 },
     "chicken_coop": { "hit_points": 100, "stock": 2, "spawn_seconds": 90.0, "max_chickens": 6 },
     "totem": { "hit_points": 30, "rock": 1, "hit_bonus": 0.05, "radius": 10.0, "max_stacking": 2 },
-    "torch": { "building_damage": 6, "fire_seconds": 15.0, "fire_damage": 2.0 }
+    "torch": { "building_damage": 6, "fire_seconds": 15.0, "fire_damage": 2.0 },
+    "market": { "hit_points": 150, "give": 3, "get": 1, "seconds": 20.0 },
+    "palisade": { "hit_points": 40, "max_segments": 100 },
+    "gate": { "hit_points": 120 }
   },
   "vikings": {
     "shield_warrior": { "hit_points": 1, "speed": 3.5, "defense_chance": 0.85, "hit_chance": 0.3 },
     "torch_warrior": { "hit_points": 1, "speed": 4.0, "defense_chance": 0.3, "hit_chance": 0.5 },
     "chicken_coop": { "hit_points": 100, "stock": 2, "spawn_seconds": 90.0, "max_chickens": 6 },
     "totem": { "hit_points": 30, "rock": 1, "hit_bonus": 0.05, "radius": 10.0, "max_stacking": 2 },
-    "torch": { "building_damage": 6, "fire_seconds": 15.0, "fire_damage": 2.0 }
+    "torch": { "building_damage": 6, "fire_seconds": 15.0, "fire_damage": 2.0 },
+    "market": { "hit_points": 150, "give": 3, "get": 1, "seconds": 20.0 },
+    "palisade": { "hit_points": 40, "max_segments": 100 },
+    "gate": { "hit_points": 120 }
   }
 }

@@ -1,6 +1,7 @@
 package com.oddlabs.tt.model.behaviour;
 
 import com.oddlabs.tt.model.Abilities;
+import com.oddlabs.tt.model.Building;
 import com.oddlabs.tt.model.Selectable;
 import org.jspecify.annotations.NonNull;
 
@@ -17,10 +18,12 @@ public final class NullController extends Controller {
     @Override
     public @NonNull Object getKey() {
         Abilities abilities = selectable.getAbilities();
+        // Walls have no job: their template tells them apart, finished or not.
         return List.of(super.getKey(), abilities.hasAbilities(Abilities.BUILD_ARMIES),
                 abilities.hasAbilities(Abilities.REPRODUCE), abilities.hasAbilities(Abilities.ATTACK),
                 abilities.hasAbilities(Abilities.SAIL), abilities.hasAbilities(Abilities.BREED),
-                abilities.hasAbilities(Abilities.AURA));
+                abilities.hasAbilities(Abilities.AURA), abilities.hasAbilities(Abilities.TRADE),
+                selectable instanceof Building building && building.isWall());
     }
 
     @Override

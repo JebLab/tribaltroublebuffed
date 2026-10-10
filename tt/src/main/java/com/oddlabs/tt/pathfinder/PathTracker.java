@@ -168,6 +168,10 @@ public final class PathTracker {
     private @Nullable Occupant getNextOccupant() {
         Occupant occ = getNextOccupantUnchecked();
         assert occ != unit : unit.getGridX() + " " + unit.getGridY() + " " + next_unit_grid_x + " " + next_unit_grid_y;
+        // An empty gate that admits the unit is a free cell for it (Buffed).
+        if (occ != null && occ == unit_grid.getGate(next_unit_grid_x, next_unit_grid_y)
+                && unit_grid.isGateOpen(next_unit_grid_x, next_unit_grid_y, unit))
+            return null;
         return occ;
     }
 
@@ -214,6 +218,16 @@ public final class PathTracker {
 
     private @Nullable GridPathNode findPathToNextRegion(int src_x, int src_y, @Nullable RegionNode next_region_node,
             boolean allow_secondary_targets) {
+        PathFinder.passer = unit;
+        try {
+            return doFindPathToNextRegion(src_x, src_y, next_region_node, allow_secondary_targets);
+        } finally {
+            PathFinder.passer = null;
+        }
+    }
+
+    private @Nullable GridPathNode doFindPathToNextRegion(int src_x, int src_y,
+            @Nullable RegionNode next_region_node, boolean allow_secondary_targets) {
         Region next_region = null;
         Region next_next_region;
         if (next_region_node != null) {

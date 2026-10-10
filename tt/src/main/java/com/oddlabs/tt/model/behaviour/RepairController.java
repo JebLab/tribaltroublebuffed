@@ -3,9 +3,11 @@ package com.oddlabs.tt.model.behaviour;
 import com.oddlabs.tt.landscape.TreeSupply;
 import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.Building;
+import com.oddlabs.tt.model.Selectable;
 import com.oddlabs.tt.model.Supply;
 import com.oddlabs.tt.model.Unit;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -14,6 +16,9 @@ public final class RepairController extends Controller {
         HARVEST,
         REPAIR
     }
+
+    // How far, in grid cells of 2 m, a Palisade builder looks for the next segment.
+    private static final int NEXT_WALL_CELLS = 8;
 
     private final Building building;
     private final Unit unit;
@@ -44,6 +49,14 @@ public final class RepairController extends Controller {
         if (building.isDead()) {
             unit.popController();
             return;
+        }
+        if (building.isWall() && !building.hasWork()) {
+            // A Palisade's builders move along the line (Buffed).
+            Building next = findNextWallSite();
+            if (next != null) {
+                unit.swapController(new RepairController(unit, next));
+                return;
+            }
         }
         Class<? extends Supply> wanted = building.getWorkMaterial();
         Class<? extends Supply> carried = unit.getSupplyContainer().getNumSupplies() > 0 ? unit.getSupplyContainer().getSupplyType() : null;
@@ -77,6 +90,25 @@ public final class RepairController extends Controller {
                 unit.popController();
             }
         }
+    }
+
+    /** The owner's unfinished or damaged wall nearest to the peon within {@link #NEXT_WALL_CELLS}, or null. */
+    private @Nullable Building findNextWallSite() {
+        Building best = null;
+        int best_dist_squared = NEXT_WALL_CELLS * NEXT_WALL_CELLS + 1;
+        for (Selectable<?> s : unit.getOwner().getUnits().getSet()) {
+            if (s instanceof Building wall && wall != building && !wall.isDead() && wall.isWall() && wall.isPlaced()
+                    && wall.hasWork()) {
+                int dx = wall.getGridX() - unit.getGridX();
+                int dy = wall.getGridY() - unit.getGridY();
+                int dist_squared = dx * dx + dy * dy;
+                if (dist_squared < best_dist_squared) {
+                    best_dist_squared = dist_squared;
+                    best = wall;
+                }
+            }
+        }
+        return best;
     }
 
     private <S extends Supply> @NonNull HarvestController<S> newHarvestController(@NonNull Class<S> material) {

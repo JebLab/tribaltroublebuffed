@@ -16,6 +16,10 @@ public final class EnterController extends Controller {
         this.building = building.getEntrance();
     }
 
+    public @NonNull Building getBuilding() {
+        return building;
+    }
+
     @Override
     public void decide() {
         if (building.isDead()) {

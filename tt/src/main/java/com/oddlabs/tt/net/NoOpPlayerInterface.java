@@ -43,6 +43,15 @@ public final class NoOpPlayerInterface implements PlayerInterface {
     }
 
     @Override
+    public void setTrade(@NonNull Building building, int give, int get) {
+    }
+
+    @Override
+    public void placePalisade(Selectable<?> @NonNull [] selection, int template_id, int grid_x1, int grid_y1,
+            int grid_x2, int grid_y2) {
+    }
+
+    @Override
     public void doMagic(@NonNull Unit chieftain, int magic) {
     }
 

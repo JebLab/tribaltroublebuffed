@@ -100,10 +100,23 @@ final class GridNode extends Node {
         if (occupant != null) {
             if (finder.touchNeighbour(occupant))
                 return true;
-            int penalty = occupant.getPenalty();
-            if (penalty >= Occupant.STATIC)
-                return false;
-            cost += penalty;
+            Gate gate = unit_grid.getGate(node.getGridX(), node.getGridY());
+            if (gate != null) {
+                // Buffed's gate: open to the movers it admits, a building to everyone else, even with a unit inside.
+                if (PathFinder.passer == null || !gate.admits(PathFinder.passer))
+                    return false;
+                if (occupant != gate) {
+                    int penalty = occupant.getPenalty();
+                    if (penalty >= Occupant.STATIC)
+                        return false;
+                    cost += penalty;
+                }
+            } else {
+                int penalty = occupant.getPenalty();
+                if (penalty >= Occupant.STATIC)
+                    return false;
+                cost += penalty;
+            }
         }
         PathFinder.addToOpenList(finder, node, this, cost);
         return false;

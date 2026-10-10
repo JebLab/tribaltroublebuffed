@@ -72,6 +72,17 @@ public abstract class Building extends Selectable<BuildingTemplate> implements O
     public void ignite(@NonNull TorchStats torch, @NonNull Player burner) {
     }
 
+    /**
+     * Sets what a finished Market trades (Buffed): {@code give} for {@code get}, as {@link Market} resource indices.
+     */
+    public void setTrade(int give, int get) {
+    }
+
+    /** Whether this is a Palisade segment or a Gate (Buffed). */
+    public final boolean isWall() {
+        return Race.isWall(getTemplate().getTemplateID());
+    }
+
     public abstract void createTransporters(int num_tree, int num_rock, int num_iron, int num_rubber);
 
     public abstract boolean isDamaged();

@@ -28,10 +28,12 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
      * @param totem             peons can build the Totem / Runestone
      * @param shield            the Armory makes Shields (the Bark-Shield Bearer / Round-Shield Carl)
      * @param torch             the Armory makes Torches (the Firebrand / Torchbearer)
+     * @param market            peons can build the Trading Post / Market
+     * @param palisade          peons can build Palisade segments and Gates
      */
     public record Features(boolean ships, boolean enormous_islands, boolean archipelago, int max_players,
                            boolean adjustable_limits, boolean chicken_coop, boolean totem, boolean shield,
-                           boolean torch) {
+                           boolean torch, boolean market, boolean palisade) {
     }
 
     /**
@@ -45,7 +47,8 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
                             @NonNull BuildingStats quarters, @NonNull BuildingStats armory,
                             @NonNull BuildingStats tower, @NonNull BuildingStats ship,
                             @NonNull ChickenCoopStats chicken_coop, @NonNull TotemStats totem,
-                            @NonNull TorchStats torch) {
+                            @NonNull TorchStats torch, @NonNull MarketStats market,
+                            @NonNull PalisadeStats palisade, @NonNull BuildingStats gate) {
     }
 
     /**
@@ -92,6 +95,26 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
      * @param fire_damage     hit points the fire takes per second
      */
     public record TorchStats(int building_damage, float fire_seconds, float fire_damage) {
+    }
+
+    /**
+     * Peons inside trade one resource for another with the owner's nearest Armory (docs/design/market.md). Built from
+     * wood like every building.
+     *
+     * @param give    resources a trade takes from the Armory
+     * @param get     resources a trade puts back, of the kind asked for
+     * @param seconds man-seconds of work a trade takes: the peons inside share it
+     */
+    public record MarketStats(int hit_points, int give, int get, float seconds) {
+    }
+
+    /**
+     * A wall segment of one grid cell (docs/design/palisade.md). Segments and Gates count against their own limit,
+     * not the building limit.
+     *
+     * @param max_segments Palisade segments and Gates one player may have at a time
+     */
+    public record PalisadeStats(int hit_points, int max_segments) {
     }
 
     /** The chieftains' spells, by their in-game names. */
