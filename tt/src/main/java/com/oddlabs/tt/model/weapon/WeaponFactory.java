@@ -1,6 +1,7 @@
 package com.oddlabs.tt.model.weapon;
 
 import com.oddlabs.tt.landscape.HeightMap;
+import com.oddlabs.tt.model.DrumAura;
 import com.oddlabs.tt.model.Selectable;
 import com.oddlabs.tt.model.TotemAura;
 import com.oddlabs.tt.model.Unit;
@@ -47,6 +48,10 @@ public abstract class WeaponFactory {
         float totem_bonus = TotemAura.getHitBonus(src);
         if (totem_bonus != 0f)
             chance += totem_bonus;
+        /* GAMEPLAY: a drummer of the attacker's team nearby (Buffed); without one, as above */
+        float drum_bonus = DrumAura.getHitBonus(src);
+        if (drum_bonus != 0f)
+            chance += drum_bonus;
         boolean hit = target.getOwner().getWorld().getRandom().nextFloat() < factor * chance * (1 - target.getDefenseChance());
         doAttack(hit, src, target);
     }

@@ -96,6 +96,21 @@ public abstract class InGameDelegate extends CameraDelegate<Camera> {
                 return true;
             }
         }
+        // Shift+F5 and Shift+F6 create a drummer and a chicken catcher where the ruleset offers them (Buffed).
+        if (actions.contains(GameAction.CHEAT_13) && viewer.getLocalPlayer().canBuildDrums()) {
+            if (viewer.getLocalPlayer().getUnitCountContainer().getNumSupplies() != viewer.getParameters().getMaxUnitCount()) {
+                new Unit(viewer.getLocalPlayer(), landscape_x, landscape_y, null,
+                        viewer.getLocalPlayer().getRace().getUnitTemplate(Race.UNIT_WARRIOR_DRUM));
+                return true;
+            }
+        }
+        if (actions.contains(GameAction.CHEAT_14) && viewer.getLocalPlayer().canBuildNets()) {
+            if (viewer.getLocalPlayer().getUnitCountContainer().getNumSupplies() != viewer.getParameters().getMaxUnitCount()) {
+                new Unit(viewer.getLocalPlayer(), landscape_x, landscape_y, null,
+                        viewer.getLocalPlayer().getRace().getUnitTemplate(Race.UNIT_WARRIOR_NET));
+                return true;
+            }
+        }
         if (actions.contains(GameAction.CHEAT_5)) {
             // F5 creates a chieftain at the center of the view unless the player already has one or is training one
             if (!viewer.getLocalPlayer().hasActiveChieftain() && !viewer.getLocalPlayer().isTrainingChieftain()) {

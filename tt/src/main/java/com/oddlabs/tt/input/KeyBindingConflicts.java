@@ -28,7 +28,7 @@ public final class KeyBindingConflicts {
     };
 
     // Active when a unit/group is selected: unit actions, build, magic, exit tower, gameplay back.
-    private static final GameAction[] UNIT_CONTEXT = {GameAction.UNIT_MOVE, GameAction.UNIT_ATTACK, GameAction.UNIT_GATHER, GameAction.UNIT_BUILD_QUARTERS, GameAction.UNIT_BUILD_ARMORY, GameAction.UNIT_BUILD_TOWER, GameAction.UNIT_BUILD_SHIP, GameAction.UNIT_BUILD_CHICKEN_COOP, GameAction.UNIT_BUILD_TOTEM, GameAction.UNIT_BUILD_MARKET, GameAction.UNIT_BUILD_PALISADE, GameAction.UNIT_BUILD_GATE, GameAction.UNIT_BUILD_GREAT_TOWER, GameAction.UNIT_BUILD_LODGE, GameAction.UNIT_EXIT_TOWER, GameAction.MAGIC_1, GameAction.MAGIC_2, GameAction.GAMEPLAY_BACK,
+    private static final GameAction[] UNIT_CONTEXT = {GameAction.UNIT_MOVE, GameAction.UNIT_ATTACK, GameAction.UNIT_GATHER, GameAction.UNIT_BUILD_QUARTERS, GameAction.UNIT_BUILD_ARMORY, GameAction.UNIT_BUILD_TOWER, GameAction.UNIT_BUILD_SHIP, GameAction.UNIT_BUILD_CHICKEN_COOP, GameAction.UNIT_BUILD_TOTEM, GameAction.UNIT_BUILD_MARKET, GameAction.UNIT_BUILD_PALISADE, GameAction.UNIT_BUILD_GATE, GameAction.UNIT_BUILD_GREAT_TOWER, GameAction.UNIT_BUILD_LODGE, GameAction.UNIT_LAY_SNARE, GameAction.UNIT_EXIT_TOWER, GameAction.MAGIC_1, GameAction.MAGIC_2, GameAction.GAMEPLAY_BACK,
     };
 
     // Armory/Quarters top-level: production category, set-rally, train chieftain,
@@ -36,7 +36,7 @@ public final class KeyBindingConflicts {
     };
 
     // Resource sub-menus (harvest / transport / weapons all share the same resource keys by design).
-    private static final GameAction[] RESOURCE_CONTEXT = {GameAction.RES_TREE, GameAction.RES_TREE_DEC, GameAction.RES_TREE_BATCH, GameAction.RES_TREE_BATCH_DEC, GameAction.RES_ROCK, GameAction.RES_ROCK_DEC, GameAction.RES_ROCK_BATCH, GameAction.RES_ROCK_BATCH_DEC, GameAction.RES_IRON, GameAction.RES_IRON_DEC, GameAction.RES_IRON_BATCH, GameAction.RES_IRON_BATCH_DEC, GameAction.RES_CHICKEN, GameAction.RES_CHICKEN_DEC, GameAction.RES_CHICKEN_BATCH, GameAction.RES_CHICKEN_BATCH_DEC, GameAction.RES_SHIELD, GameAction.RES_SHIELD_DEC, GameAction.RES_SHIELD_BATCH, GameAction.RES_SHIELD_BATCH_DEC, GameAction.RES_TORCH, GameAction.RES_TORCH_DEC, GameAction.RES_TORCH_BATCH, GameAction.RES_TORCH_BATCH_DEC,
+    private static final GameAction[] RESOURCE_CONTEXT = {GameAction.RES_TREE, GameAction.RES_TREE_DEC, GameAction.RES_TREE_BATCH, GameAction.RES_TREE_BATCH_DEC, GameAction.RES_ROCK, GameAction.RES_ROCK_DEC, GameAction.RES_ROCK_BATCH, GameAction.RES_ROCK_BATCH_DEC, GameAction.RES_IRON, GameAction.RES_IRON_DEC, GameAction.RES_IRON_BATCH, GameAction.RES_IRON_BATCH_DEC, GameAction.RES_CHICKEN, GameAction.RES_CHICKEN_DEC, GameAction.RES_CHICKEN_BATCH, GameAction.RES_CHICKEN_BATCH_DEC, GameAction.RES_SHIELD, GameAction.RES_SHIELD_DEC, GameAction.RES_SHIELD_BATCH, GameAction.RES_SHIELD_BATCH_DEC, GameAction.RES_TORCH, GameAction.RES_TORCH_DEC, GameAction.RES_TORCH_BATCH, GameAction.RES_TORCH_BATCH_DEC, GameAction.RES_DRUM, GameAction.RES_DRUM_DEC, GameAction.RES_DRUM_BATCH, GameAction.RES_DRUM_BATCH_DEC, GameAction.RES_NET, GameAction.RES_NET_DEC, GameAction.RES_NET_BATCH, GameAction.RES_NET_BATCH_DEC,
     };
 
     // UI navigation: active inside modal forms / focus traversal. A separate mode, so its keys may double as in-game keys.

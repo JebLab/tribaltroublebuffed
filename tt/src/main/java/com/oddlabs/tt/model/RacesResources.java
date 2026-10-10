@@ -8,12 +8,14 @@ import com.oddlabs.tt.global.Headless;
 import com.oddlabs.tt.gui.GUIIcons;
 import com.oddlabs.tt.landscape.TreeSupply;
 import com.oddlabs.tt.model.weapon.Champion;
+import com.oddlabs.tt.model.weapon.Drum;
 import com.oddlabs.tt.model.weapon.GearFactory;
 import com.oddlabs.tt.model.weapon.InstantHitFactory;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.IronSpearWeapon;
 import com.oddlabs.tt.model.weapon.LightningCloudFactory;
 import com.oddlabs.tt.model.weapon.MagicFactory;
+import com.oddlabs.tt.model.weapon.Net;
 import com.oddlabs.tt.model.weapon.PoisonFogFactory;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockSpearWeapon;
@@ -52,6 +54,7 @@ import com.oddlabs.tt.ruleset.RulesetStats.TerrifyingTootStats;
 import com.oddlabs.tt.ruleset.RulesetStats.UnitStats;
 import com.oddlabs.tt.util.Utils;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import java.util.HashMap;
@@ -124,6 +127,9 @@ public final class RacesResources {
     private final Map<@NonNull Class<? extends Supply>, @NonNull Audio[]> harvest_sounds = new HashMap<>();
     private final @NonNull SpriteKey[] wood_fragment_sprites = new SpriteKey[4];
     private final @NonNull SpriteKey[] treasure_sprites = new SpriteKey[6];
+    // Buffed's snares (docs/design/drum-and-net.md), per race.
+    private final @NonNull SpriteKey[] snare_sprites = new SpriteKey[2];
+    private final @NonNull String snare_name;
     private final @NonNull Race @NonNull [] races;
 
     public static boolean isValidRace(int race) {
@@ -244,17 +250,29 @@ public final class RacesResources {
     private static @NonNull UnitTemplate createGearWarriorTemplate(@NonNull RenderQueues queues, @NonNull String race,
             @NonNull String sprite, @NonNull UnitStats stats, @NonNull WeaponFactory weapon,
             @NonNull ShadowListKey shadow_list, @NonNull Audio death_sound, @NonNull String name, int status_value) {
+        return createGearWarriorTemplate(queues, race, sprite, stats, weapon, shadow_list, death_sound, name,
+                status_value, Abilities.ATTACK | Abilities.TARGET | Abilities.THROW, null);
+    }
+
+    /**
+     * @param abilities      the Drum's bearer has no {@link Abilities#ATTACK}
+     * @param supply_factory what the unit can carry (the Net's bearer carries a caught chicken), or null
+     */
+    private static @NonNull UnitTemplate createGearWarriorTemplate(@NonNull RenderQueues queues, @NonNull String race,
+            @NonNull String sprite, @NonNull UnitStats stats, @NonNull WeaponFactory weapon,
+            @NonNull ShadowListKey shadow_list, @NonNull Audio death_sound, @NonNull String name, int status_value,
+            int abilities, @Nullable UnitSupplyContainerFactory supply_factory) {
         SpriteFile sprite_file = new SpriteFile("/geometry/" + race + "/" + sprite + ".binsprite",
                 Globals.NO_MIPMAP_CUTOFF, true, true, true, false);
         return new UnitTemplate(.4f,
                 1.2f,
-                new Abilities(Abilities.ATTACK | Abilities.TARGET | Abilities.THROW),
+                new Abilities(abilities),
                 stats.speed(),
                 weapon,
                 queues.register(sprite_file),
                 1.9f,
                 shadow_list,
-                null,
+                supply_factory,
                 death_sound,
                 .25f,
                 new float[]{1.2f},
@@ -1101,6 +1119,28 @@ public final class RacesResources {
                 vikings.champion(), new GearFactory(Champion.class, vikings.champion().hit_chance(), 29f / 58f, null,
                         unit_hit_sounds),
                 default_shadow_list, death_viking1_sound, i18n("champion_vikings"), 8);
+        // Buffed's Drum / Horn and Net (docs/design/drum-and-net.md). The Drummer never strikes (no ATTACK); the
+        // Chicken Catcher strikes like the gear and carries a caught chicken like a peon.
+        int drum_abilities = Abilities.TARGET | Abilities.THROW;
+        int net_abilities = Abilities.ATTACK | Abilities.TARGET | Abilities.THROW;
+        UnitTemplate native_warrior_drum_template = createGearWarriorTemplate(queues, "natives", "drum_warrior",
+                natives.drum_warrior(), new GearFactory(Drum.class, natives.drum_warrior().hit_chance(), 46f / 100f,
+                        null, unit_hit_sounds),
+                default_shadow_list, death_native1_sound, i18n("drum_warrior_natives"), 5, drum_abilities, null);
+        UnitTemplate native_warrior_net_template = createGearWarriorTemplate(queues, "natives", "net_warrior",
+                natives.net_warrior(), new GearFactory(Net.class, natives.net_warrior().hit_chance(), 46f / 100f,
+                        null, unit_hit_sounds),
+                default_shadow_list, death_native2_sound, i18n("net_warrior_natives"), 4, net_abilities,
+                new UnitSupplyContainerFactory(MAX_UNIT_RESOURCES, native_supply_sprite_lists));
+        UnitTemplate viking_warrior_drum_template = createGearWarriorTemplate(queues, "vikings", "drum_warrior",
+                vikings.drum_warrior(), new GearFactory(Drum.class, vikings.drum_warrior().hit_chance(), 29f / 58f,
+                        null, unit_hit_sounds),
+                default_shadow_list, death_viking1_sound, i18n("drum_warrior_vikings"), 5, drum_abilities, null);
+        UnitTemplate viking_warrior_net_template = createGearWarriorTemplate(queues, "vikings", "net_warrior",
+                vikings.net_warrior(), new GearFactory(Net.class, vikings.net_warrior().hit_chance(), 29f / 58f,
+                        null, unit_hit_sounds),
+                default_shadow_list, death_viking2_sound, i18n("net_warrior_vikings"), 4, net_abilities,
+                new UnitSupplyContainerFactory(MAX_UNIT_RESOURCES, viking_supply_sprite_lists));
 
         StinkingStewStats stew = spells.stinking_stew();
         CracklingCloudStats cloud = spells.crackling_cloud();
@@ -1142,6 +1182,8 @@ public final class RacesResources {
                 native_warrior_shield_template,
                 native_warrior_torch_template,
                 native_champion_template,
+                native_warrior_drum_template,
+                native_warrior_net_template,
                 queues.register(new SpriteFile("/geometry/natives/rally_point.binsprite",
                         Globals.NO_MIPMAP_CUTOFF,
                         true, true, true, false)),
@@ -1170,6 +1212,8 @@ public final class RacesResources {
                 viking_warrior_shield_template,
                 viking_warrior_torch_template,
                 viking_champion_template,
+                viking_warrior_drum_template,
+                viking_warrior_net_template,
                 queues.register(new SpriteFile("/geometry/vikings/rally_point.binsprite",
                         Globals.NO_MIPMAP_CUTOFF,
                         true, true, true, false)),
@@ -1180,6 +1224,11 @@ public final class RacesResources {
                 new VikingChieftainAI(),
                 "/music/viking.ogg");
         races = new Race[]{natives_race, vikings_race};
+        snare_name = i18n("snare");
+        snare_sprites[RACE_NATIVES] = queues.register(new SpriteFile("/geometry/natives/snare.binsprite",
+                Globals.NO_MIPMAP_CUTOFF, true, true, true, false));
+        snare_sprites[RACE_VIKINGS] = queues.register(new SpriteFile("/geometry/vikings/snare.binsprite",
+                Globals.NO_MIPMAP_CUTOFF, true, true, true, false));
 
         wood_fragment_sprites[0] = queues.register(new SpriteFile("/geometry/misc/wood_2.binsprite",
                 Globals.NO_MIPMAP_CUTOFF,
@@ -1292,6 +1341,15 @@ public final class RacesResources {
 
     public @NonNull Audio getBuildingCollapseSound() {
         return building_collapse_sound;
+    }
+
+    /** The snare a Chicken Catcher or Fowler lays (Buffed), for {@code race}. */
+    public @NonNull String getSnareName() {
+        return snare_name;
+    }
+
+    public @NonNull SpriteKey getSnareSprite(int race) {
+        return snare_sprites[race];
     }
 
     public @NonNull Race getRace(int i) {

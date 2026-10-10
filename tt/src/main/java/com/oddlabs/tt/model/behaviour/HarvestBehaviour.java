@@ -2,6 +2,7 @@ package com.oddlabs.tt.model.behaviour;
 
 import com.oddlabs.tt.audio.AudioParameters;
 import com.oddlabs.tt.audio.AudioPlayer;
+import com.oddlabs.tt.model.RubberSupply;
 import com.oddlabs.tt.model.Supply;
 import com.oddlabs.tt.model.Unit;
 import org.jspecify.annotations.NonNull;
@@ -38,7 +39,7 @@ public final class HarvestBehaviour implements Behaviour {
                     AudioPlayer.AUDIO_DISTANCE_HARVEST,
                     AudioPlayer.AUDIO_GAIN_HARVEST,
                     AudioPlayer.AUDIO_RADIUS_HARVEST));
-            if (supply.hit()) {
+            if (stroke()) {
                 unit.getSupplyContainer().increaseSupply(1, supply.getClass());
                 unit.getOwner().harvested(supply.getClass());
             }
@@ -51,6 +52,18 @@ public final class HarvestBehaviour implements Behaviour {
         }
 
         return State.INTERRUPTIBLE;
+    }
+
+    /** One stroke at the supply; whether it yielded a load. A net (Buffed) catches a chicken in one stroke. */
+    private boolean stroke() {
+        if (unit.isNetter() && supply instanceof RubberSupply) {
+            for (int i = 0; i < Supply.HITS_PER_HARVEST; i++) {
+                if (supply.hit())
+                    return true;
+            }
+            return false;
+        }
+        return supply.hit();
     }
 
     private void restartAnimation() {

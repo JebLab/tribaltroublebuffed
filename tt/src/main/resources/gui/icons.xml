@@ -51,6 +51,13 @@
                 vikings_great_tower_icon,
                 vikings_lodge_icon,
                 vikings_champion_icon,
+                vikings_weapon_drum_status_icon,
+                vikings_weapon_net_status_icon,
+                vikings_build_weapon_drum_icon,
+                vikings_build_weapon_net_icon,
+                vikings_warrior_drum_icon,
+                vikings_warrior_net_icon,
+                vikings_lay_snare_icon,
                 natives_unit_status_icon,
                 natives_weapon_rock_status_icon,
                 natives_weapon_iron_status_icon,
@@ -91,6 +98,13 @@
                 natives_great_tower_icon,
                 natives_lodge_icon,
                 natives_champion_icon,
+                natives_weapon_drum_status_icon,
+                natives_weapon_net_status_icon,
+                natives_build_weapon_drum_icon,
+                natives_build_weapon_net_icon,
+                natives_warrior_drum_icon,
+                natives_warrior_net_icon,
+                natives_lay_snare_icon,
                 watch,
                 infinite,
                 notify_arrow
@@ -156,6 +170,13 @@
         <!ELEMENT vikings_great_tower_icon         (normal, active, disabled)>
         <!ELEMENT vikings_lodge_icon               (normal, active, disabled)>
         <!ELEMENT vikings_champion_icon            (normal, active, disabled)>
+        <!ELEMENT vikings_weapon_drum_status_icon    (quad)>
+        <!ELEMENT vikings_weapon_net_status_icon     (quad)>
+        <!ELEMENT vikings_build_weapon_drum_icon     (normal, active, disabled)>
+        <!ELEMENT vikings_build_weapon_net_icon      (normal, active, disabled)>
+        <!ELEMENT vikings_warrior_drum_icon          (normal, active, disabled)>
+        <!ELEMENT vikings_warrior_net_icon           (normal, active, disabled)>
+        <!ELEMENT vikings_lay_snare_icon             (normal, active, disabled)>
 
         <!ELEMENT natives_unit_status_icon            (quad)>
         <!ELEMENT natives_weapon_rock_status_icon    (quad)>
@@ -197,6 +218,13 @@
         <!ELEMENT natives_great_tower_icon         (normal, active, disabled)>
         <!ELEMENT natives_lodge_icon               (normal, active, disabled)>
         <!ELEMENT natives_champion_icon            (normal, active, disabled)>
+        <!ELEMENT natives_weapon_drum_status_icon    (quad)>
+        <!ELEMENT natives_weapon_net_status_icon     (quad)>
+        <!ELEMENT natives_build_weapon_drum_icon     (normal, active, disabled)>
+        <!ELEMENT natives_build_weapon_net_icon      (normal, active, disabled)>
+        <!ELEMENT natives_warrior_drum_icon          (normal, active, disabled)>
+        <!ELEMENT natives_warrior_net_icon           (normal, active, disabled)>
+        <!ELEMENT natives_lay_snare_icon             (normal, active, disabled)>
 
         <!ELEMENT watch                                (quad+)>
 
@@ -674,6 +702,67 @@
             <quad left="1024" top="512" right="1088" bottom="576"/>
         </disabled>
     </vikings_champion_icon>
+    <vikings_weapon_drum_status_icon>
+        <quad left="640" top="1024" right="672" bottom="1056"/>
+    </vikings_weapon_drum_status_icon>
+    <vikings_weapon_net_status_icon>
+        <quad left="672" top="1024" right="704" bottom="1056"/>
+    </vikings_weapon_net_status_icon>
+    <vikings_build_weapon_drum_icon>
+        <normal>
+            <quad left="0" top="1024" right="64" bottom="1088"/>
+        </normal>
+        <active>
+            <quad left="0" top="1088" right="64" bottom="1152"/>
+        </active>
+        <disabled>
+            <quad left="0" top="1152" right="64" bottom="1216"/>
+        </disabled>
+    </vikings_build_weapon_drum_icon>
+    <vikings_build_weapon_net_icon>
+        <normal>
+            <quad left="64" top="1024" right="128" bottom="1088"/>
+        </normal>
+        <active>
+            <quad left="64" top="1088" right="128" bottom="1152"/>
+        </active>
+        <disabled>
+            <quad left="64" top="1152" right="128" bottom="1216"/>
+        </disabled>
+    </vikings_build_weapon_net_icon>
+    <vikings_warrior_drum_icon>
+        <normal>
+            <quad left="128" top="1024" right="192" bottom="1088"/>
+        </normal>
+        <active>
+            <quad left="128" top="1088" right="192" bottom="1152"/>
+        </active>
+        <disabled>
+            <quad left="128" top="1152" right="192" bottom="1216"/>
+        </disabled>
+    </vikings_warrior_drum_icon>
+    <vikings_warrior_net_icon>
+        <normal>
+            <quad left="192" top="1024" right="256" bottom="1088"/>
+        </normal>
+        <active>
+            <quad left="192" top="1088" right="256" bottom="1152"/>
+        </active>
+        <disabled>
+            <quad left="192" top="1152" right="256" bottom="1216"/>
+        </disabled>
+    </vikings_warrior_net_icon>
+    <vikings_lay_snare_icon>
+        <normal>
+            <quad left="256" top="1024" right="320" bottom="1088"/>
+        </normal>
+        <active>
+            <quad left="256" top="1088" right="320" bottom="1152"/>
+        </active>
+        <disabled>
+            <quad left="256" top="1152" right="320" bottom="1216"/>
+        </disabled>
+    </vikings_lay_snare_icon>
 
     <!-- NATIVES -->
     <natives_unit_status_icon>
@@ -1068,6 +1157,67 @@
             <quad left="1024" top="832" right="1088" bottom="896"/>
         </disabled>
     </natives_champion_icon>
+    <natives_weapon_drum_status_icon>
+        <quad left="704" top="1024" right="736" bottom="1056"/>
+    </natives_weapon_drum_status_icon>
+    <natives_weapon_net_status_icon>
+        <quad left="736" top="1024" right="768" bottom="1056"/>
+    </natives_weapon_net_status_icon>
+    <natives_build_weapon_drum_icon>
+        <normal>
+            <quad left="320" top="1024" right="384" bottom="1088"/>
+        </normal>
+        <active>
+            <quad left="320" top="1088" right="384" bottom="1152"/>
+        </active>
+        <disabled>
+            <quad left="320" top="1152" right="384" bottom="1216"/>
+        </disabled>
+    </natives_build_weapon_drum_icon>
+    <natives_build_weapon_net_icon>
+        <normal>
+            <quad left="384" top="1024" right="448" bottom="1088"/>
+        </normal>
+        <active>
+            <quad left="384" top="1088" right="448" bottom="1152"/>
+        </active>
+        <disabled>
+            <quad left="384" top="1152" right="448" bottom="1216"/>
+        </disabled>
+    </natives_build_weapon_net_icon>
+    <natives_warrior_drum_icon>
+        <normal>
+            <quad left="448" top="1024" right="512" bottom="1088"/>
+        </normal>
+        <active>
+            <quad left="448" top="1088" right="512" bottom="1152"/>
+        </active>
+        <disabled>
+            <quad left="448" top="1152" right="512" bottom="1216"/>
+        </disabled>
+    </natives_warrior_drum_icon>
+    <natives_warrior_net_icon>
+        <normal>
+            <quad left="512" top="1024" right="576" bottom="1088"/>
+        </normal>
+        <active>
+            <quad left="512" top="1088" right="576" bottom="1152"/>
+        </active>
+        <disabled>
+            <quad left="512" top="1152" right="576" bottom="1216"/>
+        </disabled>
+    </natives_warrior_net_icon>
+    <natives_lay_snare_icon>
+        <normal>
+            <quad left="576" top="1024" right="640" bottom="1088"/>
+        </normal>
+        <active>
+            <quad left="576" top="1088" right="640" bottom="1152"/>
+        </active>
+        <disabled>
+            <quad left="576" top="1152" right="640" bottom="1216"/>
+        </disabled>
+    </natives_lay_snare_icon>
 
     <!-- Watch icons -->
     <watch>

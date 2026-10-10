@@ -65,6 +65,8 @@ public enum GameAction {
     UNIT_BUILD_GATE,
     UNIT_BUILD_GREAT_TOWER,
     UNIT_BUILD_LODGE,
+    // Buffed: a chicken catcher lays a snare
+    UNIT_LAY_SNARE,
     UNIT_EXIT_TOWER,
     UNIT_BEACON,
     UNIT_NEXT_IDLE,
@@ -132,6 +134,16 @@ public enum GameAction {
     RES_TORCH_BATCH,
     RES_TORCH_BATCH_DEC,
 
+    RES_DRUM,
+    RES_DRUM_DEC,
+    RES_DRUM_BATCH,
+    RES_DRUM_BATCH_DEC,
+
+    RES_NET,
+    RES_NET_DEC,
+    RES_NET_BATCH,
+    RES_NET_BATCH_DEC,
+
     DEPLOY_CHIEFTAIN,
 
     // Buffed's Market: the resource it sells and the one it buys
@@ -174,6 +186,8 @@ public enum GameAction {
     CHEAT_10,
     CHEAT_11,
     CHEAT_12,
+    CHEAT_13,
+    CHEAT_14,
 
     // Observer mode
     SPECTATOR_NEXT_PLAYER,

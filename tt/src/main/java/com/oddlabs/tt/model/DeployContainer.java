@@ -104,6 +104,12 @@ public class DeployContainer extends SupplyContainer {
             case SHELTERED:
                 building.createSheltered();
                 break;
+            case DRUM_WARRIOR:
+                building.createGearWarrior(Race.UNIT_WARRIOR_DRUM);
+                break;
+            case NET_WARRIOR:
+                building.createGearWarrior(Race.UNIT_WARRIOR_NET);
+                break;
         }
     }
 

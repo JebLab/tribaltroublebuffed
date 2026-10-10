@@ -45,5 +45,12 @@ public record RaceIcons(@NonNull IconQuad unitStatusIcon,
                         @NonNull ModeIconQuads gateIcon,
                         @NonNull ModeIconQuads greatTowerIcon,
                         @NonNull ModeIconQuads lodgeIcon,
-                        @NonNull ModeIconQuads championIcon) {
+                        @NonNull ModeIconQuads championIcon,
+                        @NonNull IconQuad weaponDrumStatusIcon,
+                        @NonNull IconQuad weaponNetStatusIcon,
+                        @NonNull ModeIconQuads buildWeaponDrumIcon,
+                        @NonNull ModeIconQuads buildWeaponNetIcon,
+                        @NonNull ModeIconQuads warriorDrumIcon,
+                        @NonNull ModeIconQuads warriorNetIcon,
+                        @NonNull ModeIconQuads laySnareIcon) {
 }

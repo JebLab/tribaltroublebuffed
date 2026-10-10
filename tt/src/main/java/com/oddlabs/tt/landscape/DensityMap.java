@@ -15,6 +15,8 @@ import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberSpearWeapon;
 import com.oddlabs.tt.model.weapon.Shield;
 import com.oddlabs.tt.model.weapon.Torch;
+import com.oddlabs.tt.model.weapon.Drum;
+import com.oddlabs.tt.model.weapon.Net;
 import com.oddlabs.tt.player.Player;
 
 
@@ -35,6 +37,8 @@ public final class DensityMap {
     private final int SHIELD_WEIGHT = 3;
     private final int TORCH_WEIGHT = 4;
     private final int CHAMPION_WEIGHT = 6;
+    private final int DRUM_WEIGHT = 2;
+    private final int NET_WEIGHT = 2;
     private final int CHIEFTAIN_WEIGHT = 11;
     private final int OUTSIDE_SCALE = 2;
 
@@ -59,6 +63,10 @@ public final class DensityMap {
                 return SHIELD_WEIGHT * OUTSIDE_SCALE;
             } else if (type == Champion.class) {
                 return CHAMPION_WEIGHT * OUTSIDE_SCALE;
+            } else if (type == Drum.class) {
+                return DRUM_WEIGHT * OUTSIDE_SCALE;
+            } else if (type == Net.class) {
+                return NET_WEIGHT * OUTSIDE_SCALE;
             } else if (type == Torch.class) {
                 return TORCH_WEIGHT * OUTSIDE_SCALE;
             } else {
@@ -77,6 +85,8 @@ public final class DensityMap {
                 weight += building.getDeployContainer(DeployType.RUBBER_WARRIOR).getNumSupplies() * RUBBER_WEIGHT;
                 weight += building.getDeployContainer(DeployType.SHIELD_WARRIOR).getNumSupplies() * SHIELD_WEIGHT;
                 weight += building.getDeployContainer(DeployType.TORCH_WARRIOR).getNumSupplies() * TORCH_WEIGHT;
+                weight += building.getDeployContainer(DeployType.DRUM_WARRIOR).getNumSupplies() * DRUM_WEIGHT;
+                weight += building.getDeployContainer(DeployType.NET_WARRIOR).getNumSupplies() * NET_WEIGHT;
                 weight += building.getDeployContainer(DeployType.PEON).getNumSupplies() * PEON_WEIGHT;
                 int total = building.getUnitContainer().getNumSupplies();
                 int rubber = building.getSupplyContainer(RubberAxeWeapon.class).getNumSupplies();
@@ -100,6 +110,12 @@ public final class DensityMap {
                 int shield = Math.min(building.getSupplyContainer(Shield.class).getNumSupplies(), total);
                 weight += shield * SHIELD_WEIGHT;
                 total -= shield;
+                int drum = Math.min(building.getSupplyContainer(Drum.class).getNumSupplies(), total);
+                weight += drum * DRUM_WEIGHT;
+                total -= drum;
+                int net = Math.min(building.getSupplyContainer(Net.class).getNumSupplies(), total);
+                weight += net * NET_WEIGHT;
+                total -= net;
                 weight += total * PEON_WEIGHT;
                 return StrictMath.round(weight * health);
             } else if (building.getAbilities().hasAbilities(Abilities.ATTACK)) {

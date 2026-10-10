@@ -1,9 +1,6 @@
 package com.oddlabs.tt.player;
 
-import com.oddlabs.tt.landscape.TreeSupply;
-import com.oddlabs.tt.model.RockSupply;
 import com.oddlabs.tt.model.behaviour.Controller;
-import com.oddlabs.tt.model.behaviour.GatherController;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -50,12 +47,7 @@ class ClassifyUnitsTest {
         assertEquals(new TestControllerA().getKey(), new TestControllerA().getKey());
         assertNotEquals(new TestControllerA().getKey(), new TestControllerB().getKey());
         assertEquals(TestControllerA.class, new TestControllerA().getKey());
-
-        // getKey() only reads the supply type, so the unit can be left out.
-        assertEquals(new GatherController<>(null, null, TreeSupply.class).getKey(),
-                new GatherController<>(null, null, TreeSupply.class).getKey());
-        assertNotEquals(new GatherController<>(null, null, TreeSupply.class).getKey(),
-                new GatherController<>(null, null, RockSupply.class).getKey());
+        // GatherController's and IdleController's keys read their unit: BuffedDrumNetTest checks them on a world.
     }
 
     private static final class TestControllerA extends Controller {

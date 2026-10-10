@@ -32,16 +32,20 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
      * @param palisade          peons can build Palisade segments and Gates
      * @param great_tower       peons can build the Great Tower
      * @param lodge             peons can build the Spirit Lodge / Mead Hall, which trains the Champion
+     * @param drum              the Armory makes Drums and Horns (the Drummer / Hornblower)
+     * @param net               the Armory makes Nets (the Chicken Catcher / Fowler), which lay snares
      */
     public record Features(boolean ships, boolean enormous_islands, boolean archipelago, int max_players,
                            boolean adjustable_limits, boolean chicken_coop, boolean totem, boolean shield,
-                           boolean torch, boolean market, boolean palisade, boolean great_tower, boolean lodge) {
+                           boolean torch, boolean market, boolean palisade, boolean great_tower, boolean lodge,
+                           boolean drum, boolean net) {
     }
 
     /**
      * One race's numbers. A building or unit that a ruleset does not offer still has its numbers here (the base file
-     * must be complete); its {@link Features} flag keeps it out of the game. The shield and torch warriors fight hand
-     * to hand, and so does the Champion: their {@code hit_chance} is that of a blow.
+     * must be complete); its {@link Features} flag keeps it out of the game. The shield, torch and net warriors fight
+     * hand to hand, and so does the Champion: their {@code hit_chance} is that of a blow. The drum warrior never
+     * attacks.
      */
     public record RaceStats(@NonNull UnitStats peon, @NonNull UnitStats rock_warrior, @NonNull UnitStats iron_warrior,
                             @NonNull UnitStats chicken_warrior, @NonNull UnitStats shield_warrior,
@@ -52,7 +56,8 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
                             @NonNull TorchStats torch, @NonNull MarketStats market,
                             @NonNull PalisadeStats palisade, @NonNull BuildingStats gate,
                             @NonNull UnitStats champion, @NonNull GreatTowerStats great_tower,
-                            @NonNull LodgeStats lodge) {
+                            @NonNull LodgeStats lodge, @NonNull UnitStats drum_warrior,
+                            @NonNull UnitStats net_warrior, @NonNull DrumStats drum, @NonNull NetStats net) {
     }
 
     /**
@@ -144,6 +149,27 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
      */
     public record LodgeStats(int hit_points, int iron, int shelter, float spell_radius, float spell_charge_factor,
                              float champion_seconds, int max_champions) {
+    }
+
+    /**
+     * The Drum / Horn's aura (docs/design/drum-and-net.md): units of the drummer's team within {@code radius} of it,
+     * itself included, hit and walk better. Several drummers do not add up.
+     *
+     * @param hit_bonus   added to the hit chance, inside it like the Totem's
+     * @param speed_bonus the share by which walking speed grows (0.15: 15 % faster)
+     * @param radius      meters
+     */
+    public record DrumStats(float hit_bonus, float speed_bonus, float radius) {
+    }
+
+    /**
+     * The Net's snares (docs/design/drum-and-net.md): a chicken catcher keeps at most {@code snares} lying at a time;
+     * each stuns the first enemy unit that steps on it.
+     *
+     * @param snares       snares of one catcher lying at a time; laying another takes up its oldest
+     * @param stun_seconds how long a snare stuns
+     */
+    public record NetStats(int snares, float stun_seconds) {
     }
 
     /** The chieftains' spells, by their in-game names. */

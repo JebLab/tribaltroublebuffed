@@ -8,6 +8,8 @@ import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
 import com.oddlabs.tt.model.weapon.Shield;
 import com.oddlabs.tt.model.weapon.Torch;
+import com.oddlabs.tt.model.weapon.Drum;
+import com.oddlabs.tt.model.weapon.Net;
 import com.oddlabs.tt.input.GameAction;
 import com.oddlabs.tt.player.PlayerInterface;
 import com.oddlabs.tt.viewer.WorldViewer;
@@ -69,6 +71,10 @@ public final class BuildSpinner extends IconSpinner {
                 player_interface.buildShieldWeapons(current_building, num, infinite);
             } else if (type == Torch.class) {
                 player_interface.buildTorchWeapons(current_building, num, infinite);
+            } else if (type == Drum.class) {
+                player_interface.buildDrumWeapons(current_building, num, infinite);
+            } else if (type == Net.class) {
+                player_interface.buildNetWeapons(current_building, num, infinite);
             } else if (type == Champion.class) {
                 player_interface.trainChampions(current_building, num, infinite);
             } else {

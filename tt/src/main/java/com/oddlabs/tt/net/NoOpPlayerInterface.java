@@ -43,6 +43,14 @@ public final class NoOpPlayerInterface implements PlayerInterface {
     }
 
     @Override
+    public void buildDrumWeapons(@NonNull Building building, int num_weapons, boolean infinite) {
+    }
+
+    @Override
+    public void buildNetWeapons(@NonNull Building building, int num_weapons, boolean infinite) {
+    }
+
+    @Override
     public void setTrade(@NonNull Building building, int give, int get) {
     }
 

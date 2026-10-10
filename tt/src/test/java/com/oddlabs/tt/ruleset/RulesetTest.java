@@ -12,9 +12,11 @@ import com.oddlabs.tt.model.RubberSupply;
 import com.oddlabs.tt.model.behaviour.RepairBehaviour;
 import com.oddlabs.tt.ruleset.RulesetStats.BuildingStats;
 import com.oddlabs.tt.ruleset.RulesetStats.ChickenCoopStats;
+import com.oddlabs.tt.ruleset.RulesetStats.DrumStats;
 import com.oddlabs.tt.ruleset.RulesetStats.GreatTowerStats;
 import com.oddlabs.tt.ruleset.RulesetStats.LodgeStats;
 import com.oddlabs.tt.ruleset.RulesetStats.MarketStats;
+import com.oddlabs.tt.ruleset.RulesetStats.NetStats;
 import com.oddlabs.tt.ruleset.RulesetStats.PalisadeStats;
 import com.oddlabs.tt.ruleset.RulesetStats.RaceStats;
 import com.oddlabs.tt.ruleset.RulesetStats.SpellStats;
@@ -94,25 +96,25 @@ final class RulesetTest {
     /**
      * 2004 had no boats, Small/Medium/Large islands only, six players (MAX_PLAYERS = 6) and fixed limits. Neither
      * 2004 nor Resurrected has the Chicken Coop, the Totem, the Shield, the Torch, the Market, the Palisade, the Great
-     * Tower or the Lodge.
+     * Tower, the Lodge, the Drum or the Net.
      */
     @Test
     void classicOffersOnly2004WorldOptions() {
         assertEquals(new RulesetStats.Features(false, false, false, 6, false, false, false, false, false, false, false,
                 false,
-                false),
+                false, false, false),
                 Ruleset.CLASSIC.getStats().features());
         assertEquals(new RulesetStats.Features(true, true, true, 12, true, false, false, false, false, false, false,
                 false,
-                false),
+                false, false, false),
                 Ruleset.RESURRECTED.getStats().features());
     }
 
-    /** Buffed offers Resurrected's world options plus its own buildings, gear, Market, walls, Great Tower and Lodge. */
+    /** Buffed offers Resurrected's world options and every one of its own buildings and pieces of gear. */
     @Test
     void buffedOffersItsBuildings() {
         assertEquals(new RulesetStats.Features(true, true, true, 12, true, true, true, true, true, true, true, true,
-                true),
+                true, true, true),
                 Ruleset.BUFFED.getStats().features());
     }
 
@@ -179,6 +181,34 @@ final class RulesetTest {
                     () -> assertEquals(new LodgeStats(200, 5, 30, 30f, 2f, 30f, 5), race.lodge(), "lodge"),
                     () -> assertUnit(race.champion(), 1, 5f, .75f, .9f));
         }
+    }
+
+    /**
+     * PLAN.md section 4.4 and docs/design/drum-and-net.md: the Drummer / Hornblower (no attack, dodge 0.5, +0.10 hit
+     * and +15 % speed within 12 m) and the Chicken Catcher / Fowler (blow 0.4, dodge 0.3, 3 snares of 4 s). The same
+     * for both races.
+     */
+    @Test
+    void buffedDrumAndNetMatchThePlan() {
+        for (boolean vikings : new boolean[]{false, true}) {
+            RaceStats race = Ruleset.BUFFED.getStats().race(vikings);
+            assertAll(
+                    () -> assertUnit(race.drum_warrior(), 1, 4f, .5f, 0f),
+                    () -> assertUnit(race.net_warrior(), 1, 4f, .3f, .4f),
+                    () -> assertEquals(new DrumStats(.1f, .15f, 12f), race.drum(), "drum"),
+                    () -> assertEquals(new NetStats(3, 4f), race.net(), "net"));
+        }
+    }
+
+    /** The Drum's and the Net's recipes: 3 wood + 1 iron, and 2 wood + 1 chicken. */
+    @Test
+    void drumAndNetCostWhatThePlanSays() {
+        assertEquals(List.of(TreeSupply.class, IronSupply.class), List.of(
+                LandBuilding.COST_DRUM_WEAPON.getSupplyTypes()));
+        assertArrayEquals(new int[]{3, 1}, LandBuilding.COST_DRUM_WEAPON.getSupplyAmounts());
+        assertEquals(List.of(TreeSupply.class, RubberSupply.class), List.of(
+                LandBuilding.COST_NET_WEAPON.getSupplyTypes()));
+        assertArrayEquals(new int[]{2, 1}, LandBuilding.COST_NET_WEAPON.getSupplyAmounts());
     }
 
     /** The Champion's recipe: 2 wood + 1 iron + 1 chicken, taken from the nearest Armory. */

@@ -1,6 +1,7 @@
 package com.oddlabs.tt.model.behaviour;
 
 import com.oddlabs.tt.gui.ToolTipBox;
+import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.AttackScanFilter;
 import com.oddlabs.tt.model.Selectable;
 import com.oddlabs.tt.model.Unit;
@@ -107,7 +108,8 @@ public final class WalkBehaviour implements Behaviour {
     }
 
     private void scan() {
-        if (scan_attack) {
+        // Buffed: a drummer has no attack, so it walks on where it was sent.
+        if (scan_attack && unit.getAbilities().hasAbilities(Abilities.ATTACK)) {
             unit.scanVicinity(scan_filter);
             Selectable<?> s = scan_filter.removeTarget();
             if (s != null) {

@@ -20,6 +20,8 @@ import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberSpearWeapon;
 import com.oddlabs.tt.model.weapon.Shield;
 import com.oddlabs.tt.model.weapon.Torch;
+import com.oddlabs.tt.model.weapon.Drum;
+import com.oddlabs.tt.model.weapon.Net;
 import com.oddlabs.tt.particle.LinearEmitter;
 import com.oddlabs.tt.particle.RandomAccelerationEmitter;
 import com.oddlabs.tt.particle.RandomVelocityEmitter;
@@ -69,6 +71,13 @@ public final class LandBuilding extends Building implements Gate {
     public static final Cost COST_TORCH_WEAPON = new Cost(
             new Class[]{TreeSupply.class, RockSupply.class, IronSupply.class},
             new int[]{2, 1, 1});
+    // Buffed's Drum / Horn and Net (docs/design/drum-and-net.md)
+    @SuppressWarnings({"unchecked"})
+    public static final Cost COST_DRUM_WEAPON = new Cost(new Class[]{TreeSupply.class, IronSupply.class},
+            new int[]{3, 1});
+    @SuppressWarnings({"unchecked"})
+    public static final Cost COST_NET_WEAPON = new Cost(new Class[]{TreeSupply.class, RubberSupply.class},
+            new int[]{2, 1});
 
     private static final float DAMAGED_PARTICLE_ALPHA = 3f;
 
@@ -369,6 +378,12 @@ public final class LandBuilding extends Building implements Gate {
         createArmy(num_torch, Race.UNIT_WARRIOR_TORCH);
     }
 
+    @Override
+    public void createGearWarrior(int template) {
+        assert !isDead();
+        createArmy(1, template);
+    }
+
     private void createArmy(int amount, int template) {
         Race race = getOwner().getRace();
         checkRallyPoint();
@@ -499,7 +514,17 @@ public final class LandBuilding extends Building implements Gate {
                             torch_container, this, COST_TORCH_WEAPON, 80f);
                     build_containers.put(Shield.class, shield);
                     build_containers.put(Torch.class, torch);
-                    BuildProductionContainer[] production_containers = new BuildProductionContainer[]{rock_axe_weapon, iron_axe_weapon, rubber_axe_weapon, shield, torch};
+                    SupplyContainer drum_container = new SupplyContainer(MAX_SUPPLY_COUNT);
+                    supply_containers.put(Drum.class, drum_container);
+                    SupplyContainer net_container = new SupplyContainer(MAX_SUPPLY_COUNT);
+                    supply_containers.put(Net.class, net_container);
+                    BuildProductionContainer drum = new BuildProductionContainer(BuildSpinner.INFINITE_LIMIT,
+                            drum_container, this, COST_DRUM_WEAPON, 60f);
+                    BuildProductionContainer net = new BuildProductionContainer(BuildSpinner.INFINITE_LIMIT,
+                            net_container, this, COST_NET_WEAPON, 60f);
+                    build_containers.put(Drum.class, drum);
+                    build_containers.put(Net.class, net);
+                    BuildProductionContainer[] production_containers = new BuildProductionContainer[]{rock_axe_weapon, iron_axe_weapon, rubber_axe_weapon, shield, torch, drum, net};
 
                     weapons_producer = new WeaponsProducer(this, (WorkerUnitContainer) getUnitContainer(),
                             production_containers, production_emitter);
@@ -531,6 +556,10 @@ public final class LandBuilding extends Building implements Gate {
                             DeployType.SHIELD_WARRIOR, Shield.class));
                     deploy_containers.put(DeployType.TORCH_WARRIOR, new DeployContainer(this, 1.5f,
                             DeployType.TORCH_WARRIOR, Torch.class));
+                    deploy_containers.put(DeployType.DRUM_WARRIOR, new DeployContainer(this, 1.5f,
+                            DeployType.DRUM_WARRIOR, Drum.class));
+                    deploy_containers.put(DeployType.NET_WARRIOR, new DeployContainer(this, 1f,
+                            DeployType.NET_WARRIOR, Net.class));
                 } else if (getAbilities().hasAbilities(Abilities.REPRODUCE)) {
                     chieftain_container = new ChieftainContainer(this);
                     deploy_containers.put(DeployType.PEON, new DeployContainer(this, .5f, DeployType.PEON, null));
@@ -1073,7 +1102,9 @@ public final class LandBuilding extends Building implements Gate {
                                                 IronAxeWeapon.class).getNumSupplies() * 3 + getSupplyContainer(
                                                         RubberAxeWeapon.class).getNumSupplies() * 8 + getSupplyContainer(
                                                                 Shield.class).getNumSupplies() + getSupplyContainer(
-                                                                        Torch.class).getNumSupplies() * 3 : 0;
+                                                                        Torch.class).getNumSupplies() * 3 + getSupplyContainer(
+                                                                                Drum.class).getNumSupplies() * 3 + getSupplyContainer(
+                                                                                        Net.class).getNumSupplies() * 2 : 0;
     }
 
     public void printDebugInfo() {

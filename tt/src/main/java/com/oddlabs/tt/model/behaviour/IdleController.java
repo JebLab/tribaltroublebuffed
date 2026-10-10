@@ -52,7 +52,8 @@ public final class IdleController extends Controller {
 
     @Override
     public @NonNull Object getKey() {
+        // Buffed's drummers and chicken catchers idle in a group of their own, apart from the army.
         return List.of(super.getKey(), unit.getAbilities().hasAbilities(Abilities.BUILD),
-                unit.getAbilities().hasAbilities(Abilities.MAGIC));
+                unit.getAbilities().hasAbilities(Abilities.MAGIC), unit.isDrummer() || unit.isNetter());
     }
 }

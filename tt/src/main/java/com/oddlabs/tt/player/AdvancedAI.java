@@ -11,6 +11,7 @@ import com.oddlabs.tt.model.LandBuilding;
 import com.oddlabs.tt.model.Lodge;
 import com.oddlabs.tt.model.Market;
 import com.oddlabs.tt.model.Race;
+import com.oddlabs.tt.model.RacesResources;
 import com.oddlabs.tt.model.Selectable;
 import com.oddlabs.tt.model.Ship;
 import com.oddlabs.tt.model.ShelterUnitContainer;
@@ -22,8 +23,10 @@ import com.oddlabs.tt.model.behaviour.IdleController;
 import com.oddlabs.tt.model.behaviour.PlaceBuildingController;
 import com.oddlabs.tt.model.behaviour.RepairController;
 import com.oddlabs.tt.model.weapon.Champion;
+import com.oddlabs.tt.model.weapon.Drum;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.IronSpearWeapon;
+import com.oddlabs.tt.model.weapon.Net;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockSpearWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
@@ -104,6 +107,16 @@ public final class AdvancedAI extends AI {
     private static final int[] TORCH_STOCK = new int[]{0, 3, 5};
     private static final int SHIELD_SHARE = 4;
     private static final int TORCH_SHARE = 5;
+    // Buffed's Drum and Net (docs/design/drum-and-net.md): the Armory keeps up to this many in stock; an attack of at
+    // least DRUM_SHARE warriors takes one drummer per DRUM_SHARE; CATCHERS chicken catchers are kept out, laying
+    // their snares on a ring SNARE_RING cells from the Quarters, then catching chickens.
+    private static final int[] DRUM_STOCK = new int[]{0, 1, 2};
+    private static final int[] NET_STOCK = new int[]{0, 1, 2};
+    private static final int DRUM_SHARE = 8;
+    private static final int[] CATCHERS = new int[]{0, 1, 2};
+    private static final float SNARE_RING = 10f;
+    private static final int SCORE_WARRIOR_DRUM = 3;
+    private static final int SCORE_WARRIOR_NET = 3;
 
     // Buffed's Great Tower (docs/design/great-tower.md): one, above this many units, GREAT_TOWER_DISTANCE cells from
     // the Armory towards the island's centre, kept manned with as many throwers as it holds.
@@ -188,6 +201,7 @@ public final class AdvancedAI extends AI {
 
         nodeBuildBuffedBuildings();
         nodeBuildGear();
+        nodeRunCatchers();
 
         reclassify();
         nodeAttackWithWarriorsAndChieftain(NUM_WARRIORS[difficulty],
@@ -338,6 +352,10 @@ public final class AdvancedAI extends AI {
                                     return SCORE_WARRIOR_TORCH;
                                 } else if (unit.isChampion()) {
                                     return SCORE_CHAMPION;
+                                } else if (unit.isDrummer()) {
+                                    return SCORE_WARRIOR_DRUM;
+                                } else if (unit.isNetter()) {
+                                    return SCORE_WARRIOR_NET;
                                 }
         throw new RuntimeException();
     }
@@ -715,6 +733,12 @@ public final class AdvancedAI extends AI {
 
             System.arraycopy(getIdleWarriors(), 0, warriors, 0, num_warriors);
             Target target = findTarget(warriors[0].getGridX(), warriors[0].getGridY());
+            // Buffed: idle drummers march with the attack (behind the shields, with the throwers).
+            Selectable<?>[] drummers = getIdleDrummers();
+            if (target != null && drummers.length > 0) {
+                warriors = Arrays.copyOf(warriors, warriors.length + drummers.length);
+                System.arraycopy(drummers, 0, warriors, warriors.length - drummers.length, drummers.length);
+            }
             if (target != null) {
                 if (Arrays.stream(warriors).anyMatch(AI::isGearWarrior))
                     attackWithGear(warriors, target);
@@ -782,11 +806,89 @@ public final class AdvancedAI extends AI {
             getOwner().setLandscapeTarget(idle, followers_target_x, followers_target_y, Action.ATTACK, true);
     }
 
+    /** Buffed: the idle drummers, for the next attack. */
+    private @NonNull Selectable<?> @NonNull [] getIdleDrummers() {
+        Selectable<?>[] support = getIdleSupport();
+        if (support == null)
+            return new Selectable<?>[0];
+        return Arrays.stream(support).filter(s -> s instanceof Unit unit && unit.isDrummer()).toArray(
+                Selectable[]::new);
+    }
+
+    /**
+     * Buffed: keeps CATCHERS chicken catchers out. An idle one with snares to spare lays the next on a ring around the
+     * Quarters, the spots towards the island's centre first; with all its snares out it catches chickens.
+     */
+    private void nodeRunCatchers() {
+        if (!getOwner().canBuildNets() || CATCHERS[difficulty] == 0 || getArmory() == null || getQuarters() == null
+                || !baseBuildingsDone())
+            return;
+        Building armory = (Building) getArmory()[0];
+        Building quarters = (Building) getQuarters()[0];
+        if (armory.isDead() || quarters.isDead())
+            return;
+        int catchers = 0;
+        for (Selectable<?> s : getOwner().getUnits().getSet()) {
+            if (s instanceof Unit unit && unit.isNetter())
+                catchers++;
+        }
+        if (catchers < CATCHERS[difficulty] && armory.getSupplyContainer(Net.class).getNumSupplies() > 0
+                && armory.getUnitContainer().getNumSupplies() > MIN_UNITS_BUILDING_WEAPONS[difficulty])
+            getOwner().deployUnits(armory, DeployType.NET_WARRIOR, 1);
+        Selectable<?>[] support = getIdleSupport();
+        if (support == null)
+            return;
+        int snares = getOwner().getWorld().getRuleset().getStats().race(
+                getOwner().getPlayerInfo().getRace() == RacesResources.RACE_VIKINGS).net().snares();
+        List<Selectable<?>> catching = new ArrayList<>();
+        for (Selectable<?> s : support) {
+            if (!(s instanceof Unit catcher) || !catcher.isNetter())
+                continue;
+            if (catcher.getSnares().size() < snares) {
+                int[] spot = nextSnareSpot(quarters);
+                getOwner().setLandscapeTarget(new Selectable<?>[]{catcher}, spot[0], spot[1], Action.SNARE, false);
+            } else {
+                catching.add(catcher);
+            }
+        }
+        if (!catching.isEmpty())
+            getOwner().catchChickens(catching.toArray(Selectable[]::new));
+    }
+
+    // The six spots of the snare ring, as rotations of the direction to the island's centre: straight on, 60 degrees
+    // to either side, 120 to either side, straight back.
+    private static final float[][] SNARE_ROTATIONS = {{1f, 0f}, {.5f, .8660254f}, {.5f, -.8660254f}, {-.5f, .8660254f}, {-.5f, -.8660254f}, {-1f, 0f}};
+    private int snare_spot;
+
+    private int @NonNull [] nextSnareSpot(@NonNull Building quarters) {
+        float[] rotation = SNARE_ROTATIONS[snare_spot];
+        snare_spot = (snare_spot + 1) % SNARE_ROTATIONS.length;
+        int center = getOwner().getWorld().getHeightMap().getGridUnitsPerWorld() / 2;
+        float dx = center - quarters.getGridX();
+        float dy = center - quarters.getGridY();
+        float length = (float) Math.sqrt(dx * dx + dy * dy);
+        if (length == 0f) {
+            dx = 1f;
+            dy = 0f;
+            length = 1f;
+        }
+        dx /= length;
+        dy /= length;
+        float rx = dx * rotation[0] - dy * rotation[1];
+        float ry = dx * rotation[1] + dy * rotation[0];
+        int grid_size = getUnitGrid().getGridSize();
+        int x = Math.clamp(Math.round(quarters.getGridX() + SNARE_RING * rx), 0, grid_size - 1);
+        int y = Math.clamp(Math.round(quarters.getGridY() + SNARE_RING * ry), 0, grid_size - 1);
+        return new int[]{x, y};
+    }
+
     /** Buffed: keeps a small stock of shields and torches in the Armory, built like the other weapons. */
     private void nodeBuildGear() {
         boolean shields = getOwner().canBuildShields() && SHIELD_STOCK[difficulty] > 0;
         boolean torches = getOwner().canBuildTorches() && TORCH_STOCK[difficulty] > 0;
-        if ((!shields && !torches) || getArmory() == null)
+        boolean drums = getOwner().canBuildDrums() && DRUM_STOCK[difficulty] > 0;
+        boolean nets = getOwner().canBuildNets() && NET_STOCK[difficulty] > 0;
+        if ((!shields && !torches && !drums && !nets) || getArmory() == null)
             return;
         Building armory = (Building) getArmory()[0];
         if (armory.isDead() || !baseBuildingsDone())
@@ -800,6 +902,16 @@ public final class AdvancedAI extends AI {
             int missing = TORCH_STOCK[difficulty] - armory.getSupplyContainer(Torch.class).getNumSupplies();
             if (missing > 0 && armory.getBuildSupplyContainer(Torch.class).getNumSupplies() == 0)
                 getOwner().buildTorchWeapons(armory, missing, false);
+        }
+        if (drums) {
+            int missing = DRUM_STOCK[difficulty] - armory.getSupplyContainer(Drum.class).getNumSupplies();
+            if (missing > 0 && armory.getBuildSupplyContainer(Drum.class).getNumSupplies() == 0)
+                getOwner().buildDrumWeapons(armory, missing, false);
+        }
+        if (nets) {
+            int missing = NET_STOCK[difficulty] - armory.getSupplyContainer(Net.class).getNumSupplies();
+            if (missing > 0 && armory.getBuildSupplyContainer(Net.class).getNumSupplies() == 0)
+                getOwner().buildNetWeapons(armory, missing, false);
         }
     }
 
@@ -849,6 +961,11 @@ public final class AdvancedAI extends AI {
                         getOwner().deployUnits(armory, DeployType.IRON_WARRIOR, num_iron_units);
                     if (num_rock_units > 0)
                         getOwner().deployUnits(armory, DeployType.ROCK_WARRIOR, num_rock_units);
+                    // Buffed: one drummer per DRUM_SHARE warriors, from the peons left over; it joins the attack.
+                    int num_drum_units = Math.min(Math.min(num_warriors / DRUM_SHARE, num_units - num_warriors),
+                            armory.getSupplyContainer(Drum.class).getNumSupplies());
+                    if (DRUM_STOCK[difficulty] > 0 && num_drum_units > 0)
+                        getOwner().deployUnits(armory, DeployType.DRUM_WARRIOR, num_drum_units);
                 } else {
                     if (num_units < num_warriors) {
                         nodeTransferUnits(num_warriors - num_units, armory);

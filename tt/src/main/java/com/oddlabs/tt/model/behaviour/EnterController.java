@@ -29,7 +29,8 @@ public final class EnterController extends Controller {
                 UnitSupplyContainer unitSupply = unit.getSupplyContainer();
                 int numSupply = (unitSupply != null) ? unitSupply.getNumSupplies() : 0;
                 if (building.getAbilities().hasAbilities(Abilities.SUPPLY_CONTAINER)) {
-                    if (unit.getAbilities().hasAbilities(Abilities.HARVEST) && numSupply > 0) {
+                    // A peon's load, or (Buffed) the chicken a catcher carries.
+                    if ((unit.getAbilities().hasAbilities(Abilities.HARVEST) || unit.isNetter()) && numSupply > 0) {
                         Class type = unitSupply.getSupplyType();
                         building.getSupplyContainer(type).increaseSupply(numSupply);
                         unitSupply.increaseSupply(-numSupply, type);

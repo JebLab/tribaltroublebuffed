@@ -25,7 +25,7 @@ The importer keeps a compressed copy of each file in the scene (a hidden custom 
 
 ## Conventions for a model
 
-- **Space:** metres, Z up, the unit standing on the origin and facing **+X** (the game turns +X towards the direction of travel). The Native warrior is about 1.5 m tall.
+- **Space:** metres, Z up, the unit standing on the origin and facing **+X** (the game turns +X towards the direction of travel). The Native warrior is about 2.9 units tall in its files and the Viking warrior about 2.3 (measured in M9; the 1.5 m written here before was wrong), so scale new props to the figures.
 - **Armature:** any bone names and any hierarchy, at most 128 bones (the converter stores bone indices in a byte). Blender bones point along their Y axis and the 2004 rigs along X; the exporter converts between the two exactly, so nothing needs to be rotated by hand. Constraints, IK and drivers are fine: the exporter reads the evaluated pose of every frame.
 - **Mesh:** quads and n-gons are triangulated on export. At most 65,536 distinct vertices per model (16-bit indices; the converter merges identical corners); units are about 500 triangles, buildings about 2,000 (PLAN.md §4.1). Mesh positions are written in the armature's space. Modifiers other than Armature (Mirror, for instance) are applied.
 - **Weights:** every vertex needs a weight on at least one bone. Weights are normalised to add up to 1; a vertex without any goes to the root bone, with a warning. A mesh with no Armature modifier (a prop such as the spear) is written with the `dummy_bone` skin that skeleton-less sprites use.

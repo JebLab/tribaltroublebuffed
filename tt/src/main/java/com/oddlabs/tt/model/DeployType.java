@@ -17,5 +17,8 @@ public enum DeployType {
     SHIELD_WARRIOR,
     TORCH_WARRIOR,
     // Buffed: a unit sheltered in the Lodge, let out as it went in.
-    SHELTERED
+    SHELTERED,
+    // Buffed's Drum / Horn and Net.
+    DRUM_WARRIOR,
+    NET_WARRIOR
 }

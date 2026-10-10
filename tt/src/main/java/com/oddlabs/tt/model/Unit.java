@@ -16,11 +16,14 @@ import com.oddlabs.tt.model.behaviour.PlaceBuildingController;
 import com.oddlabs.tt.model.behaviour.RepairController;
 import com.oddlabs.tt.model.behaviour.ShipAttackController;
 import com.oddlabs.tt.model.behaviour.SittingController;
+import com.oddlabs.tt.model.behaviour.SnareController;
 import com.oddlabs.tt.model.behaviour.StunController;
 import com.oddlabs.tt.model.behaviour.WalkBehaviour;
 import com.oddlabs.tt.model.behaviour.WalkController;
 import com.oddlabs.tt.model.weapon.Champion;
+import com.oddlabs.tt.model.weapon.Drum;
 import com.oddlabs.tt.model.weapon.GearFactory;
+import com.oddlabs.tt.model.weapon.Net;
 import com.oddlabs.tt.model.weapon.WeaponFactory;
 import com.oddlabs.tt.particle.BalancedParametricEmitter;
 import com.oddlabs.tt.particle.StunFunction;
@@ -89,6 +92,8 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
     private float mount_offset = 0;
     private Building mounted_building;
     private float range_bonus;
+    // Buffed: a chicken catcher's snares lying in the world; they go with it.
+    private final @NonNull List<@NonNull Snare> snares = new ArrayList<>(0);
 
     public Unit(@NonNull Player owner, float x, float y, @Nullable Target rally_point,
             @NonNull UnitTemplate unit_template) {
@@ -126,6 +131,8 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
 
         if (!imaginary) {
             findInitialPosition(x, y, grid_targets_only, -1);
+            if (isDrummer())
+                owner.getWorld().getDrummers().add(this);
         }
 
         pushController(new IdleController(this, new AttackScanFilter(getOwner(), AttackScanFilter.UNIT_RANGE), true));
@@ -232,6 +239,9 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
     @Override
     public final AttackScanFilter.@NonNull Priority getAttackPriority() {
         assert !isDead();
+        // Buffed: a drummer is everyone's first target among units.
+        if (isDrummer())
+            return AttackScanFilter.Priority.DRUMMER;
         return getAbilities().hasAbilities(
                 Abilities.BUILD) ? AttackScanFilter.Priority.PEON : AttackScanFilter.Priority.WARRIOR;
     }
@@ -347,10 +357,14 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
 
     public final float getMetersPerSecond() {
         assert !isDead();
+        float speed;
         if (getAbilities().hasAbilities(Abilities.HARVEST) && supply_container.getNumSupplies() > 0)
-            return TRANSPORT_SPEED_SCALE * getTemplate().getMetersPerSecond();
+            speed = TRANSPORT_SPEED_SCALE * getTemplate().getMetersPerSecond();
         else
-            return getTemplate().getMetersPerSecond();
+            speed = getTemplate().getMetersPerSecond();
+        // Buffed: a drummer of its team nearby; without one the speed is the original, bit for bit.
+        float drum_factor = DrumAura.getSpeedFactor(this);
+        return drum_factor != 1f ? speed * drum_factor : speed;
     }
 
     public final void aimAtTarget(@NonNull Target target) {
@@ -470,6 +484,11 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
             stun_marker.done();
             stun_marker = null;
         }
+        // Buffed: a drummer's aura and a catcher's snares end with it (in the world: dead, or gone into a building).
+        if (isDrummer())
+            getOwner().getWorld().getDrummers().remove(this);
+        while (!snares.isEmpty())
+            snares.getFirst().pullUp();
         super.removeDying();
     }
 
@@ -587,6 +606,28 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
         return getWeaponFactory().getType() == Champion.class;
     }
 
+    /** Whether the unit carries Buffed's Drum / Horn: it never attacks, and lifts its team nearby (DrumAura). */
+    public final boolean isDrummer() {
+        return getWeaponFactory().getType() == Drum.class;
+    }
+
+    /** Whether the unit carries Buffed's Net: it catches chickens in one stroke and lays snares. */
+    public final boolean isNetter() {
+        return getWeaponFactory().getType() == Net.class;
+    }
+
+    /** Buffed: sends a chicken catcher after the nearest chicken, then the next, as a right-click on one would. */
+    public final void catchChickens() {
+        assert isNetter() && !isDead();
+        clearControllerStack();
+        pushController(new GatherController<>(this, null, RubberSupply.class));
+    }
+
+    /** The snares this chicken catcher has lying, oldest first (Buffed). */
+    public final @NonNull List<@NonNull Snare> getSnares() {
+        return snares;
+    }
+
     private @NonNull BalancedParametricEmitter createStunStar(float x, float y, float z, float time, float velocity) {
         int num_particles = 5;
         return new BalancedParametricEmitter(getOwner().getWorld(),
@@ -615,7 +656,9 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
     }
 
     private boolean canGather(@NonNull Target target) {
-        return target instanceof Supply && getAbilities().hasAbilities(Abilities.BUILD);
+        // Buffed: a chicken catcher gathers chickens only.
+        return (target instanceof Supply && getAbilities().hasAbilities(Abilities.BUILD))
+                || (target instanceof RubberSupply && isNetter());
     }
 
     private @Nullable Building nearestSupplyBuilding(@NonNull Supply supply) {
@@ -709,6 +752,11 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
                 break;
             case DEFEND:
                 pushController(new DefendController(this, target));
+                break;
+            case SNARE:
+                // Buffed: only a chicken catcher lays snares; the rest of a selection ignores the order.
+                if (isNetter())
+                    pushController(new SnareController(this, target));
                 break;
             default:
                 IO.println("Invalid action: " + action);

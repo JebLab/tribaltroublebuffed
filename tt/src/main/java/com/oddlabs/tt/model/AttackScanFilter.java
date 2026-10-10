@@ -14,7 +14,10 @@ public final class AttackScanFilter implements ScanFilter {
         TOWER(2),
         PEON(3),
         WARRIOR(4),
-        SHIP(5);
+        // Ships stay first; only the order of the values matters, and moving SHIP from 5 to 6 keeps it.
+        SHIP(6),
+        // Buffed: a drummer is taken before every other unit (docs/design/drum-and-net.md).
+        DRUMMER(5);
 
         public final int value;
 

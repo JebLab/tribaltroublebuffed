@@ -29,6 +29,10 @@ public interface PlayerInterface {
 
     void buildTorchWeapons(@NonNull Building building, int num_weapons, boolean infinite);
 
+    void buildDrumWeapons(@NonNull Building building, int num_weapons, boolean infinite);
+
+    void buildNetWeapons(@NonNull Building building, int num_weapons, boolean infinite);
+
     // Buffed's Market and walls; ignored unless the ruleset offers them.
     void setTrade(@NonNull Building building, int give, int get);
 

@@ -8,9 +8,11 @@ import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.model.AbstractElementNode;
 import com.oddlabs.tt.model.LandBuilding;
 import com.oddlabs.tt.model.RacesResources;
+import com.oddlabs.tt.model.Snare;
 import com.oddlabs.tt.model.Supply;
 import com.oddlabs.tt.model.SupplyManager;
 import com.oddlabs.tt.model.SupplyManagers;
+import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.pathfinder.RegionBuilder;
 import com.oddlabs.tt.pathfinder.UnitGrid;
 import com.oddlabs.tt.player.Player;
@@ -68,6 +70,8 @@ public final class World {
     private final @NonNull Ruleset ruleset;
     private final @NonNull List<@NonNull LandBuilding> totems = new ArrayList<>();
     private final @NonNull List<@NonNull LandBuilding> lodges = new ArrayList<>();
+    private final @NonNull List<@NonNull Unit> drummers = new ArrayList<>();
+    private final @NonNull List<@NonNull Snare> snares = new ArrayList<>();
 
     public static @NonNull LandscapeResources loadCommon(@NonNull RenderQueues queues) {
         LandscapeResources landscape_resources = new LandscapeResources(queues);
@@ -312,5 +316,15 @@ public final class World {
     /** The finished Lodges of every player, in the order they were finished (see {@code Lodge}). */
     public @NonNull List<@NonNull LandBuilding> getLodges() {
         return lodges;
+    }
+
+    /** Every player's drummers in the world, in the order they came out (see {@code DrumAura}). */
+    public @NonNull List<@NonNull Unit> getDrummers() {
+        return drummers;
+    }
+
+    /** Every player's snares lying in the world, in the order they were laid (see {@code Snare}). */
+    public @NonNull List<@NonNull Snare> getSnares() {
+        return snares;
     }
 }

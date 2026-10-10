@@ -29,6 +29,8 @@ import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
 import com.oddlabs.tt.model.weapon.Shield;
 import com.oddlabs.tt.model.weapon.Torch;
+import com.oddlabs.tt.model.weapon.Drum;
+import com.oddlabs.tt.model.weapon.Net;
 import com.oddlabs.tt.ruleset.RulesetStats;
 import com.oddlabs.tt.util.Target;
 import org.joml.Vector4fc;
@@ -76,6 +78,8 @@ public final class Player implements PlayerInterface {
     private int units_moved;
     private int weapons_thrown;
     private int fires_lit;
+    private int snares_laid;
+    private int snares_sprung;
     private int trades_made;
     private int magics;
 
@@ -100,6 +104,8 @@ public final class Player implements PlayerInterface {
     // Buffed's gear: only a ruleset that offers it lets anyone make or deploy it.
     private final boolean can_build_shields;
     private final boolean can_build_torches;
+    private final boolean can_build_drums;
+    private final boolean can_build_nets;
 
     private float hit_bonus;
 
@@ -121,6 +127,8 @@ public final class Player implements PlayerInterface {
         can_build[Race.BUILDING_LODGE] = features.lodge();
         can_build_shields = features.shield();
         can_build_torches = features.torch();
+        can_build_drums = features.drum();
+        can_build_nets = features.net();
         this.player_info = player_info;
         this.unit_count = new SupplyContainer(world.getMaxUnitCount());
         this.building_count = new SupplyContainer(world.getMaxBuildingCount());
@@ -336,10 +344,22 @@ public final class Player implements PlayerInterface {
         return can_build_torches;
     }
 
+    /** Whether this player's Armory makes Drums / Horns (Buffed). */
+    public boolean canBuildDrums() {
+        return can_build_drums;
+    }
+
+    /** Whether this player's Armory makes Nets (Buffed), whose bearers lay snares. */
+    public boolean canBuildNets() {
+        return can_build_nets;
+    }
+
     private boolean canDeploy(@NonNull DeployType type) {
         return switch (type) {
             case SHIELD_WARRIOR -> can_build_shields;
             case TORCH_WARRIOR -> can_build_torches;
+            case DRUM_WARRIOR -> can_build_drums;
+            case NET_WARRIOR -> can_build_nets;
             default -> true;
         };
     }
@@ -582,6 +602,29 @@ public final class Player implements PlayerInterface {
     public void buildTorchWeapons(@NonNull Building building, int num_weapons, boolean infinite) {
         if (isValid(building) && can_build_torches)
             building.buildWeapons(Torch.class, num_weapons, infinite);
+    }
+
+    /**
+     * Buffed, for the AI: sends chicken catchers after the nearest chickens. Not a player command: a player
+     * right-clicks a chicken.
+     */
+    public void catchChickens(@NonNull Selectable<?> @NonNull [] selection) {
+        for (Selectable<?> s : selection) {
+            if (isValid(s) && s instanceof Unit unit && unit.isNetter())
+                unit.catchChickens();
+        }
+    }
+
+    @Override
+    public void buildDrumWeapons(@NonNull Building building, int num_weapons, boolean infinite) {
+        if (isValid(building) && can_build_drums)
+            building.buildWeapons(Drum.class, num_weapons, infinite);
+    }
+
+    @Override
+    public void buildNetWeapons(@NonNull Building building, int num_weapons, boolean infinite) {
+        if (isValid(building) && can_build_nets)
+            building.buildWeapons(Net.class, num_weapons, infinite);
     }
 
     @Override
@@ -867,6 +910,24 @@ public final class Player implements PlayerInterface {
 
     public int getFiresLit() {
         return fires_lit;
+    }
+
+    /** A chicken catcher of this player laid a snare (Buffed). */
+    public void snareLaid() {
+        snares_laid++;
+    }
+
+    public int getSnaresLaid() {
+        return snares_laid;
+    }
+
+    /** A snare of this player stunned an enemy (Buffed). */
+    public void snareSprung() {
+        snares_sprung++;
+    }
+
+    public int getSnaresSprung() {
+        return snares_sprung;
     }
 
     public void tradeMade() {

@@ -38,6 +38,7 @@ public abstract class AI implements Animated {
     private int INDEX_IDLE_PEONS;
     private int INDEX_IDLE_CHIEFTAINS;
     private int INDEX_IDLE_WARRIORS;
+    private int INDEX_IDLE_SUPPORT;
     private int INDEX_GATHER_TREE_PEONS;
     private int INDEX_GATHER_ROCK_PEONS;
     private int INDEX_GATHER_IRON_PEONS;
@@ -204,6 +205,11 @@ public abstract class AI implements Animated {
         return throwers.length > 0 ? throwers : null;
     }
 
+    /** Idle drummers and chicken catchers (Buffed), which stay out of the army's groups. */
+    protected final @NonNull Selectable<?> @Nullable [] getIdleSupport() {
+        return INDEX_IDLE_SUPPORT == -1 ? null : lists[INDEX_IDLE_SUPPORT];
+    }
+
     protected static boolean isGearWarrior(@NonNull Selectable<?> s) {
         return s instanceof Unit unit && unit.isGearWarrior();
     }
@@ -286,6 +292,7 @@ public abstract class AI implements Animated {
         INDEX_IDLE_PEONS = -1;
         INDEX_IDLE_CHIEFTAINS = -1;
         INDEX_IDLE_WARRIORS = -1;
+        INDEX_IDLE_SUPPORT = -1;
         INDEX_GATHER_TREE_PEONS = -1;
         INDEX_GATHER_ROCK_PEONS = -1;
         INDEX_GATHER_IRON_PEONS = -1;
@@ -311,12 +318,17 @@ public abstract class AI implements Animated {
                     INDEX_IDLE_PEONS = i;
                 } else if (s.getAbilities().hasAbilities(Abilities.MAGIC)) {
                     INDEX_IDLE_CHIEFTAINS = i;
+                } else if (s instanceof Unit unit && (unit.isDrummer() || unit.isNetter())) {
+                    // Buffed's drummers and chicken catchers: the AI sends them itself, not with the army.
+                    INDEX_IDLE_SUPPORT = i;
                 } else if (s.getAbilities().hasAbilities(Abilities.ATTACK)) {
                     INDEX_IDLE_WARRIORS = i;
                 }
             } else if (s.getPrimaryController() instanceof GatherController<?> gc) {
                 Class<?> supply_type = gc.getSupplyType();
-                if (supply_type == TreeSupply.class) {
+                if (!s.getAbilities().hasAbilities(Abilities.BUILD)) {
+                    // Buffed: chicken catchers catching, not peons.
+                } else if (supply_type == TreeSupply.class) {
                     INDEX_GATHER_TREE_PEONS = i;
                 } else if (supply_type == RockSupply.class) {
                     INDEX_GATHER_ROCK_PEONS = i;

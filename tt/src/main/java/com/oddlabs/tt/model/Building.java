@@ -65,6 +65,11 @@ public abstract class Building extends Selectable<BuildingTemplate> implements O
         throw new IllegalStateException(this + " has no gear");
     }
 
+    /** Deploys one warrior with Buffed's Drum or Net ({@code Race.UNIT_WARRIOR_DRUM} or {@code UNIT_WARRIOR_NET}). */
+    public void createGearWarrior(int template) {
+        throw new IllegalStateException(this + " has no gear");
+    }
+
     /**
      * A torch's blow (Buffed): sets the building on fire for the torch's {@code fire_seconds}, or starts them again.
      * Buildings that cannot burn (ships) ignore it.

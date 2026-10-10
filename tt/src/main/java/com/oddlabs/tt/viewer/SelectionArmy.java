@@ -14,6 +14,7 @@ public final class SelectionArmy extends Army {
     private final @NonNull Player local_player;
     private int num_units;
     private int num_builders;
+    private int num_catchers;
     private @Nullable Unit chieftain;
     private @Nullable Building building;
 
@@ -23,6 +24,11 @@ public final class SelectionArmy extends Army {
 
     public int getNumBuilders() {
         return num_builders;
+    }
+
+    /** Buffed's chicken catchers in the selection, who lay snares. */
+    public int getNumCatchers() {
+        return num_catchers;
     }
 
     public int getNumUnits() {
@@ -40,12 +46,15 @@ public final class SelectionArmy extends Army {
     private void update() {
         num_units = 0;
         num_builders = 0;
+        num_catchers = 0;
         chieftain = null;
         building = null;
         for (Selectable<?> s : getSet()) {
             if (s.getOwner() != local_player)
                 continue;
             Abilities abilities = s.getAbilities();
+            if (s instanceof Unit unit && unit.isNetter())
+                num_catchers++;
             if (abilities.hasAbilities(Abilities.BUILD))
                 num_builders++;
             else if (abilities.hasAbilities(Abilities.MAGIC))

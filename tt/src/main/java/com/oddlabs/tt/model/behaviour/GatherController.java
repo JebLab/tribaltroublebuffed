@@ -52,7 +52,8 @@ public final class GatherController<S extends Supply> extends Controller {
 
     @Override
     public @NonNull Object getKey() {
-        return List.of(super.getKey(), supply_type);
+        // Buffed's chicken catchers gather in a group of their own, apart from the peons.
+        return List.of(super.getKey(), supply_type, unit.getAbilities().hasAbilities(Abilities.BUILD));
     }
 
     private void gather() {
@@ -71,6 +72,9 @@ public final class GatherController<S extends Supply> extends Controller {
                 TargetTrackerAlgorithm supply_tracker = new TargetTrackerAlgorithm(unit.getUnitGrid(), 0f, supply);
                 unit.setBehaviour(new WalkBehaviour(unit, supply_tracker, false));
             }
+        } else if (unit.isGearWarrior()) {
+            // Buffed: a chicken catcher with nothing left to catch stands idle instead of going in to work.
+            unit.popController();
         } else {
             unit.swapController(new TransferUnitController(unit));
         }

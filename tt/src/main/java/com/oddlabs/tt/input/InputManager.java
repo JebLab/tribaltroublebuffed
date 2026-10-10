@@ -131,6 +131,7 @@ public final class InputManager {
         def(GameAction.UNIT_BUILD_GATE, Key.O);
         def(GameAction.UNIT_BUILD_GREAT_TOWER, Key.W);
         def(GameAction.UNIT_BUILD_LODGE, Key.L);
+        def(GameAction.UNIT_LAY_SNARE, Key.D);
         def(GameAction.UNIT_EXIT_TOWER, Key.X);
         def(GameAction.UNIT_BEACON, Key.B, Modifier.CONTROL);
         def(GameAction.UNIT_NEXT_IDLE, Key.N);
@@ -197,6 +198,16 @@ public final class InputManager {
         def(GameAction.RES_TORCH_BATCH, Key.E, Modifier.CONTROL);
         def(GameAction.RES_TORCH_BATCH_DEC, Key.E, Modifier.SHIFT, Modifier.CONTROL);
 
+        def(GameAction.RES_DRUM, Key.U);
+        def(GameAction.RES_DRUM_DEC, Key.U, Modifier.SHIFT);
+        def(GameAction.RES_DRUM_BATCH, Key.U, Modifier.CONTROL);
+        def(GameAction.RES_DRUM_BATCH_DEC, Key.U, Modifier.SHIFT, Modifier.CONTROL);
+
+        def(GameAction.RES_NET, Key.V);
+        def(GameAction.RES_NET_DEC, Key.V, Modifier.SHIFT);
+        def(GameAction.RES_NET_BATCH, Key.V, Modifier.CONTROL);
+        def(GameAction.RES_NET_BATCH_DEC, Key.V, Modifier.SHIFT, Modifier.CONTROL);
+
         def(GameAction.DEPLOY_CHIEFTAIN, Key.H);
 
         def(GameAction.MARKET_SELL, Key.S);
@@ -239,6 +250,8 @@ public final class InputManager {
         def(GameAction.CHEAT_10, Key.F2, Modifier.SHIFT);
         def(GameAction.CHEAT_11, Key.F3, Modifier.SHIFT);
         def(GameAction.CHEAT_12, Key.F4, Modifier.SHIFT);
+        def(GameAction.CHEAT_13, Key.F5, Modifier.SHIFT);
+        def(GameAction.CHEAT_14, Key.F6, Modifier.SHIFT);
 
         // Observer mode
         def(GameAction.SPECTATOR_NEXT_PLAYER, Key.RBRACKET);

@@ -40,7 +40,10 @@ public final class Race {
     public static final int UNIT_WARRIOR_TORCH = 6;
     // Buffed only: trained at the Lodge (features.lodge).
     public static final int UNIT_CHAMPION = 7;
-    public static final int NUM_UNITS = 8;
+    // Buffed only: the ruleset's features decide whether the Armory makes their gear (Player.canBuildDrums, canBuildNets).
+    public static final int UNIT_WARRIOR_DRUM = 8;
+    public static final int UNIT_WARRIOR_NET = 9;
+    public static final int NUM_UNITS = 10;
 
     private final @NonNull BuildingTemplate[] buildings = new BuildingTemplate[NUM_BUILDINGS];
     private final @NonNull UnitTemplate[] units = new UnitTemplate[NUM_UNITS];
@@ -72,6 +75,8 @@ public final class Race {
             @NonNull UnitTemplate warrior_shield,
             @NonNull UnitTemplate warrior_torch,
             @NonNull UnitTemplate champion,
+            @NonNull UnitTemplate warrior_drum,
+            @NonNull UnitTemplate warrior_net,
             @NonNull SpriteKey rally_point,
             @NonNull RaceIcons icons,
             @NonNull Audio attack_notification,
@@ -101,6 +106,8 @@ public final class Race {
         units[UNIT_WARRIOR_SHIELD] = warrior_shield;
         units[UNIT_WARRIOR_TORCH] = warrior_torch;
         units[UNIT_CHAMPION] = champion;
+        units[UNIT_WARRIOR_DRUM] = warrior_drum;
+        units[UNIT_WARRIOR_NET] = warrior_net;
         this.rally_point = rally_point;
         this.icons = icons;
         this.attack_notification = attack_notification;

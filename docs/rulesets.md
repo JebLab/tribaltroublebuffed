@@ -6,7 +6,7 @@ A *ruleset* is the set of gameplay numbers a game is played with. Three ship wit
 |---|---|---|
 | **Classic (2004)** | [`classic.json`](../tt/src/main/resources/rulesets/classic.json) | The numbers of the 2004 Oddlabs release. |
 | **Resurrected** | [`resurrected.json`](../tt/src/main/resources/rulesets/resurrected.json) | Tribal Trouble: Resurrected's numbers when this fork was made (October 2026). The complete base file. |
-| **Buffed** | [`buffed.json`](../tt/src/main/resources/rulesets/buffed.json) | This fork's new content on top of Resurrected's numbers, which it keeps: so far the Chicken Coop / Henhouse and the Totem / Runestone (M5), the Shield and Torch gear (M6), the Trading Post / Market, Palisade and Gate (M7), and the Great Tower, the Spirit Lodge / Mead Hall and its Champion (M8). |
+| **Buffed** | [`buffed.json`](../tt/src/main/resources/rulesets/buffed.json) | This fork's new content on top of Resurrected's numbers, which it keeps: so far the Chicken Coop / Henhouse and the Totem / Runestone (M5), the Shield and Torch gear (M6), the Trading Post / Market, Palisade and Gate (M7), the Great Tower, the Spirit Lodge / Mead Hall and its Champion (M8), and the Drum / Horn and Net / Snare gear (M9). |
 
 The skirmish menu preselects Buffed. Everything else plays under **Resurrected**: the campaign and tutorials (their islands were tuned for those numbers) and multiplayer (every client and the inherited servers expect them, so the pulldown is hidden there). Presets saved before rulesets existed load as Resurrected.
 
@@ -41,11 +41,11 @@ Reverting any of these behind Classic is possible later, per item, if it turns o
 
 ## Fields
 
-**Features** (`features`): `ships`, `enormous_islands`, `archipelago` (true/false), `max_players` (6–12), `adjustable_limits` (false = the 2004 limits). `TerrainMenu.enforceRulesetFeatures()` applies them. `chicken_coop` and `totem` say whether peons may build Buffed's buildings: `Player` sets its build permissions from them, and the peon panel shows their buttons only when they are on. `shield` and `torch` say whether the Armory makes Buffed's gear (`Player.canBuildShields` / `canBuildTorches`; the Armory's submenus show their buttons only when they are on). `market` and `palisade` say whether peons may build the Market, and Palisade segments and Gates (both behind the one flag). `great_tower` and `lodge` say whether peons may build the Great Tower and the Lodge; the Lodge's flag also lets it train the Champion.
+**Features** (`features`): `ships`, `enormous_islands`, `archipelago` (true/false), `max_players` (6–12), `adjustable_limits` (false = the 2004 limits). `TerrainMenu.enforceRulesetFeatures()` applies them. `chicken_coop` and `totem` say whether peons may build Buffed's buildings: `Player` sets its build permissions from them, and the peon panel shows their buttons only when they are on. `shield` and `torch` say whether the Armory makes Buffed's gear (`Player.canBuildShields` / `canBuildTorches`; the Armory's submenus show their buttons only when they are on). `market` and `palisade` say whether peons may build the Market, and Palisade segments and Gates (both behind the one flag). `great_tower` and `lodge` say whether peons may build the Great Tower and the Lodge; the Lodge's flag also lets it train the Champion. `drum` and `net` say whether the Armory makes the Drum / Horn and the Net (`Player.canBuildDrums` / `canBuildNets`; the Net's flag also shows the Lay Snare button).
 
 Every number is per race (`natives`, `vikings`) except the spells, which belong to one race each.
 
-**Units** (`peon`, `rock_warrior`, `iron_warrior`, `chicken_warrior`, `shield_warrior`, `torch_warrior`, `champion`, `chieftain`). The shield and torch warriors ([design/gear.md](design/gear.md)) and the Champion ([design/lodge-and-champion.md](design/lodge-and-champion.md)) are Buffed's; like its buildings, their numbers are also in `resurrected.json`, where the `features` keep them out. They fight hand to hand, so their `hit_chance` is that of a blow:
+**Units** (`peon`, `rock_warrior`, `iron_warrior`, `chicken_warrior`, `shield_warrior`, `torch_warrior`, `drum_warrior`, `net_warrior`, `champion`, `chieftain`). The shield and torch warriors ([design/gear.md](design/gear.md)), the drum and net warriors ([design/drum-and-net.md](design/drum-and-net.md)) and the Champion ([design/lodge-and-champion.md](design/lodge-and-champion.md)) are Buffed's; like its buildings, their numbers are also in `resurrected.json`, where the `features` keep them out. They fight hand to hand, so their `hit_chance` is that of a blow; the drum warrior never attacks (its `hit_chance` is 0 and unused):
 
 | Key | Meaning |
 |---|---|
@@ -86,6 +86,8 @@ Every number is per race (`natives`, `vikings`) except the spells, which belong 
 | | `max_champions` | a player's Champions alive, sheltered or in training (5). |
 
 **The torch** (`torch`, Buffed's): `building_damage`, what its blow takes from any building, always (4; 6 until M9, D-09); `fire_seconds` (15) and `fire_damage` (2 per second): the fire it lights, which takes its `fire_seconds × fire_damage` hit points one at a time, is started again by another blow, and goes out when a peon repairs the building. The gear's recipes (Shield: 2 wood + 1 rock in 40 man-seconds; Torch: 2 wood + 1 rock + 1 iron in 80) and deploy times (1 s, 1.5 s) are constants in `LandBuilding`, as the 2004 weapons' are; the Champion's (2 wood + 1 iron + 1 chicken, taken from the nearest Armory) is a constant in `Lodge`.
+
+**The drum and the net** (`drum`, `net`, Buffed's, [design/drum-and-net.md](design/drum-and-net.md)): `drum.hit_bonus` (0.1) is added inside the hit chance, like the totem's, and `drum.speed_bonus` (0.15) to the walking speed, of every unit of the drummer's team within `drum.radius` meters (12), the drummer included; drummers do not add up. `net.snares` (3) is how many snares one chicken catcher keeps lying (a fourth takes up its oldest), and `net.stun_seconds` (4) how long a snare stuns the first enemy unit on it. A net catches a chicken in one stroke (a peon needs ten): a rule in `HarvestBehaviour`, not a number. Recipes (Drum: 3 wood + 1 iron; Net: 2 wood + 1 chicken; 60 man-seconds each) and deploy times (1.5 s, 1 s) are constants in `LandBuilding`.
 
 **Spells** (by their in-game names):
 
