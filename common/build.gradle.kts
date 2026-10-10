@@ -18,9 +18,10 @@ tasks.withType<Test> {
 }
 
 // --- BuildInfo generation ---
-// Writes BuildInfo.java with VERSION = MAJOR.MINOR.PATCH and FULL_VERSION = "v<VERSION>-<API_VERSION>".
-// PATCH = commits since the bump commit that introduced the current MAJOR.MINOR in build.gradle.kts.
-// Must stay in sync with the `version` job in .github/workflows/gradle.yml.
+// Writes BuildInfo.java with VERSION and FULL_VERSION = "v<VERSION>-<API_VERSION>.<SIM_VERSION>".
+// VERSION comes from the newest release tag (v<major>.<minor>.<patch>) reachable from HEAD: "0.1.0" on the tagged
+// commit, "0.1.0-3-gabc1234" three commits later. Without a reachable tag it is the root project's version + "-dev".
+// The release workflow (.github/workflows/build.yml) tags releases, so a release build shows its tag in game.
 
 val generatedBuildInfoDir = layout.buildDirectory.dir("generated/sources/buildinfo/java/main")
 
@@ -32,39 +33,16 @@ val generateBuildInfo by tasks.registering {
     outputs.upToDateWhen { false }  // git history changes between commits; always recompute
 
     doLast {
-        // Regex avoids passing literal " chars through ProcessBuilder (Windows quoting issue).
-        // `.` matches the surrounding quote chars in: version = "2.0"
-        val versionPattern = "version = ." + baseVersion.replace(".", "\\.") + "."
-        val patch = runCatching {
-            val anchor = ProcessBuilder(
-                "git", "log", "--format=%H",
-                "-G", versionPattern,
-                "--", "build.gradle.kts"
-            )
+        // Resurrected-style tags (v2.0.3-103.1) are excluded.
+        val described = runCatching {
+            val process = ProcessBuilder("git", "describe", "--tags", "--match", "v[0-9]*", "--exclude", "v*-*")
                 .directory(gitDir)
-                .redirectErrorStream(true)
                 .start()
-                .inputStream.bufferedReader()
-                .readText()
-                .trim()
-                .lineSequence()
-                .firstOrNull()
-                .orEmpty()
-            if (anchor.isEmpty()) {
-                "0"
-            } else {
-                ProcessBuilder("git", "rev-list", "--count", "$anchor..HEAD")
-                    .directory(gitDir)
-                    .redirectErrorStream(true)
-                    .start()
-                    .inputStream.bufferedReader()
-                    .readText()
-                    .trim()
-                    .ifEmpty { "0" }
-            }
-        }.getOrDefault("0")
+            val output = process.inputStream.bufferedReader().readText().trim()
+            if (process.waitFor() == 0) output else ""
+        }.getOrDefault("")
 
-        val effectiveVersion = "$baseVersion.$patch"
+        val effectiveVersion = if (described.startsWith("v")) described.substring(1) else "$baseVersion-dev"
         val packageDir = outputDir.get().asFile.resolve("com/oddlabs/util")
         packageDir.mkdirs()
         packageDir.resolve("BuildInfo.java").writeText(

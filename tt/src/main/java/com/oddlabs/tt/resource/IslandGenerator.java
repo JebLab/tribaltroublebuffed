@@ -2,6 +2,7 @@ package com.oddlabs.tt.resource;
 
 import com.oddlabs.tt.form.ProgressForm;
 import com.oddlabs.tt.global.Globals;
+import com.oddlabs.tt.global.Headless;
 import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.landscape.HeightMap;
 import com.oddlabs.tt.procedural.Landscape;
@@ -90,14 +91,17 @@ public final class IslandGenerator implements WorldGenerator {
         Instant time_after = Instant.now();
         IO.println("Landscape created in " + Duration.between(time_before, time_after));
         BlendInfo[] blend_infos = landscape.getBlendInfos();
-        Texture detail = createDetail(landscape.getDetail(), base_level);
+        // A headless world has no context for the detail texture and the baked colour maps; the simulation reads
+        // neither.
+        boolean textures = !Headless.isEnabled();
+        Texture detail = textures ? createDetail(landscape.getDetail(), base_level) : null;
         // int alpha_size = grid_units;
         // Texture[][] chunk_maps = blendTextures(chunks_per_colormap, blend_infos, alpha_size, Globals.STRUCTURE_SIZE, colormap_size/alpha_size);
 
         com.oddlabs.tt.landscape.LandscapeBaker baker = new com.oddlabs.tt.landscape.LandscapeBaker();
         // Original tiled structure textures at colormap_size/STRUCTURE_SIZE repeats.
         float textureScale = (float) colormap_size / Globals.STRUCTURE_SIZE;
-        WorldInfo.Maps maps = baker.bake(colormap_size, textureScale, blend_infos);
+        WorldInfo.Maps maps = textures ? baker.bake(colormap_size, textureScale, blend_infos) : null;
 
         ProgressForm.progress();
         return new WorldInfo(meters_per_world, landscape.getSeaLevelMeters(),

@@ -1,0 +1,106 @@
+# Build and test on Windows and Linux for every push to revamp and every pull request. A tag v<major>.<minor>.<patch>
+# also builds the Windows package and publishes it as a GitHub release (docs/releasing.md).
+name: Build
+
+on:
+  push:
+    branches: [ "revamp" ]
+    tags: [ "v*" ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # generateBuildInfo names the build after the newest release tag
+      - name: Set up JDK 26
+        uses: actions/setup-java@v4
+        with:
+          java-version: '26'
+          distribution: 'temurin'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Seed Spotless eclipse formatter p2 cache (avoids download.eclipse.org dependency)
+        shell: bash
+        run: mkdir -p ~/.m2/repository/dev/equo && cp -r ci/p2-data ~/.m2/repository/dev/equo/
+      # Compiles, checks formatting and runs the tests, including the headless AI matches and their golden checksum
+      # traces: both systems must replay the same simulation.
+      - name: Build and test
+        run: ./gradlew build
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ matrix.os }}
+          path: |
+            */build/reports/tests/
+            */build/test-results/
+
+  package-windows:
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up JDK 26
+        uses: actions/setup-java@v4
+        with:
+          java-version: '26'
+          distribution: 'temurin'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Build Windows package
+        run: ./gradlew :tt:packageWindows
+      - name: Zip the package
+        shell: pwsh
+        run: Compress-Archive -Path tt/build/dist/windows/TribalTrouble -DestinationPath TribalTroubleBuffed-windows.zip
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-package
+          path: TribalTroubleBuffed-windows.zip
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: package-windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download package
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-package
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          ASSET="TribalTroubleBuffed-${TAG}-windows.zip"
+          mv TribalTroubleBuffed-windows.zip "$ASSET"
+          NOTES="docs/release-notes/${TAG}.md"
+          if [ -f "$NOTES" ]; then
+            NOTES_ARGS=(--notes-file "$NOTES")
+          else
+            NOTES_ARGS=(--generate-notes)
+          fi
+          # Until 1.0 every release is marked as a pre-release.
+          case "$TAG" in v0.*) NOTES_ARGS+=(--prerelease) ;; esac
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" "$ASSET" --clobber
+          else
+            gh release create "$TAG" "$ASSET" --title "Tribal Trouble Buffed ${TAG}" "${NOTES_ARGS[@]}"
+          fi

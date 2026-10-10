@@ -46,6 +46,33 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // The headless match tests build whole worlds, up to twelve tribes on an Enormous island.
+    maxHeapSize = "1g"
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    testLogging {
+        events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
+}
+
+// -PupdateGoldenTraces rewrites the headless golden traces in the source tree (see GoldenTraceTest).
+tasks.test {
+    if (providers.gradleProperty("updateGoldenTraces").isPresent) {
+        systemProperty("headless.goldenTraces",
+            file("src/test/resources/com/oddlabs/tt/headless/golden-traces.txt").absolutePath)
+        outputs.upToDateWhen { false }
+    }
+}
+
+// One AI-only match without a window, e.g. --args="--ruleset buffed --seed 7 --player 0:0:3 --player 1:1:3".
+tasks.register<JavaExec>("headlessMatch") {
+    group = "verification"
+    description = "Plays one headless AI-vs-AI match and prints its checksum trace"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("com.oddlabs.tt.headless.HeadlessMain")
+    jvmArgs("-ea", "-esa", "--enable-native-access=ALL-UNNAMED", "-Xmx1g")
+    // Extra JVM options, e.g. -PheadlessJvmArgs="-XX:+UnlockExperimentalVMOptions -XX:hashCode=0".
+    providers.gradleProperty("headlessJvmArgs").orNull?.let { jvmArgs(it.split(" ")) }
 }
 
 // steamworks4j lacks module-info, so it stays on the classpath as the unnamed module.
@@ -136,6 +163,7 @@ val packageWindows by tasks.registering(Exec::class) {
         "--app-content", appContentDir.get().asFile.resolve("icons").absolutePath,
         "--main-jar", mainJarFile.get(),
         "--main-class", "com.oddlabs.tt.Main",
+        "--app-version", project.version.toString(),
         "--java-options",
         "-ea -Djdk.crypto.KeyAgreement.legacyKDF=true -Xmx512m -cp \$APPDIR\\;\$APPDIR\\*",
         "--type", "app-image",

@@ -1,6 +1,7 @@
 package com.oddlabs.tt.resource;
 
 import com.oddlabs.tt.global.Globals;
+import com.oddlabs.tt.global.Headless;
 import com.oddlabs.tt.render.Texture;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.opengl.GL11;
@@ -17,8 +18,9 @@ public final class StructureBlend extends BlendInfo {
 
     public StructureBlend(GLIntImage structure_image, GLIntImage normal_image, @NonNull GLByteImage alpha_image) {
         super(alpha_image, Globals.COMPRESSED_A_FORMAT);
-        structure_map = createStructureMap(structure_image);
-        normal_map = createStructureMap(normal_image);
+        boolean textures = !Headless.isEnabled();
+        structure_map = textures ? createStructureMap(structure_image) : null;
+        normal_map = textures ? createStructureMap(normal_image) : null;
     }
 
     public @NonNull Texture getStructureMap() {

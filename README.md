@@ -33,7 +33,8 @@ Other useful tasks:
 | Task | What it does |
 |---|---|
 | `gradlew tt:run` | build everything and start the game |
-| `gradlew build` | compile all modules and run the formatter check |
+| `gradlew build` | compile all modules, check the formatting and run the tests, including AI-vs-AI matches played without a window ([docs/testing.md](docs/testing.md)) |
+| `gradlew tt:headlessMatch --args="..."` | play one AI-only match without a window and print its checksums |
 | `gradlew spotlessApply` | auto-format Java code (CI rejects unformatted code) |
 | `gradlew assets:geometry` / `assets:textures` | rebuild the binary model and texture assets from the sources in `assets/` |
 | `gradlew tt:packageWindows` / `packageLinux` / `packageMacX86` / `packageMacArm64` | self-contained packages under `tt/build/dist/` (each only on its own OS) |

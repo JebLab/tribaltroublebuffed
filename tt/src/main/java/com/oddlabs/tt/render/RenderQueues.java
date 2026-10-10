@@ -2,6 +2,7 @@ package com.oddlabs.tt.render;
 
 import com.oddlabs.geometry.AnimationInfo;
 import com.oddlabs.tt.camera.CameraState;
+import com.oddlabs.tt.global.Headless;
 import com.oddlabs.tt.render.state.RenderContext;
 import com.oddlabs.tt.resource.Resources;
 import com.oddlabs.tt.resource.SpriteFile;
@@ -23,13 +24,18 @@ public final class RenderQueues implements AutoCloseable {
     private final List<@NonNull ShadowListRenderer> shadow_renderer_lookup = new ArrayList<>();
     private final Map<@NonNull Supplier<@NonNull Texture @NonNull []>, @NonNull ShadowListKey> desc_to_shadow_key = new HashMap<>();
     private final List<@NonNull Texture> texture_lookup = new ArrayList<>();
-    private final InstancedSpriteRenderer spriteRenderer = new InstancedSpriteRenderer();
+    // Headless queues hand out keys with the simulation's data (sprite bounds, animation types) and load nothing for
+    // the GPU.
+    private final boolean headless = Headless.isEnabled();
+    private final InstancedSpriteRenderer spriteRenderer = headless ? null : new InstancedSpriteRenderer();
 
     public RenderQueues() {
     }
 
     public @NonNull TextureKey registerTexture(@NonNull Supplier<Texture[]> desc, int index) {
         TextureKey key = new TextureKey(texture_lookup.size());
+        if (headless)
+            return key;
         Texture[] textures = Resources.findResource(desc);
         texture_lookup.add(textures[index]);
         return key;
@@ -37,6 +43,8 @@ public final class RenderQueues implements AutoCloseable {
 
     public @NonNull TextureKey registerTexture(@NonNull Supplier<Texture> desc) {
         TextureKey key = new TextureKey(texture_lookup.size());
+        if (headless)
+            return key;
         texture_lookup.add(Resources.findResource(desc));
         return key;
     }
@@ -50,7 +58,7 @@ public final class RenderQueues implements AutoCloseable {
         ShadowListKey key = desc_to_shadow_key.get(desc);
         if (key != null)
             return key;
-        ShadowListRenderer renderer = new TargetRespondRenderer(desc);
+        ShadowListRenderer renderer = headless ? null : new TargetRespondRenderer(desc);
         return register(desc, renderer);
     }
 
@@ -65,7 +73,9 @@ public final class RenderQueues implements AutoCloseable {
 
     public @NonNull ShadowListKey registerSelectableShadowList(@NonNull Supplier<@NonNull Texture @NonNull []> desc) {
         ShadowListKey key = desc_to_shadow_key.get(desc);
-        return key != null ? key : register(desc, new SelectableShadowRenderer(desc));
+        if (key != null)
+            return key;
+        return register(desc, headless ? null : new SelectableShadowRenderer(desc));
     }
 
     @NonNull
@@ -80,9 +90,11 @@ public final class RenderQueues implements AutoCloseable {
     public @NonNull SpriteKey register(@NonNull SpriteFile sprite_file, int tex_index) {
         int index = sprite_list_lookup.size();
         SpriteList sprite_list = Resources.findResource(sprite_file);
-        SpriteRenderer sprite_renderer = new SpriteRenderer(sprite_list, tex_index, spriteRenderer);
-        sprite_list_lookup.add(sprite_renderer);
-        registerSpriteRenderer(sprite_renderer, sprite_file.getLocation());
+        if (!headless) {
+            SpriteRenderer sprite_renderer = new SpriteRenderer(sprite_list, tex_index, spriteRenderer);
+            sprite_list_lookup.add(sprite_renderer);
+            registerSpriteRenderer(sprite_renderer, sprite_file.getLocation());
+        }
         AnimationInfo.AnimationType[] animation_types = sprite_list.getAnimationTypes();
         int[] type_array = new int[animation_types.length];
         for (int i = 0; i < animation_types.length; i++) {
@@ -173,6 +185,8 @@ public final class RenderQueues implements AutoCloseable {
 
     @Override
     public void close() {
+        if (headless)
+            return;
         spriteRenderer.close();
         for (SpriteList spriteList : sprite_list_lookup.stream().map(
                 SpriteRenderer::getSpriteList).distinct().toList()) {

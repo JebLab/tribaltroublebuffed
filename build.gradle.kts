@@ -11,7 +11,8 @@ plugins {
 
 allprojects {
     group = "com.oddlabs.tribaltrouble"
-    version = "2.0"
+    // The next release; tags (v0.1.0, ...) name the builds, see generateBuildInfo in common.
+    version = "0.1.0"
 }
 
 subprojects {

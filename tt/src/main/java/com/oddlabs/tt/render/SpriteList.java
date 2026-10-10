@@ -2,6 +2,7 @@ package com.oddlabs.tt.render;
 
 import com.oddlabs.geometry.AnimationInfo;
 import com.oddlabs.geometry.SpriteInfo;
+import com.oddlabs.tt.global.Headless;
 import com.oddlabs.tt.render.shader.SpriteShader;
 import com.oddlabs.tt.resource.SpriteFile;
 import com.oddlabs.tt.util.BoundingBox;
@@ -24,7 +25,10 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public final class SpriteList implements AutoCloseable {
-    private static final @NonNull SpriteList QUAD_INSTANCE = new SpriteList();
+    /** Created on first use, so that loading this class needs no OpenGL context. */
+    private static final class QuadHolder {
+        static final @NonNull SpriteList INSTANCE = new SpriteList();
+    }
 
     private final @NonNull BoundingBox @NonNull [] bounds;
     private final @NonNull Sprite @NonNull [] sprites;
@@ -38,7 +42,7 @@ public final class SpriteList implements AutoCloseable {
     private int tboTextureHandle;
 
     public static @NonNull SpriteList getQuadInstance() {
-        return QUAD_INSTANCE;
+        return QuadHolder.INSTANCE;
     }
 
     private SpriteList() {
@@ -117,6 +121,18 @@ public final class SpriteList implements AutoCloseable {
                 all_indices, all_texcoords, all_vertices_and_normals)
         ).toArray(Sprite[]::new);
 
+        for (BoundingBox bound : bounds) {
+            bound.maximizeXYPlane();
+        }
+
+        if (Headless.isEnabled()) {
+            // The simulation reads only the bounds and animation types; there is no context to upload to.
+            indices = null;
+            texcoords = null;
+            vertices_and_normals = null;
+            return;
+        }
+
         all_indices.flip();
         indices = new ShortVBO(GL15.GL_STATIC_DRAW, all_indices.remaining());
         indices.put(all_indices);
@@ -128,10 +144,6 @@ public final class SpriteList implements AutoCloseable {
         all_vertices_and_normals.flip();
         vertices_and_normals = new FloatVBO(GL15.GL_STATIC_DRAW, all_vertices_and_normals.remaining());
         vertices_and_normals.put(all_vertices_and_normals);
-
-        for (BoundingBox bound : bounds) {
-            bound.maximizeXYPlane();
-        }
 
         initTBO();
     }
@@ -234,6 +246,8 @@ public final class SpriteList implements AutoCloseable {
             vao.close();
             vao = null;
         }
+        if (indices == null)
+            return;
         indices.close();
         vertices_and_normals.close();
         texcoords.close();

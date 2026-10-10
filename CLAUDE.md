@@ -7,6 +7,7 @@ A single-player fork of Tribal Trouble Resurrected (Java 26, Gradle, LWJGL). The
 ## Working here
 
 - JDK 26 lives in `.toolchain/jdk26`. In Git Bash: `export JAVA_HOME="$(cygpath -w "$PWD/.toolchain/jdk26")"` then `./gradlew.bat build` (compiles, runs the tests and the Spotless check; `spotlessApply` formats) or `./gradlew.bat tt:run` (the game, windowed, stdout in the Gradle output).
+- The build runs headless AI-vs-AI matches (about a minute) and compares them with golden checksum traces. After an intended simulation change, bump `SIM_VERSION` and regenerate the traces with `./gradlew.bat tt:test --tests com.oddlabs.tt.headless.GoldenTraceTest -PupdateGoldenTraces` ([docs/testing.md](docs/testing.md)); only the changed ruleset's traces should move.
 - Python 3.13 is on PATH in PowerShell, not in Git Bash. Run `tools/scripts/*.py` from the PowerShell tool.
 - Tool inputs decode `\u` escapes, so a `.properties` escape typed directly becomes the raw character. Write a literal backslash (e.g. `B=$(printf '\x5c')` in Bash), and check that `.properties` files stay ASCII.
 - `core.autocrlf` is on: files may be LF in the working copy after `sed -i`; Git normalises them, so diffs stay clean.

@@ -4,6 +4,7 @@ import com.oddlabs.tt.audio.Audio;
 import com.oddlabs.tt.audio.AudioFile;
 import com.oddlabs.tt.form.ProgressForm;
 import com.oddlabs.tt.global.Globals;
+import com.oddlabs.tt.global.Headless;
 import com.oddlabs.tt.gui.GUIIcons;
 import com.oddlabs.tt.landscape.TreeSupply;
 import com.oddlabs.tt.model.weapon.InstantHitFactory;
@@ -847,7 +848,8 @@ public final class RacesResources {
                 roar.seconds(), 6f, 57f / 159f, 100f / 159f);
 
         ProgressForm.progress(1f / num_progress);
-        GUIIcons icons = GUIIcons.getIcons();
+        // The race icons are only drawn; a headless world (no context to load their atlas into) has none.
+        GUIIcons icons = Headless.isEnabled() ? null : GUIIcons.getIcons();
         Race natives_race = new Race(native_quarters_template,
                 native_armory_template,
                 native_tower_template,
@@ -860,7 +862,7 @@ public final class RacesResources {
                 queues.register(new SpriteFile("/geometry/natives/rally_point.binsprite",
                         Globals.NO_MIPMAP_CUTOFF,
                         true, true, true, false)),
-                icons.getNativeIcons(),
+                icons != null ? icons.getNativeIcons() : null,
                 Resources.findResource(new AudioFile("/sfx/attacknotify_native.ogg")),
                 Resources.findResource(new AudioFile("/sfx/buildingnotify_native.ogg")),
                 native_magic,
@@ -878,7 +880,7 @@ public final class RacesResources {
                 queues.register(new SpriteFile("/geometry/vikings/rally_point.binsprite",
                         Globals.NO_MIPMAP_CUTOFF,
                         true, true, true, false)),
-                icons.getVikingIcons(),
+                icons != null ? icons.getVikingIcons() : null,
                 Resources.findResource(new AudioFile("/sfx/attacknotify_viking.ogg")),
                 Resources.findResource(new AudioFile("/sfx/buildingnotify_viking.ogg")),
                 viking_magic,

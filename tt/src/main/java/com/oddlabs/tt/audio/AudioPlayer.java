@@ -81,6 +81,11 @@ public final class AudioPlayer extends AbstractAudioPlayer {
     private static final float MAX_HEARING_DIST = 150f;
 
 
+    /** A player without a source, which plays nothing: what every sound in a headless world gets. */
+    public static @NonNull AudioPlayer silent(@NonNull AudioParameters<Audio> params) {
+        return new AudioPlayer(null, params);
+    }
+
     AudioPlayer(@Nullable AudioSource source, @NonNull AudioParameters<Audio> params) {
         super(source, params);
         if (this.source == null) {

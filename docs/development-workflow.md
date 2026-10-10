@@ -1,5 +1,7 @@
 # Development Workflow
 
+> **Resurrected's process, kept for reference.** Tribal Trouble Buffed works on `revamp` and releases from tags; see [releasing.md](releasing.md). Here `main` only mirrors upstream, and the `release` and `beta` branches and their workflows do not exist.
+
 How we branch, who can merge where, and how we ship without drowning in PRs. For the
 mechanics of actually cutting and publishing a release, see [Releasing](releasing.md).
 

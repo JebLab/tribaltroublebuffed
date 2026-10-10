@@ -3,6 +3,7 @@ package com.oddlabs.tt.render;
 import com.oddlabs.geometry.AnimationInfo;
 import com.oddlabs.geometry.SpriteInfo;
 import com.oddlabs.tt.global.Globals;
+import com.oddlabs.tt.global.Headless;
 import com.oddlabs.tt.procedural.GeneratorRespond;
 import com.oddlabs.tt.render.shader.SpriteShader;
 import com.oddlabs.tt.render.state.RenderContext;
@@ -103,6 +104,12 @@ public final class Sprite {
                 all_vertices_and_normals.put(tmp_vertices[j][i]);
                 all_vertices_and_normals.put(tmp_normals[j][i]);
             }
+        }
+
+        if (Headless.isEnabled()) {
+            textures = new Texture[0][0];
+            respond_texture = null;
+            return;
         }
 
         int color_format = alpha ? Globals.COMPRESSED_RGBA_FORMAT : Globals.COMPRESSED_RGB_FORMAT;
