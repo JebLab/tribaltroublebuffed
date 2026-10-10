@@ -95,6 +95,12 @@ public class DeployContainer extends SupplyContainer {
             case PEON_TRANSPORT_RUBBER:
                 building.createTransporters(0, 0, 0, 1);
                 break;
+            case SHIELD_WARRIOR:
+                building.createGearArmy(1, 0);
+                break;
+            case TORCH_WARRIOR:
+                building.createGearArmy(0, 1);
+                break;
         }
     }
 

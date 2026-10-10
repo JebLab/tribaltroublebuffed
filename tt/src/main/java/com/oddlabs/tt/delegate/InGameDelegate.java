@@ -68,6 +68,21 @@ public abstract class InGameDelegate extends CameraDelegate<Camera> {
                 return true;
             }
         }
+        // Shift+F2 and Shift+F3 create a shield and a torch warrior where the ruleset offers them (Buffed).
+        if (actions.contains(GameAction.CHEAT_10) && viewer.getLocalPlayer().canBuildShields()) {
+            if (viewer.getLocalPlayer().getUnitCountContainer().getNumSupplies() != viewer.getParameters().getMaxUnitCount()) {
+                new Unit(viewer.getLocalPlayer(), landscape_x, landscape_y, null,
+                        viewer.getLocalPlayer().getRace().getUnitTemplate(Race.UNIT_WARRIOR_SHIELD));
+                return true;
+            }
+        }
+        if (actions.contains(GameAction.CHEAT_11) && viewer.getLocalPlayer().canBuildTorches()) {
+            if (viewer.getLocalPlayer().getUnitCountContainer().getNumSupplies() != viewer.getParameters().getMaxUnitCount()) {
+                new Unit(viewer.getLocalPlayer(), landscape_x, landscape_y, null,
+                        viewer.getLocalPlayer().getRace().getUnitTemplate(Race.UNIT_WARRIOR_TORCH));
+                return true;
+            }
+        }
         if (actions.contains(GameAction.CHEAT_5)) {
             // F5 creates a chieftain at the center of the view unless the player already has one or is training one
             if (!viewer.getLocalPlayer().hasActiveChieftain() && !viewer.getLocalPlayer().isTrainingChieftain()) {

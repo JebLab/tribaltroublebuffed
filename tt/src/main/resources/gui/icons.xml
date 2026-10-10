@@ -39,6 +39,12 @@
                 vikings_ship_icon,
                 vikings_chicken_coop_icon,
                 vikings_totem_icon,
+                vikings_weapon_shield_status_icon,
+                vikings_weapon_torch_status_icon,
+                vikings_build_weapon_shield_icon,
+                vikings_build_weapon_torch_icon,
+                vikings_warrior_shield_icon,
+                vikings_warrior_torch_icon,
                 natives_unit_status_icon,
                 natives_weapon_rock_status_icon,
                 natives_weapon_iron_status_icon,
@@ -67,6 +73,12 @@
                 natives_ship_icon,
                 natives_chicken_coop_icon,
                 natives_totem_icon,
+                natives_weapon_shield_status_icon,
+                natives_weapon_torch_status_icon,
+                natives_build_weapon_shield_icon,
+                natives_build_weapon_torch_icon,
+                natives_warrior_shield_icon,
+                natives_warrior_torch_icon,
                 watch,
                 infinite,
                 notify_arrow
@@ -120,6 +132,12 @@
         <!ELEMENT vikings_ship_icon                  (normal, active, disabled)>
         <!ELEMENT vikings_chicken_coop_icon          (normal, active, disabled)>
         <!ELEMENT vikings_totem_icon                 (normal, active, disabled)>
+        <!ELEMENT vikings_weapon_shield_status_icon    (quad)>
+        <!ELEMENT vikings_weapon_torch_status_icon     (quad)>
+        <!ELEMENT vikings_build_weapon_shield_icon     (normal, active, disabled)>
+        <!ELEMENT vikings_build_weapon_torch_icon      (normal, active, disabled)>
+        <!ELEMENT vikings_warrior_shield_icon          (normal, active, disabled)>
+        <!ELEMENT vikings_warrior_torch_icon           (normal, active, disabled)>
 
         <!ELEMENT natives_unit_status_icon            (quad)>
         <!ELEMENT natives_weapon_rock_status_icon    (quad)>
@@ -149,6 +167,12 @@
         <!ELEMENT natives_ship_icon                  (normal, active, disabled)>
         <!ELEMENT natives_chicken_coop_icon          (normal, active, disabled)>
         <!ELEMENT natives_totem_icon                 (normal, active, disabled)>
+        <!ELEMENT natives_weapon_shield_status_icon    (quad)>
+        <!ELEMENT natives_weapon_torch_status_icon     (quad)>
+        <!ELEMENT natives_build_weapon_shield_icon     (normal, active, disabled)>
+        <!ELEMENT natives_build_weapon_torch_icon      (normal, active, disabled)>
+        <!ELEMENT natives_warrior_shield_icon          (normal, active, disabled)>
+        <!ELEMENT natives_warrior_torch_icon           (normal, active, disabled)>
 
         <!ELEMENT watch                                (quad+)>
 
@@ -510,6 +534,56 @@
             <quad left="960" top="640" right="1024" bottom="704"/>
         </disabled>
     </vikings_totem_icon>
+    <vikings_weapon_shield_status_icon>
+        <quad left="0" top="896" right="32" bottom="928"/>
+    </vikings_weapon_shield_status_icon>
+    <vikings_weapon_torch_status_icon>
+        <quad left="32" top="896" right="64" bottom="928"/>
+    </vikings_weapon_torch_status_icon>
+    <vikings_build_weapon_shield_icon>
+        <normal>
+            <quad left="0" top="704" right="64" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="0" top="768" right="64" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="0" top="832" right="64" bottom="896"/>
+        </disabled>
+    </vikings_build_weapon_shield_icon>
+    <vikings_build_weapon_torch_icon>
+        <normal>
+            <quad left="64" top="704" right="128" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="64" top="768" right="128" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="64" top="832" right="128" bottom="896"/>
+        </disabled>
+    </vikings_build_weapon_torch_icon>
+    <vikings_warrior_shield_icon>
+        <normal>
+            <quad left="256" top="704" right="320" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="256" top="768" right="320" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="256" top="832" right="320" bottom="896"/>
+        </disabled>
+    </vikings_warrior_shield_icon>
+    <vikings_warrior_torch_icon>
+        <normal>
+            <quad left="320" top="704" right="384" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="320" top="768" right="384" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="320" top="832" right="384" bottom="896"/>
+        </disabled>
+    </vikings_warrior_torch_icon>
 
     <!-- NATIVES -->
     <natives_unit_status_icon>
@@ -788,6 +862,56 @@
             <quad left="832" top="640" right="896" bottom="704"/>
         </disabled>
     </natives_totem_icon>
+    <natives_weapon_shield_status_icon>
+        <quad left="64" top="896" right="96" bottom="928"/>
+    </natives_weapon_shield_status_icon>
+    <natives_weapon_torch_status_icon>
+        <quad left="96" top="896" right="128" bottom="928"/>
+    </natives_weapon_torch_status_icon>
+    <natives_build_weapon_shield_icon>
+        <normal>
+            <quad left="128" top="704" right="192" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="128" top="768" right="192" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="128" top="832" right="192" bottom="896"/>
+        </disabled>
+    </natives_build_weapon_shield_icon>
+    <natives_build_weapon_torch_icon>
+        <normal>
+            <quad left="192" top="704" right="256" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="192" top="768" right="256" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="192" top="832" right="256" bottom="896"/>
+        </disabled>
+    </natives_build_weapon_torch_icon>
+    <natives_warrior_shield_icon>
+        <normal>
+            <quad left="384" top="704" right="448" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="384" top="768" right="448" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="384" top="832" right="448" bottom="896"/>
+        </disabled>
+    </natives_warrior_shield_icon>
+    <natives_warrior_torch_icon>
+        <normal>
+            <quad left="448" top="704" right="512" bottom="768"/>
+        </normal>
+        <active>
+            <quad left="448" top="768" right="512" bottom="832"/>
+        </active>
+        <disabled>
+            <quad left="448" top="832" right="512" bottom="896"/>
+        </disabled>
+    </natives_warrior_torch_icon>
 
     <!-- Watch icons -->
     <watch>

@@ -36,7 +36,7 @@ public final class KeyBindingConflicts {
     };
 
     // Resource sub-menus (harvest / transport / weapons all share the same resource keys by design).
-    private static final GameAction[] RESOURCE_CONTEXT = {GameAction.RES_TREE, GameAction.RES_TREE_DEC, GameAction.RES_TREE_BATCH, GameAction.RES_TREE_BATCH_DEC, GameAction.RES_ROCK, GameAction.RES_ROCK_DEC, GameAction.RES_ROCK_BATCH, GameAction.RES_ROCK_BATCH_DEC, GameAction.RES_IRON, GameAction.RES_IRON_DEC, GameAction.RES_IRON_BATCH, GameAction.RES_IRON_BATCH_DEC, GameAction.RES_CHICKEN, GameAction.RES_CHICKEN_DEC, GameAction.RES_CHICKEN_BATCH, GameAction.RES_CHICKEN_BATCH_DEC,
+    private static final GameAction[] RESOURCE_CONTEXT = {GameAction.RES_TREE, GameAction.RES_TREE_DEC, GameAction.RES_TREE_BATCH, GameAction.RES_TREE_BATCH_DEC, GameAction.RES_ROCK, GameAction.RES_ROCK_DEC, GameAction.RES_ROCK_BATCH, GameAction.RES_ROCK_BATCH_DEC, GameAction.RES_IRON, GameAction.RES_IRON_DEC, GameAction.RES_IRON_BATCH, GameAction.RES_IRON_BATCH_DEC, GameAction.RES_CHICKEN, GameAction.RES_CHICKEN_DEC, GameAction.RES_CHICKEN_BATCH, GameAction.RES_CHICKEN_BATCH_DEC, GameAction.RES_SHIELD, GameAction.RES_SHIELD_DEC, GameAction.RES_SHIELD_BATCH, GameAction.RES_SHIELD_BATCH_DEC, GameAction.RES_TORCH, GameAction.RES_TORCH_DEC, GameAction.RES_TORCH_BATCH, GameAction.RES_TORCH_BATCH_DEC,
     };
 
     // UI navigation: active inside modal forms / focus traversal. A separate mode, so its keys may double as in-game keys.

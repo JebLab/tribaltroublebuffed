@@ -12,6 +12,8 @@ import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockSpearWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberSpearWeapon;
+import com.oddlabs.tt.model.weapon.Shield;
+import com.oddlabs.tt.model.weapon.Torch;
 import com.oddlabs.tt.player.Player;
 
 
@@ -29,6 +31,8 @@ public final class DensityMap {
     private final int ROCK_WEIGHT = 3;
     private final int IRON_WEIGHT = 5;
     private final int RUBBER_WEIGHT = 8;
+    private final int SHIELD_WEIGHT = 3;
+    private final int TORCH_WEIGHT = 4;
     private final int CHIEFTAIN_WEIGHT = 11;
     private final int OUTSIDE_SCALE = 2;
 
@@ -49,6 +53,10 @@ public final class DensityMap {
                 return IRON_WEIGHT * OUTSIDE_SCALE;
             } else if (type == RubberAxeWeapon.class || type == RubberSpearWeapon.class) {
                 return RUBBER_WEIGHT * OUTSIDE_SCALE;
+            } else if (type == Shield.class) {
+                return SHIELD_WEIGHT * OUTSIDE_SCALE;
+            } else if (type == Torch.class) {
+                return TORCH_WEIGHT * OUTSIDE_SCALE;
             } else {
                 return PEON_WEIGHT * OUTSIDE_SCALE;
             }
@@ -63,6 +71,8 @@ public final class DensityMap {
                 weight += building.getDeployContainer(DeployType.ROCK_WARRIOR).getNumSupplies() * ROCK_WEIGHT;
                 weight += building.getDeployContainer(DeployType.IRON_WARRIOR).getNumSupplies() * IRON_WEIGHT;
                 weight += building.getDeployContainer(DeployType.RUBBER_WARRIOR).getNumSupplies() * RUBBER_WEIGHT;
+                weight += building.getDeployContainer(DeployType.SHIELD_WARRIOR).getNumSupplies() * SHIELD_WEIGHT;
+                weight += building.getDeployContainer(DeployType.TORCH_WARRIOR).getNumSupplies() * TORCH_WEIGHT;
                 weight += building.getDeployContainer(DeployType.PEON).getNumSupplies() * PEON_WEIGHT;
                 int total = building.getUnitContainer().getNumSupplies();
                 int rubber = building.getSupplyContainer(RubberAxeWeapon.class).getNumSupplies();
@@ -80,6 +90,12 @@ public final class DensityMap {
                 rock = Math.min(rock, total);
                 weight += rock * ROCK_WEIGHT;
                 total -= rock;
+                int torch = Math.min(building.getSupplyContainer(Torch.class).getNumSupplies(), total);
+                weight += torch * TORCH_WEIGHT;
+                total -= torch;
+                int shield = Math.min(building.getSupplyContainer(Shield.class).getNumSupplies(), total);
+                weight += shield * SHIELD_WEIGHT;
+                total -= shield;
                 weight += total * PEON_WEIGHT;
                 return StrictMath.round(weight * health);
             } else if (building.getAbilities().hasAbilities(Abilities.ATTACK)) {

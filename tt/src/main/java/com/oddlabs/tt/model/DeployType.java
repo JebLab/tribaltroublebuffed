@@ -12,5 +12,8 @@ public enum DeployType {
     PEON_HARVEST_IRON,
     PEON_TRANSPORT_IRON,
     PEON_HARVEST_RUBBER,
-    PEON_TRANSPORT_RUBBER
+    PEON_TRANSPORT_RUBBER,
+    // Buffed's gear. Last, because the ordinal goes into the world checksum.
+    SHIELD_WARRIOR,
+    TORCH_WARRIOR
 }

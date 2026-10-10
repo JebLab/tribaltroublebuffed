@@ -57,5 +57,6 @@ public abstract class WeaponFactory {
 
     protected abstract void doAttack(boolean hit, @NonNull Unit src, @NonNull Selectable<?> target);
 
-    public abstract @Nullable Class<? extends ThrowingWeapon> getType();
+    /** The weapon in the Armory's stock this unit carries (a thrown weapon's class or a gear key), or null. */
+    public abstract @Nullable Class<?> getType();
 }

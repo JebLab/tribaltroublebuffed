@@ -117,7 +117,13 @@ public class GUIIcons {
                 magic2_desc,
                 Icons.getNamedIconQuads(n, head + "_ship_icon", texture),
                 Icons.getNamedIconQuads(n, head + "_chicken_coop_icon", texture),
-                Icons.getNamedIconQuads(n, head + "_totem_icon", texture));
+                Icons.getNamedIconQuads(n, head + "_totem_icon", texture),
+                Icons.getNamedIconQuad(n, head + "_weapon_shield_status_icon", texture),
+                Icons.getNamedIconQuad(n, head + "_weapon_torch_status_icon", texture),
+                Icons.getNamedIconQuads(n, head + "_build_weapon_shield_icon", texture),
+                Icons.getNamedIconQuads(n, head + "_build_weapon_torch_icon", texture),
+                Icons.getNamedIconQuads(n, head + "_warrior_shield_icon", texture),
+                Icons.getNamedIconQuads(n, head + "_warrior_torch_icon", texture));
     }
 
     private static @NonNull IconQuad @NonNull [] generateWatchIcons() {

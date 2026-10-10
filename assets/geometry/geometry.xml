@@ -44,6 +44,38 @@
             <animation name="die" wpc="1" type="plain">vikings/warrior/warrior_die.xml</animation>
             <animation name="sit" wpc="1" type="loop">vikings/warrior/warrior_sitting.xml</animation>
         </sprite>
+        <sprite name="shield_warrior">
+            <skeleton>vikings/warrior/warrior_skeleton.xml</skeleton>
+            <model r="90" g="60" b="30">
+                vikings/shield_warrior/viking_shield_warrior_mesh.xml
+                <texture name="viking_warrior_shield" team="viking_warrior_shield_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/shield_warrior/viking_shield_warrior_low_poly_mesh.xml
+                <texture name="viking_warrior_shield" team="viking_warrior_shield_team"/>
+            </model>
+            <animation name="idle" wpc="1" type="loop">vikings/warrior/warrior_idle.xml</animation>
+            <animation name="run" wpc="5" type="loop">vikings/warrior/warrior_run.xml</animation>
+            <animation name="attack" wpc="1" type="plain">vikings/warrior/warrior_attack.xml</animation>
+            <animation name="die" wpc="1" type="plain">vikings/warrior/warrior_die.xml</animation>
+            <animation name="sit" wpc="1" type="loop">vikings/warrior/warrior_sitting.xml</animation>
+        </sprite>
+        <sprite name="torch_warrior">
+            <skeleton>vikings/warrior/warrior_skeleton.xml</skeleton>
+            <model r="90" g="60" b="30">
+                vikings/torch_warrior/viking_torch_warrior_mesh.xml
+                <texture name="viking_warrior_torch" team="viking_warrior_rock_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/torch_warrior/viking_torch_warrior_low_poly_mesh.xml
+                <texture name="viking_warrior_torch" team="viking_warrior_rock_team"/>
+            </model>
+            <animation name="idle" wpc="1" type="loop">vikings/warrior/warrior_idle.xml</animation>
+            <animation name="run" wpc="5" type="loop">vikings/warrior/warrior_run.xml</animation>
+            <animation name="attack" wpc="1" type="plain">vikings/warrior/warrior_attack.xml</animation>
+            <animation name="die" wpc="1" type="plain">vikings/warrior/warrior_die.xml</animation>
+            <animation name="sit" wpc="1" type="loop">vikings/warrior/warrior_sitting.xml</animation>
+        </sprite>
         <sprite name="chieftain">
             <skeleton>vikings/chieftain/viking_chieftain_skeleton.xml</skeleton>
             <model r="90" g="60" b="30">
@@ -400,6 +432,38 @@
                 <texture name="native_warrior_rock" team="native_warrior_rock_team"/>
                 <texture name="native_warrior_iron" team="native_warrior_iron_team"/>
                 <texture name="native_warrior_rubber" team="native_warrior_rubber_team"/>
+            </model>
+            <animation name="idle" wpc="1" type="loop">natives/warrior/native_warrior_idle.xml</animation>
+            <animation name="run" wpc="3.2" type="loop">natives/warrior/native_warrior_run.xml</animation>
+            <animation name="attack" wpc="1" type="plain">natives/warrior/native_warrior_attack.xml</animation>
+            <animation name="die" wpc="1" type="plain">natives/warrior/native_warrior_die.xml</animation>
+            <animation name="sit" wpc="1" type="loop">natives/warrior/native_warrior_sitting.xml</animation>
+        </sprite>
+        <sprite name="shield_warrior">
+            <skeleton>natives/warrior/native_warrior_skeleton.xml</skeleton>
+            <model r="90" g="60" b="30">
+                natives/shield_warrior/native_shield_warrior_mesh.xml
+                <texture name="native_warrior_shield" team="native_warrior_shield_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/shield_warrior/native_shield_warrior_low_poly_mesh.xml
+                <texture name="native_warrior_shield" team="native_warrior_shield_team"/>
+            </model>
+            <animation name="idle" wpc="1" type="loop">natives/warrior/native_warrior_idle.xml</animation>
+            <animation name="run" wpc="3.2" type="loop">natives/warrior/native_warrior_run.xml</animation>
+            <animation name="attack" wpc="1" type="plain">natives/warrior/native_warrior_attack.xml</animation>
+            <animation name="die" wpc="1" type="plain">natives/warrior/native_warrior_die.xml</animation>
+            <animation name="sit" wpc="1" type="loop">natives/warrior/native_warrior_sitting.xml</animation>
+        </sprite>
+        <sprite name="torch_warrior">
+            <skeleton>natives/warrior/native_warrior_skeleton.xml</skeleton>
+            <model r="90" g="60" b="30">
+                natives/torch_warrior/native_torch_warrior_mesh.xml
+                <texture name="native_warrior_torch" team="native_warrior_rock_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/torch_warrior/native_torch_warrior_low_poly_mesh.xml
+                <texture name="native_warrior_torch" team="native_warrior_rock_team"/>
             </model>
             <animation name="idle" wpc="1" type="loop">natives/warrior/native_warrior_idle.xml</animation>
             <animation name="run" wpc="3.2" type="loop">natives/warrior/native_warrior_run.xml</animation>

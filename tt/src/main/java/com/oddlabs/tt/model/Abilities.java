@@ -20,7 +20,7 @@ public final class Abilities {
     public static final int REPRODUCE = 32;
     // Can target other units
     public static final int TARGET = 64;
-    // Can throw weapon
+    // An armed warrior from the Armory: a thrower, or (Buffed) gear that fights hand to hand
     public static final int THROW = 128;
     // Can be a rally target
     public static final int RALLY_TO = 256;

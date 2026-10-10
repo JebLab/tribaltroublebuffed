@@ -14,7 +14,7 @@ public final class ShipUnitContainer extends UnitContainer {
     }
 
     public final boolean canEnter(Unit unit) {
-        return ship.getShipHR().canAllocate(unit);
+        return !unit.isGearWarrior() && ship.getShipHR().canAllocate(unit);
     }
 
     private final int getTotalSupplies() {

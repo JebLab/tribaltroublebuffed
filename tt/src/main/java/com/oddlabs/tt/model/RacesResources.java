@@ -7,6 +7,7 @@ import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.global.Headless;
 import com.oddlabs.tt.gui.GUIIcons;
 import com.oddlabs.tt.landscape.TreeSupply;
+import com.oddlabs.tt.model.weapon.GearFactory;
 import com.oddlabs.tt.model.weapon.InstantHitFactory;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.IronSpearWeapon;
@@ -17,9 +18,11 @@ import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockSpearWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberSpearWeapon;
+import com.oddlabs.tt.model.weapon.Shield;
 import com.oddlabs.tt.model.weapon.SonicBlastFactory;
 import com.oddlabs.tt.model.weapon.StunFactory;
 import com.oddlabs.tt.model.weapon.ThrowingFactory;
+import com.oddlabs.tt.model.weapon.Torch;
 import com.oddlabs.tt.model.weapon.WeaponFactory;
 import com.oddlabs.tt.player.NativeChieftainAI;
 import com.oddlabs.tt.player.VikingChieftainAI;
@@ -43,6 +46,7 @@ import com.oddlabs.tt.ruleset.RulesetStats.RavagingRoarStats;
 import com.oddlabs.tt.ruleset.RulesetStats.SpellStats;
 import com.oddlabs.tt.ruleset.RulesetStats.StinkingStewStats;
 import com.oddlabs.tt.ruleset.RulesetStats.TerrifyingTootStats;
+import com.oddlabs.tt.ruleset.RulesetStats.UnitStats;
 import com.oddlabs.tt.util.Utils;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.opengl.GL11;
@@ -221,6 +225,35 @@ public final class RacesResources {
                 0f, 0f, 0f,
                 is_vikings,
                 name);
+    }
+
+    /**
+     * A Buffed gear warrior: the race's warrior with a shield or a torch. Placeholder models: the warrior's mesh with
+     * the prop, on its skeleton and animations, so the blow lands where the warrior's throw would leave the hand.
+     */
+    private static @NonNull UnitTemplate createGearWarriorTemplate(@NonNull RenderQueues queues, @NonNull String race,
+            @NonNull String sprite, @NonNull UnitStats stats, @NonNull WeaponFactory weapon,
+            @NonNull ShadowListKey shadow_list, @NonNull Audio death_sound, @NonNull String name, int status_value) {
+        SpriteFile sprite_file = new SpriteFile("/geometry/" + race + "/" + sprite + ".binsprite",
+                Globals.NO_MIPMAP_CUTOFF, true, true, true, false);
+        return new UnitTemplate(.4f,
+                1.2f,
+                new Abilities(Abilities.ATTACK | Abilities.TARGET | Abilities.THROW),
+                stats.speed(),
+                weapon,
+                queues.register(sprite_file),
+                1.9f,
+                shadow_list,
+                null,
+                death_sound,
+                .25f,
+                new float[]{1.2f},
+                1f,
+                stats.defense_chance(),
+                name,
+                stats.hit_points(),
+                0f, 0f, 2f,
+                status_value);
     }
 
     private static @NonNull BuildingTemplate createTotemTemplate(@NonNull RenderQueues queues, @NonNull String race,
@@ -888,6 +921,24 @@ public final class RacesResources {
                 .878f, .151f, 2.8f,
                 40);
 
+        // Buffed's gear warriors: hand to hand, striking at the warrior's release point (46/100 and 29/58).
+        UnitTemplate native_warrior_shield_template = createGearWarriorTemplate(queues, "natives", "shield_warrior",
+                natives.shield_warrior(), new GearFactory(Shield.class, natives.shield_warrior().hit_chance(),
+                        46f / 100f, null, unit_hit_sounds),
+                default_shadow_list, death_native1_sound, i18n("shield_warrior_natives"), 4);
+        UnitTemplate native_warrior_torch_template = createGearWarriorTemplate(queues, "natives", "torch_warrior",
+                natives.torch_warrior(), new GearFactory(Torch.class, natives.torch_warrior().hit_chance(),
+                        46f / 100f, natives.torch(), unit_hit_sounds),
+                default_shadow_list, death_native2_sound, i18n("torch_warrior_natives"), 6);
+        UnitTemplate viking_warrior_shield_template = createGearWarriorTemplate(queues, "vikings", "shield_warrior",
+                vikings.shield_warrior(), new GearFactory(Shield.class, vikings.shield_warrior().hit_chance(),
+                        29f / 58f, null, unit_hit_sounds),
+                default_shadow_list, death_viking1_sound, i18n("shield_warrior_vikings"), 4);
+        UnitTemplate viking_warrior_torch_template = createGearWarriorTemplate(queues, "vikings", "torch_warrior",
+                vikings.torch_warrior(), new GearFactory(Torch.class, vikings.torch_warrior().hit_chance(),
+                        29f / 58f, vikings.torch(), unit_hit_sounds),
+                default_shadow_list, death_viking2_sound, i18n("torch_warrior_vikings"), 6);
+
         StinkingStewStats stew = spells.stinking_stew();
         CracklingCloudStats cloud = spells.crackling_cloud();
         TerrifyingTootStats toot = spells.terrifying_toot();
@@ -920,6 +971,8 @@ public final class RacesResources {
                 native_warrior_rubber_template,
                 native_peon_template,
                 native_chieftain_template,
+                native_warrior_shield_template,
+                native_warrior_torch_template,
                 queues.register(new SpriteFile("/geometry/natives/rally_point.binsprite",
                         Globals.NO_MIPMAP_CUTOFF,
                         true, true, true, false)),
@@ -940,6 +993,8 @@ public final class RacesResources {
                 viking_warrior_rubber_template,
                 viking_peon_template,
                 viking_chieftain_template,
+                viking_warrior_shield_template,
+                viking_warrior_torch_template,
                 queues.register(new SpriteFile("/geometry/vikings/rally_point.binsprite",
                         Globals.NO_MIPMAP_CUTOFF,
                         true, true, true, false)),

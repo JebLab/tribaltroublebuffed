@@ -22,11 +22,23 @@ public final class InstantHitFactory extends WeaponFactory {
 
     @Override
     protected void doAttack(boolean hit, @NonNull Unit src, @NonNull Selectable<?> target) {
+        blow(hit, src, target, sounds);
+    }
+
+    /** A blow: a tower always takes 6, anything else 1 if the blow hit. */
+    static void blow(boolean hit, @NonNull Unit src, @NonNull Selectable<?> target,
+            @NonNull Audio @NonNull [] sounds) {
         int damage = 1;
         if (target instanceof Building && target.getTemplate().getAbilities().hasAbilities(Abilities.ATTACK))
             damage = 6;
         else if (!hit)
             return;
+        strike(src, target, damage, sounds);
+    }
+
+    /** A blow that lands, with the death sound for a unit. */
+    static void strike(@NonNull Unit src, @NonNull Selectable<?> target, int damage,
+            @NonNull Audio @NonNull [] sounds) {
         float dx = target.getPositionX() - src.getPositionX();
         float dy = target.getPositionY() - src.getPositionY();
         float dir_len_inv = 1f / (float) Math.sqrt(dx * dx + dy * dy);
@@ -44,7 +56,7 @@ public final class InstantHitFactory extends WeaponFactory {
     }
 
     @Override
-    public @Nullable Class<? extends ThrowingWeapon> getType() {
+    public @Nullable Class<?> getType() {
         return null;
     }
 }

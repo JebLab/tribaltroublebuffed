@@ -22,9 +22,13 @@ public final class Race {
     public static final int UNIT_WARRIOR_RUBBER = 2;
     public static final int UNIT_PEON = 3;
     public static final int UNIT_CHIEFTAIN = 4;
+    // Buffed only: the ruleset's features decide whether the Armory makes their gear (Player.canBuildShields, canBuildTorches).
+    public static final int UNIT_WARRIOR_SHIELD = 5;
+    public static final int UNIT_WARRIOR_TORCH = 6;
+    public static final int NUM_UNITS = 7;
 
     private final @NonNull BuildingTemplate[] buildings = new BuildingTemplate[NUM_BUILDINGS];
-    private final @NonNull UnitTemplate[] units = new UnitTemplate[5];
+    private final @NonNull UnitTemplate[] units = new UnitTemplate[NUM_UNITS];
     private final @NonNull SpriteKey rally_point;
     private final @NonNull RaceIcons icons;
     private final @NonNull Audio attack_notification;
@@ -45,6 +49,8 @@ public final class Race {
             @NonNull UnitTemplate warrior_rubber,
             @NonNull UnitTemplate peon,
             @NonNull UnitTemplate chieftain,
+            @NonNull UnitTemplate warrior_shield,
+            @NonNull UnitTemplate warrior_torch,
             @NonNull SpriteKey rally_point,
             @NonNull RaceIcons icons,
             @NonNull Audio attack_notification,
@@ -66,6 +72,8 @@ public final class Race {
         units[UNIT_WARRIOR_RUBBER] = warrior_rubber;
         units[UNIT_PEON] = peon;
         units[UNIT_CHIEFTAIN] = chieftain;
+        units[UNIT_WARRIOR_SHIELD] = warrior_shield;
+        units[UNIT_WARRIOR_TORCH] = warrior_torch;
         this.rally_point = rally_point;
         this.icons = icons;
         this.attack_notification = attack_notification;

@@ -26,6 +26,8 @@ import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
+import com.oddlabs.tt.model.weapon.Shield;
+import com.oddlabs.tt.model.weapon.Torch;
 import com.oddlabs.tt.player.Player;
 import com.oddlabs.tt.player.PlayerInterface;
 import com.oddlabs.tt.render.Renderer;
@@ -56,6 +58,9 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
             GameAction.RES_ROCK_DEC, GameAction.RES_ROCK_BATCH, GameAction.RES_ROCK_BATCH_DEC, GameAction.RES_IRON,
             GameAction.RES_IRON_DEC, GameAction.RES_IRON_BATCH, GameAction.RES_IRON_BATCH_DEC, GameAction.RES_CHICKEN,
             GameAction.RES_CHICKEN_DEC, GameAction.RES_CHICKEN_BATCH, GameAction.RES_CHICKEN_BATCH_DEC,
+            GameAction.RES_SHIELD, GameAction.RES_SHIELD_DEC, GameAction.RES_SHIELD_BATCH,
+            GameAction.RES_SHIELD_BATCH_DEC,
+            GameAction.RES_TORCH, GameAction.RES_TORCH_DEC, GameAction.RES_TORCH_BATCH, GameAction.RES_TORCH_BATCH_DEC,
             GameAction.TRAIN_PEON, GameAction.TRAIN_PEON_DEC, GameAction.TRAIN_PEON_BATCH,
             GameAction.TRAIN_PEON_BATCH_DEC, GameAction.GAMEPLAY_BACK);
 
@@ -74,6 +79,7 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
     private final Group ship_army_group = new NonFocusGroup();
     private final Group transport_group = new NonFocusGroup();
     private final Group chicken_coop_status_group = new NonFocusGroup();
+    private final Group gear_status_group = new NonFocusGroup();
 
     private final @NonNull NonFocusIconButton tower_attack_button;
     private final @NonNull NonFocusIconButton tower_exit_button;
@@ -96,6 +102,15 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
     private final boolean chicken_coop_enabled;
     private final boolean totem_enabled;
     private final @NonNull StatusIcon chicken_coop_stock_status;
+    // Buffed's gear: a second column in the Armory's weapon and army submenus, and its stock beside the status.
+    private final boolean shield_enabled;
+    private final boolean torch_enabled;
+    private final @NonNull StatusIcon weapon_shield_status;
+    private final @NonNull StatusIcon weapon_torch_status;
+    private final @NonNull BuildSpinner build_weapon_shield_button;
+    private final @NonNull BuildSpinner build_weapon_torch_button;
+    private final @NonNull DeploySpinner army_warrior_shield_button;
+    private final @NonNull DeploySpinner army_warrior_torch_button;
     private final @NonNull NonFocusIconButton harvest_button;
     private final @NonNull NonFocusIconButton build_button;
     private final @NonNull NonFocusIconButton army_button;
@@ -258,6 +273,8 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                 player.getPlayerInfo().getRace() == RacesResources.RACE_VIKINGS);
         chicken_coop_enabled = stats.features().chicken_coop();
         totem_enabled = stats.features().totem();
+        shield_enabled = stats.features().shield();
+        torch_enabled = stats.features().torch();
         String chicken_coop_name = player.getRace().getBuildingTemplate(Race.BUILDING_CHICKEN_COOP).getName();
         chicken_coop_button = new NonFocusIconButton(race_icons.chickenCoopIcon(), GameAction.UNIT_BUILD_CHICKEN_COOP,
                 () -> i18n("chicken_coop_tip", chicken_coop_name, getBinding(GameAction.UNIT_BUILD_CHICKEN_COOP),
@@ -357,6 +374,26 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         chicken_coop_status_group.addChild(chicken_coop_stock_status);
         chicken_coop_stock_status.place();
         chicken_coop_status_group.compileCanvas(5, 5, 5, 5);
+
+        String shield_name = player.getRace().getUnitTemplate(Race.UNIT_WARRIOR_SHIELD).getName();
+        String torch_name = player.getRace().getUnitTemplate(Race.UNIT_WARRIOR_TORCH).getName();
+        weapon_shield_status = new StatusIcon(label_width, race_icons.weaponShieldStatusIcon(), i18n(
+                "shield_weapons_tip"));
+        weapon_torch_status = new StatusIcon(label_width, race_icons.weaponTorchStatusIcon(), i18n(
+                "torch_weapons_tip"));
+        if (shield_enabled) {
+            gear_status_group.addChild(weapon_shield_status);
+            weapon_shield_status.place();
+        }
+        if (torch_enabled) {
+            gear_status_group.addChild(weapon_torch_status);
+            if (shield_enabled)
+                weapon_torch_status.place(weapon_shield_status, Placement.BOTTOM_MID);
+            else
+                weapon_torch_status.place();
+        }
+        if (shield_enabled || torch_enabled)
+            gear_status_group.compileCanvas(5, 5, 5, 5);
 
         quarters_unit_status = new WatchStatusIcon(label_width, race_icons.unitStatusIcon(), i18n("units_tip"));
         quarters_status_group.addChild(quarters_unit_status);
@@ -486,6 +523,16 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                 i18n("build_chicken_tip"), LandBuilding.COST_RUBBER_WEAPON.iconList(), GameAction.RES_CHICKEN,
                 GameAction.RES_CHICKEN_DEC);
         build_group.addChild(build_weapon_rubber_button);
+        build_weapon_shield_button = new BuildSpinner(viewer, player_interface, race_icons.buildWeaponShieldIcon(),
+                i18n("build_shield_tip"), LandBuilding.COST_SHIELD_WEAPON.iconList(), GameAction.RES_SHIELD,
+                GameAction.RES_SHIELD_DEC);
+        build_weapon_torch_button = new BuildSpinner(viewer, player_interface, race_icons.buildWeaponTorchIcon(),
+                i18n("build_torch_tip"), LandBuilding.COST_TORCH_WEAPON.iconList(), GameAction.RES_TORCH,
+                GameAction.RES_TORCH_DEC);
+        if (shield_enabled)
+            build_group.addChild(build_weapon_shield_button);
+        if (torch_enabled)
+            build_group.addChild(build_weapon_torch_button);
         build_back_button = new NonFocusIconButton(skin.getBackButton(), GameAction.GAMEPLAY_BACK,
                 () -> i18n("back_tip", getBinding(GameAction.GAMEPLAY_BACK)));
         build_back_button.addMouseClickListener(this::cancelSubMenu);
@@ -494,6 +541,11 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         build_weapon_iron_button.place(build_weapon_rock_button, Placement.BOTTOM_MID);
         build_weapon_rubber_button.place(build_weapon_iron_button, Placement.BOTTOM_MID);
         build_back_button.place(build_weapon_rubber_button, Placement.BOTTOM_MID);
+        // A second column, so the submenu does not grow taller than the screen.
+        if (shield_enabled)
+            build_weapon_shield_button.place(build_weapon_rock_button, Placement.LEFT_MID);
+        if (torch_enabled)
+            build_weapon_torch_button.place(build_weapon_iron_button, Placement.LEFT_MID);
         build_group.compileCanvas(GROUP_LEFT_OFFSET, GROUP_BOTTOM_OFFSET, GROUP_RIGHT_OFFSET, GROUP_TOP_OFFSET);
 
         army_peon_button = new DeploySpinner(viewer, player_interface, race_icons.peonIcon(), i18n("deploy_peon_tip"),
@@ -517,6 +569,17 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                 GameAction.RES_CHICKEN_DEC, null, null);
         army_group.addChild(army_warrior_rubber_button);
 
+        army_warrior_shield_button = new DeploySpinner(viewer, player_interface, race_icons.warriorShieldIcon(),
+                shield_name, List.of(race_icons.unitStatusIcon(), race_icons.weaponShieldStatusIcon()),
+                GameAction.RES_SHIELD, GameAction.RES_SHIELD_DEC, null, null);
+        army_warrior_torch_button = new DeploySpinner(viewer, player_interface, race_icons.warriorTorchIcon(),
+                torch_name, List.of(race_icons.unitStatusIcon(), race_icons.weaponTorchStatusIcon()),
+                GameAction.RES_TORCH, GameAction.RES_TORCH_DEC, null, null);
+        if (shield_enabled)
+            army_group.addChild(army_warrior_shield_button);
+        if (torch_enabled)
+            army_group.addChild(army_warrior_torch_button);
+
         army_back_button = new NonFocusIconButton(skin.getBackButton(), GameAction.GAMEPLAY_BACK,
                 () -> i18n("back_tip", getBinding(GameAction.GAMEPLAY_BACK)));
         army_back_button.addMouseClickListener(this::cancelSubMenu);
@@ -526,6 +589,10 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         army_warrior_iron_button.place(army_warrior_rock_button, Placement.BOTTOM_MID);
         army_warrior_rubber_button.place(army_warrior_iron_button, Placement.BOTTOM_MID);
         army_back_button.place(army_warrior_rubber_button, Placement.BOTTOM_MID);
+        if (shield_enabled)
+            army_warrior_shield_button.place(army_warrior_rock_button, Placement.LEFT_MID);
+        if (torch_enabled)
+            army_warrior_torch_button.place(army_warrior_iron_button, Placement.LEFT_MID);
         army_group.compileCanvas(GROUP_LEFT_OFFSET, GROUP_BOTTOM_OFFSET, GROUP_RIGHT_OFFSET, GROUP_TOP_OFFSET);
 
         ship_army_peon_button = new DeploySpinner(viewer, player_interface, race_icons.peonIcon(), i18n(
@@ -705,6 +772,8 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
             }
             if (current_armory) {
                 addChild(status_group);
+                if (shield_enabled || torch_enabled)
+                    addChild(gear_status_group);
                 addChild(armory_group);
                 if (player.canUseRubber()) {
                     build_group.addChild(build_weapon_rubber_button);
@@ -758,6 +827,16 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
             army_warrior_iron_button.doUpdate();
             army_warrior_rock_button.doUpdate();
             army_peon_button.doUpdate();
+            if (shield_enabled) {
+                weapon_shield_status.doUpdate();
+                build_weapon_shield_button.doUpdate();
+                army_warrior_shield_button.doUpdate();
+            }
+            if (torch_enabled) {
+                weapon_torch_status.doUpdate();
+                build_weapon_torch_button.doUpdate();
+                army_warrior_torch_button.doUpdate();
+            }
             transport_tree_button.doUpdate();
             transport_rock_button.doUpdate();
             transport_iron_button.doUpdate();
@@ -838,6 +917,7 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         ship_army_group.remove();
         transport_group.remove();
         chicken_coop_status_group.remove();
+        gear_status_group.remove();
         current_submenu = null;
     }
 
@@ -889,6 +969,20 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         army_warrior_rubber_button.setContainers(current_building, DeployType.RUBBER_WARRIOR, RubberAxeWeapon.class);
         army_warrior_rubber_button.setIconDisabler(() -> suppliesEmpty(unit_counter, weapon_rubber_counter));
 
+        // Ships have no gear (gear warriors do not board them); only an Armory's panel shows these.
+        if (current_armory && (shield_enabled || torch_enabled)) {
+            SupplyCounter weapon_shield_counter = new SupplyCounter(current_building, Shield.class);
+            weapon_shield_status.setCounter(weapon_shield_counter);
+            SupplyCounter weapon_torch_counter = new SupplyCounter(current_building, Torch.class);
+            weapon_torch_status.setCounter(weapon_torch_counter);
+            build_weapon_shield_button.setBuildSupplyContainer(current_building, Shield.class);
+            build_weapon_torch_button.setBuildSupplyContainer(current_building, Torch.class);
+            army_warrior_shield_button.setContainers(current_building, DeployType.SHIELD_WARRIOR, Shield.class);
+            army_warrior_shield_button.setIconDisabler(() -> suppliesEmpty(unit_counter, weapon_shield_counter));
+            army_warrior_torch_button.setContainers(current_building, DeployType.TORCH_WARRIOR, Torch.class);
+            army_warrior_torch_button.setIconDisabler(() -> suppliesEmpty(unit_counter, weapon_torch_counter));
+        }
+
         ship_army_peon_button.setContainers(current_building, DeployType.PEON, null);
         ship_army_peon_button.setIconDisabler(() -> unit_counter.getNumSupplies() == 0);
         ship_army_warrior_rock_button.setContainers(current_building, DeployType.ROCK_WARRIOR, RockAxeWeapon.class);
@@ -930,6 +1024,8 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         quarters_group.setPos(width - quarters_group.getWidth(),
                 quarters_status_group.getY() - quarters_group.getHeight());
         status_group.setPos(width - status_group.getWidth(), height - status_group.getHeight());
+        gear_status_group.setPos(status_group.getX() - gear_status_group.getWidth(),
+                height - gear_status_group.getHeight());
         armory_group.setPos(width - armory_group.getWidth(), status_group.getY() - armory_group.getHeight());
         ship_group.setPos(width - ship_group.getWidth(), status_group.getY() - ship_group.getHeight());
         harvest_group.setPos(width - harvest_group.getWidth(), status_group.getY() - harvest_group.getHeight());
@@ -1155,8 +1251,13 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                             transport_rock_button);
                     event.getActions().clear();
                 }
+
+                if (gearShortcut(event, true))
+                    event.getActions().clear();
             }
         } else if (released) {
+            if (gearShortcut(event, false))
+                return;
             var chicken = checkResourceAction(event, GameAction.RES_CHICKEN, GameAction.RES_CHICKEN_DEC,
                     GameAction.RES_CHICKEN_BATCH, GameAction.RES_CHICKEN_BATCH_DEC);
             if (chicken.active()) {
@@ -1253,6 +1354,29 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
             if (pressed) target.shortcutPressed(action.decrement(), action.batch());
             else target.shortcutReleased(action.decrement(), action.batch());
         }
+    }
+
+    /** Buffed's gear rows in the Armory's weapon and army submenus; returns whether the event was theirs. */
+    private boolean gearShortcut(@NonNull InputEvent event, boolean pressed) {
+        if (shield_enabled) {
+            var shield = checkResourceAction(event, GameAction.RES_SHIELD, GameAction.RES_SHIELD_DEC,
+                    GameAction.RES_SHIELD_BATCH, GameAction.RES_SHIELD_BATCH_DEC);
+            if (shield.active()) {
+                handleArmoryShortcut(pressed, shield, null, build_weapon_shield_button, army_warrior_shield_button,
+                        null, null);
+                return true;
+            }
+        }
+        if (torch_enabled) {
+            var torch = checkResourceAction(event, GameAction.RES_TORCH, GameAction.RES_TORCH_DEC,
+                    GameAction.RES_TORCH_BATCH, GameAction.RES_TORCH_BATCH_DEC);
+            if (torch.active()) {
+                handleArmoryShortcut(pressed, torch, null, build_weapon_torch_button, army_warrior_torch_button,
+                        null, null);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -34,10 +34,14 @@ public record HeadlessMatchResult(int winningTeam, int finalTick, int finalCheck
      *
      * @param completedBuildings template ids ({@code Race.BUILDING_*}) of the finished buildings it had
      * @param chickenCoopBred    whether one of its Chicken Coops had let out a chicken
+     * @param unitTypes          {@code Race.UNIT_*} ids of the units it had in the field
+     * @param firesLit           buildings its torches set on fire (a fire started again counts again)
      */
-    public record Census(@NonNull Set<@NonNull Integer> completedBuildings, boolean chickenCoopBred) {
+    public record Census(@NonNull Set<@NonNull Integer> completedBuildings, boolean chickenCoopBred,
+                         @NonNull Set<@NonNull Integer> unitTypes, int firesLit) {
         public Census {
             completedBuildings = Collections.unmodifiableSortedSet(new TreeSet<>(completedBuildings));
+            unitTypes = Collections.unmodifiableSortedSet(new TreeSet<>(unitTypes));
         }
     }
 

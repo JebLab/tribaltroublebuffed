@@ -24,6 +24,11 @@ public interface PlayerInterface {
 
     void buildRubberWeapons(@NonNull Building building, int num_weapons, boolean infinite);
 
+    // Buffed's gear; ignored unless the ruleset offers it.
+    void buildShieldWeapons(@NonNull Building building, int num_weapons, boolean infinite);
+
+    void buildTorchWeapons(@NonNull Building building, int num_weapons, boolean infinite);
+
     void doMagic(@NonNull Unit chieftain, int magic);
 
     void exitTower(@NonNull Building building);

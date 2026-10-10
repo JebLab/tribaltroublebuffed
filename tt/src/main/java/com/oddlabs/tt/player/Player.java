@@ -25,6 +25,8 @@ import com.oddlabs.tt.model.behaviour.NullController;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
+import com.oddlabs.tt.model.weapon.Shield;
+import com.oddlabs.tt.model.weapon.Torch;
 import com.oddlabs.tt.ruleset.RulesetStats;
 import com.oddlabs.tt.util.Target;
 import org.joml.Vector4fc;
@@ -68,6 +70,7 @@ public final class Player implements PlayerInterface {
     private int buildings_destroyed;
     private int units_moved;
     private int weapons_thrown;
+    private int fires_lit;
     private int magics;
 
     private int tree_harvested;
@@ -88,6 +91,9 @@ public final class Player implements PlayerInterface {
     private boolean can_build_weapons = true;
     private boolean can_transport = true;
     private final boolean[] can_do_magic = new boolean[RacesResources.NUM_MAGIC];
+    // Buffed's gear: only a ruleset that offers it lets anyone make or deploy it.
+    private final boolean can_build_shields;
+    private final boolean can_build_torches;
 
     private float hit_bonus;
 
@@ -102,6 +108,8 @@ public final class Player implements PlayerInterface {
         RulesetStats.Features features = world.getRuleset().getStats().features();
         can_build[Race.BUILDING_CHICKEN_COOP] = features.chicken_coop();
         can_build[Race.BUILDING_TOTEM] = features.totem();
+        can_build_shields = features.shield();
+        can_build_torches = features.torch();
         this.player_info = player_info;
         this.unit_count = new SupplyContainer(world.getMaxUnitCount());
         this.building_count = new SupplyContainer(world.getMaxBuildingCount());
@@ -303,6 +311,24 @@ public final class Player implements PlayerInterface {
         return can_build_chieftains;
     }
 
+    /** Whether this player's Armory makes Shields (Buffed). */
+    public boolean canBuildShields() {
+        return can_build_shields;
+    }
+
+    /** Whether this player's Armory makes Torches (Buffed). */
+    public boolean canBuildTorches() {
+        return can_build_torches;
+    }
+
+    private boolean canDeploy(@NonNull DeployType type) {
+        return switch (type) {
+            case SHIELD_WARRIOR -> can_build_shields;
+            case TORCH_WARRIOR -> can_build_torches;
+            default -> true;
+        };
+    }
+
     @Override
     public @NonNull String toString() {
         return player_info.toString();
@@ -452,7 +478,7 @@ public final class Player implements PlayerInterface {
 
     @Override
     public void deployUnits(@NonNull Building building, @NonNull DeployType type, int num_units) {
-        if (isValid(building))
+        if (isValid(building) && canDeploy(type))
             building.deployUnits(type, num_units);
     }
 
@@ -523,6 +549,18 @@ public final class Player implements PlayerInterface {
     public void buildRubberWeapons(@NonNull Building building, int num_weapons, boolean infinite) {
         if (isValid(building))
             building.buildWeapons(RubberAxeWeapon.class, num_weapons, infinite);
+    }
+
+    @Override
+    public void buildShieldWeapons(@NonNull Building building, int num_weapons, boolean infinite) {
+        if (isValid(building) && can_build_shields)
+            building.buildWeapons(Shield.class, num_weapons, infinite);
+    }
+
+    @Override
+    public void buildTorchWeapons(@NonNull Building building, int num_weapons, boolean infinite) {
+        if (isValid(building) && can_build_torches)
+            building.buildWeapons(Torch.class, num_weapons, infinite);
     }
 
     @Override
@@ -739,6 +777,15 @@ public final class Player implements PlayerInterface {
 
     public void buildingDestroyed() {
         buildings_destroyed++;
+    }
+
+    /** A torch of this player set a building on fire (Buffed). */
+    public void fireLit() {
+        fires_lit++;
+    }
+
+    public int getFiresLit() {
+        return fires_lit;
     }
 
     public int getBuildingsDestroyed() {

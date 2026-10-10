@@ -6,7 +6,8 @@ import com.oddlabs.tt.model.Building;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
-import com.oddlabs.tt.model.weapon.ThrowingWeapon;
+import com.oddlabs.tt.model.weapon.Shield;
+import com.oddlabs.tt.model.weapon.Torch;
 import com.oddlabs.tt.input.GameAction;
 import com.oddlabs.tt.player.PlayerInterface;
 import com.oddlabs.tt.viewer.WorldViewer;
@@ -20,7 +21,7 @@ public final class BuildSpinner extends IconSpinner {
     private final @NonNull PlayerInterface player_interface;
 
     private Building current_building;
-    private Class<? extends ThrowingWeapon> type;
+    private Class<?> type;
     private int num_orders;
     private int order_size;
     private boolean infinite;
@@ -32,7 +33,7 @@ public final class BuildSpinner extends IconSpinner {
         this.player_interface = player_interface;
     }
 
-    void setBuildSupplyContainer(@NonNull Building current_building, @NonNull Class<? extends ThrowingWeapon> type) {
+    void setBuildSupplyContainer(@NonNull Building current_building, @NonNull Class<?> type) {
         this.current_building = current_building;
         this.type = type;
         if (!current_building.isDead() && current_building.getBuildSupplyContainer(type) != null)
@@ -64,6 +65,10 @@ public final class BuildSpinner extends IconSpinner {
                 player_interface.buildIronWeapons(current_building, num, infinite);
             } else if (type == RubberAxeWeapon.class) {
                 player_interface.buildRubberWeapons(current_building, num, infinite);
+            } else if (type == Shield.class) {
+                player_interface.buildShieldWeapons(current_building, num, infinite);
+            } else if (type == Torch.class) {
+                player_interface.buildTorchWeapons(current_building, num, infinite);
             } else {
                 throw new IllegalArgumentException();
             }

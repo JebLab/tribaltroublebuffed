@@ -26,6 +26,7 @@ import com.oddlabs.tt.util.Target;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -182,6 +183,22 @@ public abstract class AI implements Animated {
 
     protected final @NonNull Selectable<?> @Nullable [] getIdleWarriors() {
         return INDEX_IDLE_WARRIORS == -1 ? null : lists[INDEX_IDLE_WARRIORS];
+    }
+
+    /**
+     * The idle warriors that can man a tower or board a ship: all of them, unless some carry Buffed's gear, which
+     * fights hand to hand.
+     */
+    protected final @NonNull Selectable<?> @Nullable [] getIdleThrowers() {
+        Selectable<?>[] warriors = getIdleWarriors();
+        if (warriors == null || Arrays.stream(warriors).noneMatch(AI::isGearWarrior))
+            return warriors;
+        Selectable<?>[] throwers = Arrays.stream(warriors).filter(s -> !isGearWarrior(s)).toArray(Selectable[]::new);
+        return throwers.length > 0 ? throwers : null;
+    }
+
+    protected static boolean isGearWarrior(@NonNull Selectable<?> s) {
+        return s instanceof Unit unit && unit.isGearWarrior();
     }
 
     protected final @NonNull Selectable<?> @Nullable [] getGatherTreePeons() {
@@ -379,7 +396,7 @@ public abstract class AI implements Animated {
     public final void manTowers(int num_towers) {
         reclassify();
         Selectable<?>[] towers = getTowers();
-        Selectable<?>[] idle_warriors = getIdleWarriors();
+        Selectable<?>[] idle_warriors = getIdleThrowers();
         if (towers == null || idle_warriors == null)
             return;
 

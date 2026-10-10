@@ -3,18 +3,26 @@ package com.oddlabs.tt.ruleset;
 import com.oddlabs.matchmaking.Preset;
 import com.oddlabs.matchmaking.WorldConfig;
 import com.oddlabs.tt.gamemode.PresetLibrary;
+import com.oddlabs.tt.landscape.TreeSupply;
+import com.oddlabs.tt.model.IronSupply;
+import com.oddlabs.tt.model.LandBuilding;
+import com.oddlabs.tt.model.RockSupply;
 import com.oddlabs.tt.model.behaviour.RepairBehaviour;
 import com.oddlabs.tt.ruleset.RulesetStats.BuildingStats;
 import com.oddlabs.tt.ruleset.RulesetStats.ChickenCoopStats;
 import com.oddlabs.tt.ruleset.RulesetStats.RaceStats;
 import com.oddlabs.tt.ruleset.RulesetStats.SpellStats;
 import com.oddlabs.tt.ruleset.RulesetStats.TotemStats;
+import com.oddlabs.tt.ruleset.RulesetStats.TorchStats;
 import com.oddlabs.tt.ruleset.RulesetStats.UnitStats;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -79,20 +87,20 @@ final class RulesetTest {
 
     /**
      * 2004 had no boats, Small/Medium/Large islands only, six players (MAX_PLAYERS = 6) and fixed limits. Neither
-     * 2004 nor Resurrected has the Chicken Coop or the Totem.
+     * 2004 nor Resurrected has the Chicken Coop, the Totem, the Shield or the Torch.
      */
     @Test
     void classicOffersOnly2004WorldOptions() {
-        assertEquals(new RulesetStats.Features(false, false, false, 6, false, false, false),
+        assertEquals(new RulesetStats.Features(false, false, false, 6, false, false, false, false, false),
                 Ruleset.CLASSIC.getStats().features());
-        assertEquals(new RulesetStats.Features(true, true, true, 12, true, false, false),
+        assertEquals(new RulesetStats.Features(true, true, true, 12, true, false, false, false, false),
                 Ruleset.RESURRECTED.getStats().features());
     }
 
-    /** Buffed offers Resurrected's world options plus its own buildings. */
+    /** Buffed offers Resurrected's world options plus its own buildings and gear. */
     @Test
     void buffedOffersItsBuildings() {
-        assertEquals(new RulesetStats.Features(true, true, true, 12, true, true, true),
+        assertEquals(new RulesetStats.Features(true, true, true, 12, true, true, true, true, true),
                 Ruleset.BUFFED.getStats().features());
     }
 
@@ -105,6 +113,29 @@ final class RulesetTest {
                     () -> assertEquals(new ChickenCoopStats(100, 2, 90f, 6), race.chicken_coop(), "chicken_coop"),
                     () -> assertEquals(new TotemStats(30, 1, .05f, 10f, 2), race.totem(), "totem"));
         }
+    }
+
+    /** PLAN.md section 4.4 and docs/design/gear.md: the Shield and the Torch, the same for both races. */
+    @Test
+    void buffedGearMatchesThePlan() {
+        for (boolean vikings : new boolean[]{false, true}) {
+            RaceStats race = Ruleset.BUFFED.getStats().race(vikings);
+            assertAll(
+                    () -> assertUnit(race.shield_warrior(), 1, 3.5f, .85f, .3f),
+                    () -> assertUnit(race.torch_warrior(), 1, 4f, .3f, .5f),
+                    () -> assertEquals(new TorchStats(6, 15f, 2f), race.torch(), "torch"));
+        }
+    }
+
+    /** The gear's recipes and labour: 2 wood + 1 rock in 40 man-seconds, 2 wood + 1 rock + 1 iron in 80. */
+    @Test
+    void gearCostsWhatThePlanSays() {
+        assertEquals(List.of(TreeSupply.class, RockSupply.class),
+                List.of(LandBuilding.COST_SHIELD_WEAPON.getSupplyTypes()));
+        assertArrayEquals(new int[]{2, 1}, LandBuilding.COST_SHIELD_WEAPON.getSupplyAmounts());
+        assertEquals(List.of(TreeSupply.class, RockSupply.class, IronSupply.class),
+                List.of(LandBuilding.COST_TORCH_WEAPON.getSupplyTypes()));
+        assertArrayEquals(new int[]{2, 1, 1}, LandBuilding.COST_TORCH_WEAPON.getSupplyAmounts());
     }
 
     /** A building's hit points are built 5 per log, so the plan's wood cost is its hit points over 5. */

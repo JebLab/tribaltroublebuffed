@@ -11,7 +11,8 @@ when Josh allows it (docs/SESSION_RULES.md section 8). Standard library only; ru
   python tools/scripts/drive_game.py move <x> <y>        move the cursor (e.g. off a button before a screenshot)
   python tools/scripts/drive_game.py drag <x1> <y1> <x2> <y2>  drag with the left button (box-selects units)
   python tools/scripts/drive_game.py key <key>           tap a key: esc, enter, space, tab, f1..f12, a..z, 0..9,
-                                                         add / subtract (numpad + and -: game speed)
+                                                         add / subtract (numpad + and -: game speed);
+                                                         shift+ or ctrl+ in front holds that key (shift+f2)
   python tools/scripts/drive_game.py type <letters>      tap each of a..z, 0..9, / in turn (chat commands)
   python tools/scripts/drive_game.py wait <seconds>      sleep (between steps that load)
 
@@ -37,6 +38,7 @@ KEYS.update({str(d): 0x30 + d for d in range(10)})
 KEYS["/"] = 0xBF  # VK_OEM_2: the slash key on a US layout, for chat commands such as /iamacheater
 KEYS["add"] = 0x6B  # VK_ADD: numpad +, game speed up
 KEYS["subtract"] = 0x6D  # VK_SUBTRACT: numpad -, game speed down
+MODIFIERS = {"shift": 0x10, "ctrl": 0x11}  # held for "shift+f2" and the like
 
 user32 = ctypes.WinDLL("user32", use_last_error=True)
 gdi32 = ctypes.WinDLL("gdi32", use_last_error=True)
@@ -145,13 +147,18 @@ def move(hwnd, x, y):
 
 
 def key(hwnd, name):
-    code = KEYS.get(name.lower())
-    if code is None:
+    *mods, base = name.lower().split("+")
+    code = KEYS.get(base)
+    if code is None or any(m not in MODIFIERS for m in mods):
         return {"ok": False, "error": f"unknown key {name!r}"}
     focus(hwnd)
+    for m in mods:
+        user32.keybd_event(MODIFIERS[m], 0, 0, 0)
     user32.keybd_event(code, 0, 0, 0)
     time.sleep(0.06)
     user32.keybd_event(code, 0, 2, 0)  # KEYEVENTF_KEYUP
+    for m in reversed(mods):
+        user32.keybd_event(MODIFIERS[m], 0, 2, 0)
     time.sleep(0.4)
     return {"ok": True, "key": name}
 

@@ -17,7 +17,8 @@ import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockSpearWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberSpearWeapon;
-import com.oddlabs.tt.model.weapon.ThrowingWeapon;
+import com.oddlabs.tt.model.weapon.Shield;
+import com.oddlabs.tt.model.weapon.Torch;
 import com.oddlabs.tt.particle.LinearEmitter;
 import com.oddlabs.tt.particle.RandomAccelerationEmitter;
 import com.oddlabs.tt.particle.RandomVelocityEmitter;
@@ -26,6 +27,7 @@ import com.oddlabs.tt.pathfinder.UnitGrid;
 import com.oddlabs.tt.player.Player;
 import com.oddlabs.tt.render.SpriteKey;
 import com.oddlabs.tt.ruleset.RulesetStats.RaceStats;
+import com.oddlabs.tt.ruleset.RulesetStats.TorchStats;
 import com.oddlabs.tt.util.Target;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -55,6 +57,14 @@ public final class LandBuilding extends Building {
     public static final Cost COST_RUBBER_WEAPON = new Cost(
             new Class[]{TreeSupply.class, RockSupply.class, IronSupply.class, RubberSupply.class},
             new int[]{2, 1, 1, 1});
+    // Buffed's gear (docs/design/gear.md)
+    @SuppressWarnings({"unchecked"})
+    public static final Cost COST_SHIELD_WEAPON = new Cost(new Class[]{TreeSupply.class, RockSupply.class},
+            new int[]{2, 1});
+    @SuppressWarnings({"unchecked"})
+    public static final Cost COST_TORCH_WEAPON = new Cost(
+            new Class[]{TreeSupply.class, RockSupply.class, IronSupply.class},
+            new int[]{2, 1, 1});
 
     private static final float DAMAGED_PARTICLE_ALPHA = 3f;
 
@@ -76,6 +86,14 @@ public final class LandBuilding extends Building {
 
     private Target rally_point = this;
     private boolean is_training_chieftain = false;
+
+    // Buffed's fire, lit by a torch: the hit points it will still take, one every so many seconds, the time towards
+    // the next one, and the player whose torch lit it.
+    private int fire_damage_left = 0;
+    private float fire_seconds_per_hit_point = 0;
+    private float fire_time = 0;
+    private @Nullable Player fire_owner = null;
+    private @Nullable LinearEmitter fire_emitter = null;
 
     public LandBuilding(@NonNull Player owner, @NonNull BuildingTemplate template, int grid_x, int grid_y) {
         super(owner, template);
@@ -174,6 +192,8 @@ public final class LandBuilding extends Building {
                     }
                 }
             }
+            if (fire_damage_left > 0)
+                burn(t);
         }
 
         if (remove_delay > 0) {
@@ -279,7 +299,7 @@ public final class LandBuilding extends Building {
         }
     }
 
-    public void buildWeapons(@NonNull Class<? extends ThrowingWeapon> type, int num_weapons, boolean infinite) {
+    public void buildWeapons(@NonNull Class<?> type, int num_weapons, boolean infinite) {
         assert !isDead();
         if (infinite)
             getOwner().getWorld().updateGlobalChecksum(num_weapons);
@@ -327,6 +347,13 @@ public final class LandBuilding extends Building {
         createArmy(num_rock, Race.UNIT_WARRIOR_ROCK);
         createArmy(num_iron, Race.UNIT_WARRIOR_IRON);
         createArmy(num_rubber, Race.UNIT_WARRIOR_RUBBER);
+    }
+
+    @Override
+    public void createGearArmy(int num_shield, int num_torch) {
+        assert !isDead();
+        createArmy(num_shield, Race.UNIT_WARRIOR_SHIELD);
+        createArmy(num_torch, Race.UNIT_WARRIOR_TORCH);
     }
 
     private void createArmy(int amount, int template) {
@@ -395,6 +422,8 @@ public final class LandBuilding extends Building {
     public void repair(int amount) {
         assert !isDead();
         assert isPlaced();
+        if (isBurning())
+            extinguish();
         if (!isDamaged())
             return;
 
@@ -445,7 +474,19 @@ public final class LandBuilding extends Building {
                     build_containers.put(RockAxeWeapon.class, rock_axe_weapon);
                     build_containers.put(IronAxeWeapon.class, iron_axe_weapon);
                     build_containers.put(RubberAxeWeapon.class, rubber_axe_weapon);
-                    BuildProductionContainer[] production_containers = new BuildProductionContainer[]{rock_axe_weapon, iron_axe_weapon, rubber_axe_weapon};
+                    // Buffed's gear. Every Armory has the containers; only a ruleset that offers the gear lets
+                    // anyone order it (Player.canBuildShields, canBuildTorches), so elsewhere they stay empty.
+                    SupplyContainer shield_container = new SupplyContainer(MAX_SUPPLY_COUNT);
+                    supply_containers.put(Shield.class, shield_container);
+                    SupplyContainer torch_container = new SupplyContainer(MAX_SUPPLY_COUNT);
+                    supply_containers.put(Torch.class, torch_container);
+                    BuildProductionContainer shield = new BuildProductionContainer(BuildSpinner.INFINITE_LIMIT,
+                            shield_container, this, COST_SHIELD_WEAPON, 40f);
+                    BuildProductionContainer torch = new BuildProductionContainer(BuildSpinner.INFINITE_LIMIT,
+                            torch_container, this, COST_TORCH_WEAPON, 80f);
+                    build_containers.put(Shield.class, shield);
+                    build_containers.put(Torch.class, torch);
+                    BuildProductionContainer[] production_containers = new BuildProductionContainer[]{rock_axe_weapon, iron_axe_weapon, rubber_axe_weapon, shield, torch};
 
                     weapons_producer = new WeaponsProducer(this, (WorkerUnitContainer) getUnitContainer(),
                             production_containers, production_emitter);
@@ -473,6 +514,10 @@ public final class LandBuilding extends Building {
                             DeployType.PEON_HARVEST_RUBBER, null));
                     deploy_containers.put(DeployType.PEON_TRANSPORT_RUBBER, new DeployContainer(this, .5f,
                             DeployType.PEON_TRANSPORT_RUBBER, RubberSupply.class));
+                    deploy_containers.put(DeployType.SHIELD_WARRIOR, new DeployContainer(this, 1f,
+                            DeployType.SHIELD_WARRIOR, Shield.class));
+                    deploy_containers.put(DeployType.TORCH_WARRIOR, new DeployContainer(this, 1.5f,
+                            DeployType.TORCH_WARRIOR, Torch.class));
                 } else if (getAbilities().hasAbilities(Abilities.REPRODUCE)) {
                     chieftain_container = new ChieftainContainer(this);
                     deploy_containers.put(DeployType.PEON, new DeployContainer(this, .5f, DeployType.PEON, null));
@@ -675,6 +720,10 @@ public final class LandBuilding extends Building {
         free();
         undoLandscape();
         getOwner().getWorld().getTotems().remove(this);
+        if (fire_emitter != null) {
+            extinguish();
+            fire_emitter.done();
+        }
         int result = getOwner().getBuildingCountContainer().increaseSupply(-1);
         assert result == -1;
         super.removeDying();
@@ -795,15 +844,89 @@ public final class LandBuilding extends Building {
                     world.getRandom()), getPositionX(), getPositionY(), getPositionZ(),
                     AudioPlayer.AUDIO_RANK_WEAPON_HIT, AudioPlayer.AUDIO_DISTANCE_WEAPON_HIT,
                     AudioPlayer.AUDIO_GAIN_WEAPON_HIT, AudioPlayer.AUDIO_RADIUS_WEAPON_HIT));
+            if (hit_points == 0)
+                destroyed(owner);
+        }
+    }
+
+    private void destroyed(@NonNull Player attacker) {
+        // stats
+        getOwner().buildingLost();
+        attacker.buildingDestroyed();
+        if (is_training_chieftain)
+            getOwner().setTrainingChieftain(false);
+        removeDying();
+    }
+
+    @Override
+    public void ignite(@NonNull TorchStats torch, @NonNull Player burner) {
+        assert !isDead();
+        if (fire_emitter == null)
+            fire_emitter = createFireEmitter();
+        fire_emitter.start();
+        fire_damage_left = Math.round(torch.fire_seconds() * torch.fire_damage());
+        fire_seconds_per_hit_point = 1f / torch.fire_damage();
+        fire_time = 0;
+        fire_owner = burner;
+        burner.fireLit();
+    }
+
+    /** Whether a torch's fire burns here (Buffed). */
+    public boolean isBurning() {
+        return fire_damage_left > 0;
+    }
+
+    /** The player whose torch lit the fire, while it burns. */
+    public @Nullable Player getFireOwner() {
+        return fire_owner;
+    }
+
+    /**
+     * The fire takes its hit points one at a time, evenly over its seconds, without a sound or an attack alert each
+     * time.
+     */
+    private void burn(float t) {
+        fire_time += t;
+        int damage = 0;
+        while (fire_time >= fire_seconds_per_hit_point && damage < fire_damage_left) {
+            fire_time -= fire_seconds_per_hit_point;
+            damage++;
+        }
+        if (damage > 0) {
+            fire_damage_left -= damage;
+            setHitPoints(hit_points - damage);
             if (hit_points == 0) {
-                // stats
-                getOwner().buildingLost();
-                owner.buildingDestroyed();
-                if (is_training_chieftain)
-                    getOwner().setTrainingChieftain(false);
-                removeDying();
+                destroyed(fire_owner);
+                return;
             }
         }
+        if (fire_damage_left == 0)
+            extinguish();
+    }
+
+    private void extinguish() {
+        fire_damage_left = 0;
+        fire_time = 0;
+        fire_owner = null;
+        if (fire_emitter != null)
+            fire_emitter.stop();
+    }
+
+    /** Orange smoke while the building burns, in game time and from the world's random numbers like all effects. */
+    private @NonNull LinearEmitter createFireEmitter() {
+        World world = getOwner().getWorld();
+        LinearEmitter emitter = new RandomVelocityEmitter(world, new Vector3f(getPositionX(), getPositionY(),
+                getPositionZ() + getHitOffsetZ()), 0f, 0f,
+                getTemplate().getSmokeRadius() * .4f, getTemplate().getSmokeHeight() * .5f, 0.4f, .7f,
+                -1, 40f,
+                new Vector3f(0f, 0f, 3f), new Vector3f(0f, 0f, 1f),
+                new Vector4f(1f, .6f, .15f, 1f), new Vector4f(0f, -.5f, -.15f, -.9f),
+                new Vector3f(1.2f, 1.2f, 1.2f), new Vector3f(1.2f, 1.2f, 1.2f), 1.1f, .8f,
+                GL11.GL_SRC_ALPHA, GL11.GL_ONE,
+                world.getRacesResources().getSmokeTextures(),
+                world.getAnimationManagerGameTime());
+        emitter.stop();
+        return emitter;
     }
 
     @Override
@@ -832,7 +955,9 @@ public final class LandBuilding extends Building {
                         Abilities.BUILD_ARMIES) ? getUnitContainer().getNumSupplies() + getSupplyContainer(
                                 RockAxeWeapon.class).getNumSupplies() + getSupplyContainer(
                                         IronAxeWeapon.class).getNumSupplies() * 3 + getSupplyContainer(
-                                                RubberAxeWeapon.class).getNumSupplies() * 8 : 0;
+                                                RubberAxeWeapon.class).getNumSupplies() * 8 + getSupplyContainer(
+                                                        Shield.class).getNumSupplies() + getSupplyContainer(
+                                                                Torch.class).getNumSupplies() * 3 : 0;
     }
 
     public void printDebugInfo() {

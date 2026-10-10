@@ -37,7 +37,7 @@ public final class MountUnitContainer extends UnitContainer {
 
     @Override
     public boolean canEnter(@NonNull Unit unit) {
-        return !isSupplyFull() && unit.getAbilities().hasAbilities(Abilities.THROW);
+        return !isSupplyFull() && unit.getAbilities().hasAbilities(Abilities.THROW) && !unit.isGearWarrior();
     }
 
     public @Nullable Unit getUnit() {

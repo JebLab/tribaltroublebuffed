@@ -26,20 +26,26 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
      *                          uses the 2004 values (20, 250, 20)
      * @param chicken_coop      peons can build the Chicken Coop / Henhouse
      * @param totem             peons can build the Totem / Runestone
+     * @param shield            the Armory makes Shields (the Bark-Shield Bearer / Round-Shield Carl)
+     * @param torch             the Armory makes Torches (the Firebrand / Torchbearer)
      */
     public record Features(boolean ships, boolean enormous_islands, boolean archipelago, int max_players,
-                           boolean adjustable_limits, boolean chicken_coop, boolean totem) {
+                           boolean adjustable_limits, boolean chicken_coop, boolean totem, boolean shield,
+                           boolean torch) {
     }
 
     /**
-     * One race's numbers. A building that a ruleset does not offer still has its numbers here (the base file must be
-     * complete); its {@link Features} flag keeps it out of the game.
+     * One race's numbers. A building or unit that a ruleset does not offer still has its numbers here (the base file
+     * must be complete); its {@link Features} flag keeps it out of the game. The shield and torch warriors fight hand
+     * to hand: their {@code hit_chance} is that of a blow.
      */
     public record RaceStats(@NonNull UnitStats peon, @NonNull UnitStats rock_warrior, @NonNull UnitStats iron_warrior,
-                            @NonNull UnitStats chicken_warrior, @NonNull UnitStats chieftain,
+                            @NonNull UnitStats chicken_warrior, @NonNull UnitStats shield_warrior,
+                            @NonNull UnitStats torch_warrior, @NonNull UnitStats chieftain,
                             @NonNull BuildingStats quarters, @NonNull BuildingStats armory,
                             @NonNull BuildingStats tower, @NonNull BuildingStats ship,
-                            @NonNull ChickenCoopStats chicken_coop, @NonNull TotemStats totem) {
+                            @NonNull ChickenCoopStats chicken_coop, @NonNull TotemStats totem,
+                            @NonNull TorchStats torch) {
     }
 
     /**
@@ -75,6 +81,17 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
      * @param max_stacking at most this many totems add up
      */
     public record TotemStats(int hit_points, int rock, float hit_bonus, float radius, int max_stacking) {
+    }
+
+    /**
+     * What a torch does to a building: its blow always hits and sets the building on fire. Another blow restarts the
+     * fire; a peon repairing the building puts it out.
+     *
+     * @param building_damage hit points a blow takes from a building
+     * @param fire_seconds    how long the fire burns
+     * @param fire_damage     hit points the fire takes per second
+     */
+    public record TorchStats(int building_damage, float fire_seconds, float fire_damage) {
     }
 
     /** The chieftains' spells, by their in-game names. */

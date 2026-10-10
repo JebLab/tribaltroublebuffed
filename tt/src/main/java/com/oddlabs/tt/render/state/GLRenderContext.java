@@ -270,7 +270,8 @@ public final class GLRenderContext implements RenderContext {
     @Override
     public @NonNull ScopedState withDepthFunc(int func) {
         if (currentDepthFunc == func) return NO_OP;
-        int previous = currentDepthFunc;
+        // After reset() the tracked value is unknown (-1), which GL rejects: restore the default instead.
+        int previous = currentDepthFunc == -1 ? GL11.GL_LEQUAL : currentDepthFunc;
         setDepthFunc(func);
         return () -> setDepthFunc(previous);
     }

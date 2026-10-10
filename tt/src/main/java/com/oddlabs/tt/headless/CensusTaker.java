@@ -2,7 +2,9 @@ package com.oddlabs.tt.headless;
 
 import com.oddlabs.tt.model.ChickenCoop;
 import com.oddlabs.tt.model.LandBuilding;
+import com.oddlabs.tt.model.Race;
 import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.player.Player;
 import org.jspecify.annotations.NonNull;
 
@@ -12,17 +14,22 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Notes what each player has built, for the tests to check that the AI uses its buildings. It only reads the world,
- * so taking a census never changes a match.
+ * Notes what each player has built and fielded, for the tests to check that the AI uses its buildings and gear. It
+ * only reads the world, so taking a census never changes a match.
  */
 final class CensusTaker {
     private final List<Set<Integer>> completed_buildings = new ArrayList<>();
+    private final List<Set<Integer>> unit_types = new ArrayList<>();
     private final boolean[] chicken_coop_bred;
+    private final int[] fires_lit;
 
     CensusTaker(int num_players) {
-        for (int i = 0; i < num_players; i++)
+        for (int i = 0; i < num_players; i++) {
             completed_buildings.add(new TreeSet<>());
+            unit_types.add(new TreeSet<>());
+        }
         chicken_coop_bred = new boolean[num_players];
+        fires_lit = new int[num_players];
     }
 
     void update(@NonNull Player @NonNull [] players) {
@@ -33,8 +40,14 @@ final class CensusTaker {
                     ChickenCoop coop = building.getChickenCoop();
                     if (coop != null && coop.getNumChickens() > 0)
                         chicken_coop_bred[i] = true;
+                } else if (s instanceof Unit unit && !unit.isDead()) {
+                    for (int type = 0; type < Race.NUM_UNITS; type++) {
+                        if (players[i].getRace().getUnitTemplate(type) == unit.getTemplate())
+                            unit_types.get(i).add(type);
+                    }
                 }
             }
+            fires_lit[i] = players[i].getFiresLit();
         }
     }
 
@@ -42,7 +55,8 @@ final class CensusTaker {
     List<HeadlessMatchResult.@NonNull Census> result() {
         List<HeadlessMatchResult.Census> census = new ArrayList<>();
         for (int i = 0; i < chicken_coop_bred.length; i++)
-            census.add(new HeadlessMatchResult.Census(completed_buildings.get(i), chicken_coop_bred[i]));
+            census.add(new HeadlessMatchResult.Census(completed_buildings.get(i), chicken_coop_bred[i],
+                    unit_types.get(i), fires_lit[i]));
         return census;
     }
 }

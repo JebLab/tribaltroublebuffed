@@ -4,10 +4,10 @@ import com.oddlabs.tt.landscape.TreeSupply;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
-import com.oddlabs.tt.model.weapon.ThrowingWeapon;
 import com.oddlabs.tt.pathfinder.Occupant;
 import com.oddlabs.tt.pathfinder.UnitGrid;
 import com.oddlabs.tt.player.Player;
+import com.oddlabs.tt.ruleset.RulesetStats.TorchStats;
 import com.oddlabs.tt.util.Target;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -48,7 +48,7 @@ public abstract class Building extends Selectable<BuildingTemplate> implements O
 
     public abstract void createHarvesters(int num_tree, int num_rock, int num_iron, int num_rubber);
 
-    public abstract void buildWeapons(@NonNull Class<? extends ThrowingWeapon> type, int num_weapons, boolean infinite);
+    public abstract void buildWeapons(@NonNull Class<?> type, int num_weapons, boolean infinite);
 
     public abstract boolean canBuildChieftain();
 
@@ -59,6 +59,18 @@ public abstract class Building extends Selectable<BuildingTemplate> implements O
     public abstract void deployChieftain();
 
     public abstract void createArmy(int num_peon, int num_rock, int num_iron, int num_rubber);
+
+    /** Deploys warriors with Buffed's gear, which only an Armory stocks (gear warriors do not board ships). */
+    public void createGearArmy(int num_shield, int num_torch) {
+        throw new IllegalStateException(this + " has no gear");
+    }
+
+    /**
+     * A torch's blow (Buffed): sets the building on fire for the torch's {@code fire_seconds}, or starts them again.
+     * Buildings that cannot burn (ships) ignore it.
+     */
+    public void ignite(@NonNull TorchStats torch, @NonNull Player burner) {
+    }
 
     public abstract void createTransporters(int num_tree, int num_rock, int num_iron, int num_rubber);
 

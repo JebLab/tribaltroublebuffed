@@ -19,12 +19,7 @@ import com.oddlabs.tt.model.behaviour.SittingController;
 import com.oddlabs.tt.model.behaviour.StunController;
 import com.oddlabs.tt.model.behaviour.WalkBehaviour;
 import com.oddlabs.tt.model.behaviour.WalkController;
-import com.oddlabs.tt.model.weapon.IronAxeWeapon;
-import com.oddlabs.tt.model.weapon.IronSpearWeapon;
-import com.oddlabs.tt.model.weapon.RockAxeWeapon;
-import com.oddlabs.tt.model.weapon.RockSpearWeapon;
-import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
-import com.oddlabs.tt.model.weapon.RubberSpearWeapon;
+import com.oddlabs.tt.model.weapon.GearFactory;
 import com.oddlabs.tt.model.weapon.WeaponFactory;
 import com.oddlabs.tt.particle.BalancedParametricEmitter;
 import com.oddlabs.tt.particle.StunFunction;
@@ -557,17 +552,17 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
         forceDecide();
     }
 
+    /** Whether the unit carries a weapon from the Armory: a thrown one, or Buffed's gear. */
     public final boolean isWarrior() {
-        Class type = getWeaponFactory().getType();
-        if (type == RockAxeWeapon.class
-                || type == IronAxeWeapon.class
-                || type == RubberAxeWeapon.class
-                || type == RockSpearWeapon.class
-                || type == IronSpearWeapon.class
-                || type == RubberSpearWeapon.class) {
-            return true;
-        }
-        return false;
+        return getWeaponFactory().getType() != null;
+    }
+
+    /**
+     * Whether the unit fights hand to hand with Buffed's gear. Such a warrior cannot man a tower or board a ship, whose
+     * places are for throwers.
+     */
+    public final boolean isGearWarrior() {
+        return getWeaponFactory() instanceof GearFactory;
     }
 
     public final boolean isChieftain() {

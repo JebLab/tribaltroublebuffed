@@ -12,6 +12,7 @@ import com.oddlabs.tt.model.Selectable;
 import com.oddlabs.tt.model.Ship;
 import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.model.behaviour.Controller;
+import com.oddlabs.tt.model.behaviour.IdleController;
 import com.oddlabs.tt.model.behaviour.PlaceBuildingController;
 import com.oddlabs.tt.model.behaviour.RepairController;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
@@ -20,6 +21,8 @@ import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockSpearWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberSpearWeapon;
+import com.oddlabs.tt.model.weapon.Shield;
+import com.oddlabs.tt.model.weapon.Torch;
 import com.oddlabs.tt.pathfinder.FindOccupantFilter;
 import com.oddlabs.tt.landscape.IslandInfo;
 import com.oddlabs.tt.landscape.DensityMap;
@@ -43,6 +46,8 @@ public final class AdvancedAI extends AI {
     private static final int SCORE_WARRIOR_ROCK = 4;
     private static final int SCORE_WARRIOR_IRON = 5;
     private static final int SCORE_WARRIOR_RUBBER = 10;
+    private static final int SCORE_WARRIOR_SHIELD = 4;
+    private static final int SCORE_WARRIOR_TORCH = 5;
     private static final int SCORE_CHIEFTAIN = 25;
     private static final float[] DEFENSE_FACTOR = new float[]{1f, 1.5f, 2f};
 
@@ -68,6 +73,13 @@ public final class AdvancedAI extends AI {
     private static final int CHICKEN_COOP_BUILDERS = 6;
     private static final int TOTEM_BUILDERS = 3;
 
+    // Buffed's gear (docs/design/gear.md): the Armory keeps up to this many in stock, and an attack takes one shield
+    // per SHIELD_SHARE warriors and one torch per TORCH_SHARE, as far as the stock goes.
+    private static final int[] SHIELD_STOCK = new int[]{0, 6, 10};
+    private static final int[] TORCH_STOCK = new int[]{0, 3, 5};
+    private static final int SHIELD_SHARE = 4;
+    private static final int TORCH_SHARE = 5;
+
     private static final int SHIP_PEONS = 26;
     private static final int SHIP_WARRIORS = 50;
     private static final int SHIP_BUILDERS = 20;
@@ -92,6 +104,11 @@ public final class AdvancedAI extends AI {
 
     private DensityMap density_map;
 
+    // Buffed: the throwers of an attack led by shields, sent after them on the next decision.
+    private final List<@NonNull Selectable<?>> followers = new ArrayList<>();
+    private int followers_target_x;
+    private int followers_target_y;
+
     public AdvancedAI(@NonNull Player owner, UnitInfo unit_info, int difficulty) {
         super(owner, unit_info);
         this.difficulty = difficulty;
@@ -106,6 +123,7 @@ public final class AdvancedAI extends AI {
     public void animate(float t) {
         if (!shouldDoAction(t))
             return;
+        nodeSendFollowers();
         reclassify();
         nodeDefendBase();
         reclassify();
@@ -128,6 +146,7 @@ public final class AdvancedAI extends AI {
         }
 
         nodeBuildBuffedBuildings();
+        nodeBuildGear();
 
         reclassify();
         nodeAttackWithWarriorsAndChieftain(NUM_WARRIORS[difficulty],
@@ -173,6 +192,11 @@ public final class AdvancedAI extends AI {
                     IronAxeWeapon.class).getNumSupplies());
             int num_rock_units = Math.min(num_warriors - num_rubber_units - num_iron_units, armory.getSupplyContainer(
                     RockAxeWeapon.class).getNumSupplies());
+            // Buffed: shields after the throwers; torches stay in stock for attacks.
+            int num_shield_units = Math.min(num_warriors - num_rubber_units - num_iron_units - num_rock_units,
+                    armory.getSupplyContainer(Shield.class).getNumSupplies());
+            if (num_shield_units > 0)
+                getOwner().deployUnits(armory, DeployType.SHIELD_WARRIOR, num_shield_units);
             if (num_rubber_units > 0) {
                 getOwner().deployUnits(armory, DeployType.RUBBER_WARRIOR, num_rubber_units);
 //				deployed += num_rubber_units*SCORE_WARRIOR_RUBBER;
@@ -267,6 +291,10 @@ public final class AdvancedAI extends AI {
                         } else if (unit.getWeaponFactory().getType() == RubberAxeWeapon.class
                                 || unit.getWeaponFactory().getType() == RubberSpearWeapon.class) {
                                     return SCORE_WARRIOR_RUBBER;
+                                } else if (unit.getWeaponFactory().getType() == Shield.class) {
+                                    return SCORE_WARRIOR_SHIELD;
+                                } else if (unit.getWeaponFactory().getType() == Torch.class) {
+                                    return SCORE_WARRIOR_TORCH;
                                 }
         throw new RuntimeException();
     }
@@ -276,9 +304,10 @@ public final class AdvancedAI extends AI {
             nodeBuildTower(num_towers);
         } else if (num_towers > 0) {
             for (int i = 0; i < getTowers().length; i++) {
-                if (!((Building) getTowers()[i]).getUnitContainer().isSupplyFull() && getIdleWarriors() != null
-                        && getIdleWarriors().length > i) {
-                    getOwner().setTarget(Selectable.newArray(getIdleWarriors()[i]), getTowers()[i], Action.DEFAULT,
+                Selectable<?>[] throwers = getIdleThrowers();
+                if (!((Building) getTowers()[i]).getUnitContainer().isSupplyFull() && throwers != null
+                        && throwers.length > i) {
+                    getOwner().setTarget(Selectable.newArray(throwers[i]), getTowers()[i], Action.DEFAULT,
                             false);
                     nodeDeployUnitsInArmory(1);
                 }
@@ -420,7 +449,10 @@ public final class AdvancedAI extends AI {
             System.arraycopy(getIdleWarriors(), 0, warriors, 0, num_warriors);
             Target target = findTarget(warriors[0].getGridX(), warriors[0].getGridY());
             if (target != null) {
-                getOwner().setLandscapeTarget(warriors, target.getGridX(), target.getGridY(), Action.ATTACK, true);
+                if (Arrays.stream(warriors).anyMatch(AI::isGearWarrior))
+                    attackWithGear(warriors, target);
+                else
+                    getOwner().setLandscapeTarget(warriors, target.getGridX(), target.getGridY(), Action.ATTACK, true);
                 if (NUM_WARRIORS[difficulty] < NUM_WARRIORS_MAX[difficulty])
                     NUM_WARRIORS[difficulty] += NUM_WARRIORS_INCREASE[difficulty];
             }
@@ -432,6 +464,74 @@ public final class AdvancedAI extends AI {
             }
             if (use_chieftain)
                 nodeTrainChieftain();
+        }
+    }
+
+    /**
+     * Buffed: an attack with gear. Torches go for the nearest enemy building; shields march at once and the rest of the
+     * group follows on the next decision, a few seconds later, so the slower shields lead and take the first throws.
+     */
+    private void attackWithGear(@NonNull Selectable<?> @NonNull [] warriors, @NonNull Target target) {
+        List<Selectable<?>> shields = new ArrayList<>();
+        List<Selectable<?>> torches = new ArrayList<>();
+        List<Selectable<?>> others = new ArrayList<>();
+        for (Selectable<?> s : warriors) {
+            Class<?> type = s instanceof Unit unit ? unit.getWeaponFactory().getType() : null;
+            if (type == Shield.class)
+                shields.add(s);
+            else if (type == Torch.class)
+                torches.add(s);
+            else
+                others.add(s);
+        }
+        Selectable<?> building = torches.isEmpty() ? null : getOwner().findNearestEnemyBuilding(target.getGridX(),
+                target.getGridY());
+        if (building != null)
+            getOwner().setTarget(torches.toArray(Selectable[]::new), building, Action.ATTACK, true);
+        else
+            shields.addAll(torches);
+        if (!shields.isEmpty() && !others.isEmpty()) {
+            followers.clear();
+            followers.addAll(others);
+            followers_target_x = target.getGridX();
+            followers_target_y = target.getGridY();
+            others.clear();
+        }
+        shields.addAll(others);
+        if (!shields.isEmpty())
+            getOwner().setLandscapeTarget(shields.toArray(Selectable[]::new), target.getGridX(), target.getGridY(),
+                    Action.ATTACK, true);
+    }
+
+    /** Sends the throwers of the last shield-led attack after the shields, if they are still idle. */
+    private void nodeSendFollowers() {
+        if (followers.isEmpty())
+            return;
+        Selectable<?>[] idle = followers.stream().filter(s -> !s.isDead()
+                && s.getPrimaryController() instanceof IdleController).toArray(Selectable[]::new);
+        followers.clear();
+        if (idle.length > 0)
+            getOwner().setLandscapeTarget(idle, followers_target_x, followers_target_y, Action.ATTACK, true);
+    }
+
+    /** Buffed: keeps a small stock of shields and torches in the Armory, built like the other weapons. */
+    private void nodeBuildGear() {
+        boolean shields = getOwner().canBuildShields() && SHIELD_STOCK[difficulty] > 0;
+        boolean torches = getOwner().canBuildTorches() && TORCH_STOCK[difficulty] > 0;
+        if ((!shields && !torches) || getArmory() == null)
+            return;
+        Building armory = (Building) getArmory()[0];
+        if (armory.isDead() || !baseBuildingsDone())
+            return;
+        if (shields) {
+            int missing = SHIELD_STOCK[difficulty] - armory.getSupplyContainer(Shield.class).getNumSupplies();
+            if (missing > 0 && armory.getBuildSupplyContainer(Shield.class).getNumSupplies() == 0)
+                getOwner().buildShieldWeapons(armory, missing, false);
+        }
+        if (torches) {
+            int missing = TORCH_STOCK[difficulty] - armory.getSupplyContainer(Torch.class).getNumSupplies();
+            if (missing > 0 && armory.getBuildSupplyContainer(Torch.class).getNumSupplies() == 0)
+                getOwner().buildTorchWeapons(armory, missing, false);
         }
     }
 
@@ -454,12 +554,27 @@ public final class AdvancedAI extends AI {
                 int num_weapons = numWeapons(armory) - MIN_WEAPONS_IN_STOCK[difficulty];
 
                 if (num_units >= num_warriors && num_weapons >= num_warriors) {
-                    int num_rubber_units = Math.min(num_warriors, armory.getSupplyContainer(
+                    // Buffed: a share of shields and torches (none in stock elsewhere), then throwers as before, and
+                    // more gear if the throwers run short.
+                    int shield_stock = armory.getSupplyContainer(Shield.class).getNumSupplies();
+                    int torch_stock = armory.getSupplyContainer(Torch.class).getNumSupplies();
+                    int num_shield_units = Math.min(num_warriors / SHIELD_SHARE, shield_stock);
+                    int num_torch_units = Math.min(num_warriors / TORCH_SHARE, torch_stock);
+                    int num_throwers = num_warriors - num_shield_units - num_torch_units;
+                    int num_rubber_units = Math.min(num_throwers, armory.getSupplyContainer(
                             RubberAxeWeapon.class).getNumSupplies());
-                    int num_iron_units = Math.min(num_warriors - num_rubber_units, armory.getSupplyContainer(
+                    int num_iron_units = Math.min(num_throwers - num_rubber_units, armory.getSupplyContainer(
                             IronAxeWeapon.class).getNumSupplies());
-                    int num_rock_units = Math.min(num_warriors - num_rubber_units - num_iron_units,
+                    int num_rock_units = Math.min(num_throwers - num_rubber_units - num_iron_units,
                             armory.getSupplyContainer(RockAxeWeapon.class).getNumSupplies());
+                    int missing = num_throwers - num_rubber_units - num_iron_units - num_rock_units;
+                    int more_shields = Math.min(missing, shield_stock - num_shield_units);
+                    num_shield_units += more_shields;
+                    num_torch_units += Math.min(missing - more_shields, torch_stock - num_torch_units);
+                    if (num_shield_units > 0)
+                        getOwner().deployUnits(armory, DeployType.SHIELD_WARRIOR, num_shield_units);
+                    if (num_torch_units > 0)
+                        getOwner().deployUnits(armory, DeployType.TORCH_WARRIOR, num_torch_units);
                     if (num_rubber_units > 0)
                         getOwner().deployUnits(armory, DeployType.RUBBER_WARRIOR, num_rubber_units);
                     if (num_iron_units > 0)
@@ -1024,8 +1139,9 @@ public final class AdvancedAI extends AI {
 
         int warriors_needed = getMinWarriorsOnShip() - warriors_aboard;
         if (warriors_needed > 0) {
-            if (getIdleWarriors() != null && getIdleWarriors().length > 0) {
-                getOwner().setTarget(firstN(getIdleWarriors(), warriors_needed), ship, Action.MOVE, false);
+            Selectable<?>[] throwers = getIdleThrowers();
+            if (throwers != null && throwers.length > 0) {
+                getOwner().setTarget(firstN(throwers, warriors_needed), ship, Action.MOVE, false);
             } else {
                 nodeDeployUnitsInArmory(warriors_needed);
             }
@@ -1087,10 +1203,13 @@ public final class AdvancedAI extends AI {
             return result;
         }
     */
+    /** Weapons and gear in stock (Buffed's gear is never stocked elsewhere). */
     private int numWeapons(@NonNull Building armory) {
         return armory.getSupplyContainer(RockAxeWeapon.class).getNumSupplies() + armory.getSupplyContainer(
                 IronAxeWeapon.class).getNumSupplies() + armory.getSupplyContainer(
-                        RubberAxeWeapon.class).getNumSupplies();
+                        RubberAxeWeapon.class).getNumSupplies() + armory.getSupplyContainer(
+                                Shield.class).getNumSupplies() + armory.getSupplyContainer(
+                                        Torch.class).getNumSupplies();
     }
 
     private @Nullable Target findTarget(int start_x, int start_y) {

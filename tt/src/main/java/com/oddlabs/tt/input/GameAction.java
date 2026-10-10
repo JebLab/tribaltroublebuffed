@@ -116,6 +116,17 @@ public enum GameAction {
     RES_CHICKEN_BATCH,
     RES_CHICKEN_BATCH_DEC,
 
+    // Buffed's gear (the Armory's weapon and army submenus)
+    RES_SHIELD,
+    RES_SHIELD_DEC,
+    RES_SHIELD_BATCH,
+    RES_SHIELD_BATCH_DEC,
+
+    RES_TORCH,
+    RES_TORCH_DEC,
+    RES_TORCH_BATCH,
+    RES_TORCH_BATCH_DEC,
+
     DEPLOY_CHIEFTAIN,
 
     // Unit Specific
@@ -145,6 +156,8 @@ public enum GameAction {
     CHEAT_7,
     CHEAT_8,
     CHEAT_9,
+    CHEAT_10,
+    CHEAT_11,
 
     // Observer mode
     SPECTATOR_NEXT_PLAYER,

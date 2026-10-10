@@ -33,5 +33,11 @@ public record RaceIcons(@NonNull IconQuad unitStatusIcon,
                         @NonNull Supplier<@NonNull String> magic2Desc,
                         @NonNull ModeIconQuads shipIcon,
                         @NonNull ModeIconQuads chickenCoopIcon,
-                        @NonNull ModeIconQuads totemIcon) {
+                        @NonNull ModeIconQuads totemIcon,
+                        @NonNull IconQuad weaponShieldStatusIcon,
+                        @NonNull IconQuad weaponTorchStatusIcon,
+                        @NonNull ModeIconQuads buildWeaponShieldIcon,
+                        @NonNull ModeIconQuads buildWeaponTorchIcon,
+                        @NonNull ModeIconQuads warriorShieldIcon,
+                        @NonNull ModeIconQuads warriorTorchIcon) {
 }

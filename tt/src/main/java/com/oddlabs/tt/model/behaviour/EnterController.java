@@ -4,8 +4,6 @@ import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.Building;
 import com.oddlabs.tt.model.UnitSupplyContainer;
 import com.oddlabs.tt.model.Unit;
-import com.oddlabs.tt.model.weapon.ThrowingFactory;
-import com.oddlabs.tt.model.weapon.ThrowingWeapon;
 import org.jspecify.annotations.NonNull;
 
 public final class EnterController extends Controller {
@@ -32,10 +30,10 @@ public final class EnterController extends Controller {
                         building.getSupplyContainer(type).increaseSupply(numSupply);
                         unitSupply.increaseSupply(-numSupply, type);
                     }
-                    if (unit.getWeaponFactory() instanceof ThrowingFactory) {
-                        Class<? extends ThrowingWeapon> type = unit.getWeaponFactory().getType();
+                    // A warrior hands back its weapon or gear.
+                    Class<?> type = unit.getWeaponFactory().getType();
+                    if (type != null)
                         building.getSupplyContainer(type).increaseSupply(1);
-                    }
                 }
                 building.getUnitContainer().enter(unit);
             } else {

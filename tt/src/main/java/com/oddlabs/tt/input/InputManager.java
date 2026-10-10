@@ -182,6 +182,16 @@ public final class InputManager {
         def(GameAction.RES_CHICKEN_BATCH, Key.C, Modifier.CONTROL);
         def(GameAction.RES_CHICKEN_BATCH_DEC, Key.C, Modifier.SHIFT, Modifier.CONTROL);
 
+        def(GameAction.RES_SHIELD, Key.D);
+        def(GameAction.RES_SHIELD_DEC, Key.D, Modifier.SHIFT);
+        def(GameAction.RES_SHIELD_BATCH, Key.D, Modifier.CONTROL);
+        def(GameAction.RES_SHIELD_BATCH_DEC, Key.D, Modifier.SHIFT, Modifier.CONTROL);
+
+        def(GameAction.RES_TORCH, Key.E);
+        def(GameAction.RES_TORCH_DEC, Key.E, Modifier.SHIFT);
+        def(GameAction.RES_TORCH_BATCH, Key.E, Modifier.CONTROL);
+        def(GameAction.RES_TORCH_BATCH_DEC, Key.E, Modifier.SHIFT, Modifier.CONTROL);
+
         def(GameAction.DEPLOY_CHIEFTAIN, Key.H);
 
         // Units
@@ -213,6 +223,8 @@ public final class InputManager {
         def(GameAction.CHEAT_7, Key.F7);
         def(GameAction.CHEAT_8, Key.F8);
         def(GameAction.CHEAT_9, Key.F9);
+        def(GameAction.CHEAT_10, Key.F2, Modifier.SHIFT);
+        def(GameAction.CHEAT_11, Key.F3, Modifier.SHIFT);
 
         // Observer mode
         def(GameAction.SPECTATOR_NEXT_PLAYER, Key.RBRACKET);

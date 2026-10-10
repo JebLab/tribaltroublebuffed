@@ -35,6 +35,14 @@ public final class NoOpPlayerInterface implements PlayerInterface {
     }
 
     @Override
+    public void buildShieldWeapons(@NonNull Building building, int num_weapons, boolean infinite) {
+    }
+
+    @Override
+    public void buildTorchWeapons(@NonNull Building building, int num_weapons, boolean infinite) {
+    }
+
+    @Override
     public void doMagic(@NonNull Unit chieftain, int magic) {
     }
 
