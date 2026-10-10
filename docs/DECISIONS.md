@@ -7,6 +7,7 @@ Where sessions bank what only Josh can decide, record Josh's answers, and log th
 | Id | Decision | Recommendation | Blocks |
 |---|---|---|---|
 | D-01 | Ask the original developers for the same blessing to use the "Tribal Trouble" name that Resurrected has (PLAN.md §1, principle 4), or plan a rename. | Josh sends one short email before the first public release; a draft can be prepared on request. | the first public release on itch.io (M22) |
+| D-05 | Blender for the content pipeline (M4): it is not installed. Either Josh installs Blender (4.2 LTS or newer), or a session may download the portable Blender zip from blender.org into `.toolchain/blender` (about 350 MB, nothing installed) and SimoGecko's XML→glTF converter from GitHub. | Allow the session to download both: portable, inside the ignored `.toolchain` folder, removable by deleting it. | M4's round trip and in-game check (the rest of M4 can go ahead) |
 
 ## Josh's checks
 
@@ -33,5 +34,5 @@ Where sessions bank what only Josh can decide, record Josh's answers, and log th
 | R-05 | The in-game version comes from `git describe` of `v*` tags (`0.1.0` on the tag, `0.1.0-3-gabc1234` after it, `<root version>-dev` without one); the root `version` is `0.1.0` and is also jpackage's `--app-version`. | A release build then shows its tag in game; the `-API.SIM` suffix stays. | 2026-10-09 |
 | R-06 | GitHub releases before 1.0 are marked pre-release. | The fork is early and Josh has not play-tested a release yet. | 2026-10-09 |
 | R-07 | The cross-system replay check is a set of golden checksum traces of the headless matches, recorded with `SIM_VERSION` and compared on Windows and Linux in CI; the game's own `event.log` replay stays a local check. | The event-log replay needs a window and a recorded human session; the traces catch the same divergence plus simulation changes made without a `SIM_VERSION` bump. | 2026-10-09 |
-| R-08 | CI builds and tests on Windows and Linux; the Windows package is built only for `v*` tags and manual runs; no macOS job until M22. | Keeps every push under ten minutes; packages for other systems are M22's scope. | 2026-10-09 |
+| R-08 | CI builds and tests on Windows and Linux; the Windows package is built only for `v*` tags and manual runs; no macOS job until M22. | A push takes about five minutes with a warm Gradle cache (the first Windows run, cold, took 24); packages for other systems are M22's scope. | 2026-10-09 |
 | R-09 | The Enormous-island test plays 6v6 instead of a 12-tribe free-for-all. | The free-for-all (seed 5) is still undecided after 60 minutes; that stall is for the AI milestone (M14). | 2026-10-09 |
