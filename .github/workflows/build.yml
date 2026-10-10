@@ -38,6 +38,14 @@ jobs:
       # traces: both systems must replay the same simulation.
       - name: Build and test
         run: ./gradlew build
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # The plain-Python half of the Blender add-on (docs/content-pipeline.md): reading, writing and keeping the
+      # numbers of the game's geometry XML.
+      - name: Test the Blender add-on
+        run: python -m unittest discover -s tools/blender/tests
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v4

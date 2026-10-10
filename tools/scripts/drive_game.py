@@ -5,9 +5,12 @@ as the screenshots this saves. Clicks and keys move the real mouse and keyboard 
 when Josh allows it (docs/SESSION_RULES.md section 8). Standard library only; run it with the Windows Python.
 
   python tools/scripts/drive_game.py shot <name>         save %TEMP%\\tt-game\\<name>.png
+  python tools/scripts/drive_game.py zoom <name> <x> <y> <w> <h>   save that part of the window, three times larger
   python tools/scripts/drive_game.py click <x> <y>       left click
+  python tools/scripts/drive_game.py rclick <x> <y>      right click (orders selected units)
   python tools/scripts/drive_game.py move <x> <y>        move the cursor (e.g. off a button before a screenshot)
   python tools/scripts/drive_game.py key <key>           tap a key: esc, enter, space, tab, f1..f12, a..z, 0..9
+  python tools/scripts/drive_game.py type <letters>      tap each of a..z, 0..9, / in turn (chat commands)
   python tools/scripts/drive_game.py wait <seconds>      sleep (between steps that load)
 
 Several steps can be chained in one call: drive_game.py click 87 334 wait 1 shot menu
@@ -29,6 +32,7 @@ KEYS = {"esc": 0x1B, "enter": 0x0D, "space": 0x20, "tab": 0x09, "backspace": 0x0
 KEYS.update({f"f{n}": 0x6F + n for n in range(1, 13)})
 KEYS.update({chr(c): c - 32 for c in range(ord("a"), ord("z") + 1)})
 KEYS.update({str(d): 0x30 + d for d in range(10)})
+KEYS["/"] = 0xBF  # VK_OEM_2: the slash key on a US layout, for chat commands such as /iamacheater
 
 user32 = ctypes.WinDLL("user32", use_last_error=True)
 gdi32 = ctypes.WinDLL("gdi32", use_last_error=True)
@@ -63,7 +67,8 @@ class BITMAPINFOHEADER(ctypes.Structure):
                 ("biYPelsPerMeter", wt.LONG), ("biClrUsed", wt.DWORD), ("biClrImportant", wt.DWORD)]
 
 
-def shot(hwnd, name):
+def shot(hwnd, name, box=None, scale=1):
+    """Save the game window, or the part `box` (x, y, width, height) of it enlarged `scale` times."""
     left, top, width, height = client_box(hwnd)
     screen = user32.GetDC(0)
     memory = gdi32.CreateCompatibleDC(screen)
@@ -81,7 +86,13 @@ def shot(hwnd, name):
         line = raw[y * stride:(y + 1) * stride]
         rgb = bytearray(width * 3)
         rgb[0::3], rgb[1::3], rgb[2::3] = line[2::4], line[1::4], line[0::4]
-        rows.append(b"\x00" + bytes(rgb))
+        rows.append(bytes(rgb))
+    if box is not None:
+        x, y, w, h = box
+        rows = [b"".join(row[(x + i) * 3:(x + i + 1) * 3] * scale for i in range(w))
+                for row in rows[y:y + h] for _ in range(scale)]
+        width, height = w * scale, h * scale
+    rows = [b"\x00" + row for row in rows]
 
     def chunk(kind, body):
         return struct.pack(">I", len(body)) + kind + body + struct.pack(">I", zlib.crc32(kind + body) & 0xFFFFFFFF)
@@ -95,16 +106,16 @@ def shot(hwnd, name):
     return {"ok": True, "shot": path, "size": [width, height]}
 
 
-def click(hwnd, x, y):
+def click(hwnd, x, y, right=False):
     left, top, _, _ = client_box(hwnd)
     focus(hwnd)
     user32.SetCursorPos(left + x, top + y)
     time.sleep(0.12)
-    user32.mouse_event(0x0002, 0, 0, 0, 0)  # left down
+    user32.mouse_event(0x0008 if right else 0x0002, 0, 0, 0, 0)  # button down
     time.sleep(0.06)
-    user32.mouse_event(0x0004, 0, 0, 0, 0)  # left up
+    user32.mouse_event(0x0010 if right else 0x0004, 0, 0, 0, 0)  # button up
     time.sleep(0.4)
-    return {"ok": True, "click": [x, y]}
+    return {"ok": True, "rclick" if right else "click": [x, y]}
 
 
 def move(hwnd, x, y):
@@ -134,23 +145,31 @@ def main(argv):
     steps, i = [], 0
     while i < len(argv):
         command = argv[i]
-        if command in ("click", "move"):
+        if command in ("click", "rclick", "move"):
             steps.append((command, int(argv[i + 1]), int(argv[i + 2])))
             i += 3
-        elif command in ("key", "shot", "wait"):
+        elif command == "zoom":
+            steps.append((command, argv[i + 1], tuple(int(v) for v in argv[i + 2:i + 6])))
+            i += 6
+        elif command in ("key", "shot", "wait", "type"):
             steps.append((command, argv[i + 1]))
             i += 2
         else:
             raise SystemExit(json.dumps({"ok": False, "error": f"unknown command {command!r}"}))
     for step in steps:
-        if step[0] == "click":
-            result = click(hwnd, step[1], step[2])
+        if step[0] in ("click", "rclick"):
+            result = click(hwnd, step[1], step[2], right=step[0] == "rclick")
+        elif step[0] == "type":
+            results = [key(hwnd, letter) for letter in step[1]]
+            result = {"ok": all(r["ok"] for r in results), "type": step[1]}
         elif step[0] == "move":
             result = move(hwnd, step[1], step[2])
         elif step[0] == "key":
             result = key(hwnd, step[1])
         elif step[0] == "shot":
             result = shot(hwnd, step[1])
+        elif step[0] == "zoom":
+            result = shot(hwnd, step[1], step[2], 3)
         else:
             time.sleep(float(step[1]))
             result = {"ok": True, "wait": float(step[1])}

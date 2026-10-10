@@ -268,3 +268,7 @@ server/logs/
 .claude/worktrees/
 reports/STOP_CHAIN
 reports/REVIEW_DUE
+
+# Python bytecode (tools/blender, tools/scripts)
+__pycache__/
+*.pyc

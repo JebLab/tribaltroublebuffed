@@ -7,12 +7,12 @@ Where sessions bank what only Josh can decide, record Josh's answers, and log th
 | Id | Decision | Recommendation | Blocks |
 |---|---|---|---|
 | D-01 | Ask the original developers for the same blessing to use the "Tribal Trouble" name that Resurrected has (PLAN.md §1, principle 4), or plan a rename. | Josh sends one short email before the first public release; a draft can be prepared on request. | the first public release on itch.io (M22) |
-| D-05 | Blender for the content pipeline (M4): it is not installed. Either Josh installs Blender (4.2 LTS or newer), or a session may download the portable Blender zip from blender.org into `.toolchain/blender` (about 350 MB, nothing installed) and SimoGecko's XML→glTF converter from GitHub. | Allow the session to download both: portable, inside the ignored `.toolchain` folder, removable by deleting it. | M4's round trip and in-game check (the rest of M4 can go ahead) |
 
 ## Josh's checks
 
 | Id | Milestone | Try this | Expect |
 |---|---|---|---|
+| J-01 | M4 | `./gradlew.bat tools:blenderAddon`, then in Blender (`.toolchain/blender/blender.exe`): Edit > Preferences > Add-ons > Install from Disk..., pick `tools/build/blender/io_scene_tribaltrouble.zip`, enable it. File > Import > Tribal Trouble, pick `assets/geometry/geometry.xml` (Sprite: `natives/warrior`), press Space. Then File > Export > Tribal Trouble into an empty folder. | A textured warrior with an armature; it plays its idle animation (other actions in the Action editor); Properties > Object Data shows "Tribal Trouble animation"; the export writes 8 files and a text `tt_sprite.xml`. Tested headless in M4; the menus and dialogs were not. |
 
 ## Answered
 
@@ -22,6 +22,7 @@ Where sessions bank what only Josh can decide, record Josh's answers, and log th
 | D-02 | May sessions tag versions and publish GitHub releases on JebLab/tribaltroublebuffed without asking? | Yes, GitHub only. itch.io, Flathub, winget, accounts and money stay banked. | 2026-10-09 |
 | D-03 | May sessions drive the game window with synthetic clicks and keys for in-game checks? | Yes, with `tools/scripts/drive_game.py`, game-window screenshots only, kept short. | 2026-10-09 |
 | D-04 | Chain mode when the session chain was set up | Free: sessions chain through the queue without asking. Josh can switch to manual in `.claude/settings.local.json`. | 2026-10-09 |
+| D-05 | Blender for the content pipeline (M4) | "Feel free to install blender" (in the M3 session's chat). Blender 5.2.2 LTS portable in `.toolchain/blender`, downloaded and SHA-256-checked by the M3 session. SimoGecko's XML-to-glTF converter was not part of the answer; M4 wrote its own importer instead. | 2026-10-09 |
 
 ## Decided by default (reversible)
 
@@ -36,3 +37,7 @@ Where sessions bank what only Josh can decide, record Josh's answers, and log th
 | R-07 | The cross-system replay check is a set of golden checksum traces of the headless matches, recorded with `SIM_VERSION` and compared on Windows and Linux in CI; the game's own `event.log` replay stays a local check. | The event-log replay needs a window and a recorded human session; the traces catch the same divergence plus simulation changes made without a `SIM_VERSION` bump. | 2026-10-09 |
 | R-08 | CI builds and tests on Windows and Linux; the Windows package is built only for `v*` tags and manual runs; no macOS job until M22. | A push takes about five minutes with a warm Gradle cache (the first Windows run, cold, took 24); packages for other systems are M22's scope. | 2026-10-09 |
 | R-09 | The Enormous-island test plays 6v6 instead of a 12-tribe free-for-all. | The free-for-all (seed 5) is still undecided after 60 minutes; that stall is for the AI milestone (M14). | 2026-10-09 |
+| R-10 | The Blender add-on imports the game's XML itself instead of going through SimoGecko's XML-to-glTF converter. | No second download or format in between, and the importer can keep each source file for an exact re-export. | 2026-10-09 |
+| R-11 | Export keeps imported numbers: values that still match the imported file within a small tolerance are written as imported, and an unchanged structure is patched in place ("Keep imported numbers", on by default). | Blender holds 32-bit floats and orthonormal bones, so recomputed numbers differ in the last digits; this makes an untouched model byte-identical (M4's done-when) and keeps Git diffs to real edits. Turning it off gives the fully computed export. | 2026-10-09 |
+| R-12 | Add-on conventions: a Blender bone is the 2004 bone matrix times a fixed axis swap (X along the bone becomes Y); files are named after their object or action; models are listed most triangles first; animation name, position, wpc and type are Action properties; new files use the standard layout (IntelliJ style, 120 columns, no final newline). | Exact conversion both ways and the least to set by hand. | 2026-10-09 |
+| R-13 | CI runs the add-on's plain-Python tests with Python 3.12 on Windows and Linux; the Blender round trip (`tools/blender/roundtrip.py`) stays a local check. | The runners have Python but not Blender; a 400 MB Blender download per CI run is not worth it. | 2026-10-09 |
