@@ -100,6 +100,14 @@ public final class Market {
 
     /** The owner's finished Armory nearest to the Market (the first of equally near ones), or null. */
     public @Nullable LandBuilding findArmory() {
+        return findArmory(building);
+    }
+
+    /**
+     * The owner's finished Armory nearest to a building that has no store of its own (the Market, the Lodge), the
+     * first of equally near ones, or null.
+     */
+    public static @Nullable LandBuilding findArmory(@NonNull Building building) {
         LandBuilding best = null;
         int best_dist_squared = Integer.MAX_VALUE;
         for (Selectable<?> s : building.getOwner().getUnits().getSet()) {

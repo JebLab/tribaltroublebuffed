@@ -67,6 +67,7 @@ public final class World {
     private final @NonNull GameMode mode;
     private final @NonNull Ruleset ruleset;
     private final @NonNull List<@NonNull LandBuilding> totems = new ArrayList<>();
+    private final @NonNull List<@NonNull LandBuilding> lodges = new ArrayList<>();
 
     public static @NonNull LandscapeResources loadCommon(@NonNull RenderQueues queues) {
         LandscapeResources landscape_resources = new LandscapeResources(queues);
@@ -306,5 +307,10 @@ public final class World {
     /** The finished totems of every player, in the order they were finished (see {@code TotemAura}). */
     public @NonNull List<@NonNull LandBuilding> getTotems() {
         return totems;
+    }
+
+    /** The finished Lodges of every player, in the order they were finished (see {@code Lodge}). */
+    public @NonNull List<@NonNull LandBuilding> getLodges() {
+        return lodges;
     }
 }

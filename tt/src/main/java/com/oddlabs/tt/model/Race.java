@@ -18,7 +18,9 @@ public final class Race {
     public static final int BUILDING_MARKET = 6;
     public static final int BUILDING_PALISADE = 7;
     public static final int BUILDING_GATE = 8;
-    public static final int NUM_BUILDINGS = 9;
+    public static final int BUILDING_GREAT_TOWER = 9;
+    public static final int BUILDING_LODGE = 10;
+    public static final int NUM_BUILDINGS = 11;
 
     /**
      * Palisade segments and Gates: one cell each, laid out at once, outside the building limit
@@ -36,7 +38,9 @@ public final class Race {
     // Buffed only: the ruleset's features decide whether the Armory makes their gear (Player.canBuildShields, canBuildTorches).
     public static final int UNIT_WARRIOR_SHIELD = 5;
     public static final int UNIT_WARRIOR_TORCH = 6;
-    public static final int NUM_UNITS = 7;
+    // Buffed only: trained at the Lodge (features.lodge).
+    public static final int UNIT_CHAMPION = 7;
+    public static final int NUM_UNITS = 8;
 
     private final @NonNull BuildingTemplate[] buildings = new BuildingTemplate[NUM_BUILDINGS];
     private final @NonNull UnitTemplate[] units = new UnitTemplate[NUM_UNITS];
@@ -58,6 +62,8 @@ public final class Race {
             @NonNull BuildingTemplate market,
             @NonNull BuildingTemplate palisade,
             @NonNull BuildingTemplate gate,
+            @NonNull BuildingTemplate great_tower,
+            @NonNull BuildingTemplate lodge,
             @NonNull UnitTemplate warrior_rock,
             @NonNull UnitTemplate warrior_iron,
             @NonNull UnitTemplate warrior_rubber,
@@ -65,6 +71,7 @@ public final class Race {
             @NonNull UnitTemplate chieftain,
             @NonNull UnitTemplate warrior_shield,
             @NonNull UnitTemplate warrior_torch,
+            @NonNull UnitTemplate champion,
             @NonNull SpriteKey rally_point,
             @NonNull RaceIcons icons,
             @NonNull Audio attack_notification,
@@ -81,6 +88,8 @@ public final class Race {
         buildings[BUILDING_MARKET] = market;
         buildings[BUILDING_PALISADE] = palisade;
         buildings[BUILDING_GATE] = gate;
+        buildings[BUILDING_GREAT_TOWER] = great_tower;
+        buildings[BUILDING_LODGE] = lodge;
         for (int i = 0; i < buildings.length; i++) {
             assert buildings[i].getTemplateID() == i;
         }
@@ -91,6 +100,7 @@ public final class Race {
         units[UNIT_CHIEFTAIN] = chieftain;
         units[UNIT_WARRIOR_SHIELD] = warrior_shield;
         units[UNIT_WARRIOR_TORCH] = warrior_torch;
+        units[UNIT_CHAMPION] = champion;
         this.rally_point = rally_point;
         this.icons = icons;
         this.attack_notification = attack_notification;

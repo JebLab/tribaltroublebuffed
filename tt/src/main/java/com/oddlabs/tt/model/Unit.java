@@ -19,6 +19,7 @@ import com.oddlabs.tt.model.behaviour.SittingController;
 import com.oddlabs.tt.model.behaviour.StunController;
 import com.oddlabs.tt.model.behaviour.WalkBehaviour;
 import com.oddlabs.tt.model.behaviour.WalkController;
+import com.oddlabs.tt.model.weapon.Champion;
 import com.oddlabs.tt.model.weapon.GearFactory;
 import com.oddlabs.tt.model.weapon.WeaponFactory;
 import com.oddlabs.tt.particle.BalancedParametricEmitter;
@@ -286,6 +287,15 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
     }
 
     public final void mount(@NonNull Building building) {
+        mountAt(building, building.getPositionX(), building.getPositionY());
+    }
+
+    /** Mounts a tower that holds several throwers (Buffed's Great Tower), at a place this far from its centre. */
+    public final void mount(@NonNull Building building, float offset_x, float offset_y) {
+        mountAt(building, building.getPositionX() + offset_x, building.getPositionY() + offset_y);
+    }
+
+    private void mountAt(@NonNull Building building, float x, float y) {
         assert !isDead();
         mounted_building = building;
         mount_offset = building.getTemplate().getMountOffset();
@@ -293,7 +303,7 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
             disable();
             free();
         }
-        setPosition(building.getPositionX(), building.getPositionY());
+        setPosition(x, y);
         mounted = true;
         clearControllerStack();
         swapController(new IdleController(this, new AttackScanFilter(getOwner(), AttackScanFilter.TOWER_RANGE), false));
@@ -410,8 +420,11 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
         getOwner().getWorld().updateGlobalChecksum(animation);
 
         if (getAbilities().hasAbilities(Abilities.MAGIC)) {
+            // Buffed: a Lodge of the chieftain's team nearby charges the spells faster; without one, exactly as before.
+            float factor = Lodge.getSpellChargeFactor(this);
+            float charge = factor != 1f ? t * factor : t;
             for (int i = 0; i < magic_energy.length; i++) {
-                increaseMagicEnergy(i, t);
+                increaseMagicEnergy(i, charge);
             }
         }
     }
@@ -567,6 +580,11 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
 
     public final boolean isChieftain() {
         return getAbilities().hasAbilities(Abilities.MAGIC);
+    }
+
+    /** Whether the unit is Buffed's Champion, trained at the Lodge: only a Lodge shelters it. */
+    public final boolean isChampion() {
+        return getWeaponFactory().getType() == Champion.class;
     }
 
     private @NonNull BalancedParametricEmitter createStunStar(float x, float y, float z, float time, float velocity) {

@@ -28,7 +28,7 @@ public final class KeyBindingConflicts {
     };
 
     // Active when a unit/group is selected: unit actions, build, magic, exit tower, gameplay back.
-    private static final GameAction[] UNIT_CONTEXT = {GameAction.UNIT_MOVE, GameAction.UNIT_ATTACK, GameAction.UNIT_GATHER, GameAction.UNIT_BUILD_QUARTERS, GameAction.UNIT_BUILD_ARMORY, GameAction.UNIT_BUILD_TOWER, GameAction.UNIT_BUILD_SHIP, GameAction.UNIT_BUILD_CHICKEN_COOP, GameAction.UNIT_BUILD_TOTEM, GameAction.UNIT_BUILD_MARKET, GameAction.UNIT_BUILD_PALISADE, GameAction.UNIT_BUILD_GATE, GameAction.UNIT_EXIT_TOWER, GameAction.MAGIC_1, GameAction.MAGIC_2, GameAction.GAMEPLAY_BACK,
+    private static final GameAction[] UNIT_CONTEXT = {GameAction.UNIT_MOVE, GameAction.UNIT_ATTACK, GameAction.UNIT_GATHER, GameAction.UNIT_BUILD_QUARTERS, GameAction.UNIT_BUILD_ARMORY, GameAction.UNIT_BUILD_TOWER, GameAction.UNIT_BUILD_SHIP, GameAction.UNIT_BUILD_CHICKEN_COOP, GameAction.UNIT_BUILD_TOTEM, GameAction.UNIT_BUILD_MARKET, GameAction.UNIT_BUILD_PALISADE, GameAction.UNIT_BUILD_GATE, GameAction.UNIT_BUILD_GREAT_TOWER, GameAction.UNIT_BUILD_LODGE, GameAction.UNIT_EXIT_TOWER, GameAction.MAGIC_1, GameAction.MAGIC_2, GameAction.GAMEPLAY_BACK,
     };
 
     // Armory/Quarters top-level: production category, set-rally, train chieftain,
@@ -57,12 +57,16 @@ public final class KeyBindingConflicts {
     private static final GameAction[] MARKET_CONTEXT = {GameAction.TRAIN_PEON, GameAction.TRAIN_PEON_DEC, GameAction.TRAIN_PEON_BATCH, GameAction.TRAIN_PEON_BATCH_DEC, GameAction.UNIT_SET_RALLY, GameAction.MARKET_SELL, GameAction.MARKET_BUY,
     };
 
+    // Lodge selected (Buffed): the spinner that lets units out, set-rally, and the Champion spinner.
+    private static final GameAction[] LODGE_CONTEXT = {GameAction.TRAIN_PEON, GameAction.TRAIN_PEON_DEC, GameAction.TRAIN_PEON_BATCH, GameAction.TRAIN_PEON_BATCH_DEC, GameAction.UNIT_SET_RALLY, GameAction.TRAIN_CHAMPION, GameAction.TRAIN_CHAMPION_DEC, GameAction.TRAIN_CHAMPION_BATCH, GameAction.TRAIN_CHAMPION_BATCH_DEC,
+    };
+
     // In-game selection contexts. Mutually exclusive with each other (you have a unit XOR a building
     // selected), so they may safely reuse keys among themselves, but each is active alongside ALWAYS_ACTIVE.
     // Added Peon Context to allow same bind with train peon, prod resource, and build quarters.
-    private static final GameAction[][] IN_GAME_CONTEXTS = {UNIT_CONTEXT, BUILDING_CONTEXT, PEON_CONTEXT, RESOURCE_CONTEXT, MARKET_CONTEXT};
+    private static final GameAction[][] IN_GAME_CONTEXTS = {UNIT_CONTEXT, BUILDING_CONTEXT, PEON_CONTEXT, RESOURCE_CONTEXT, MARKET_CONTEXT, LODGE_CONTEXT};
     // train peon actions still conflict check against always_active
-    private static final GameAction[][] CONFLICT_GROUPS = {ALWAYS_ACTIVE, UNIT_CONTEXT, PEON_CONTEXT, QUARTERS_CONTEXT, BUILDING_CONTEXT, RESOURCE_CONTEXT, MARKET_CONTEXT, UI_NAV};
+    private static final GameAction[][] CONFLICT_GROUPS = {ALWAYS_ACTIVE, UNIT_CONTEXT, PEON_CONTEXT, QUARTERS_CONTEXT, BUILDING_CONTEXT, RESOURCE_CONTEXT, MARKET_CONTEXT, LODGE_CONTEXT, UI_NAV};
 
     private static final Map<GameAction, Set<GameAction>> CONFLICT_MAP = buildConflictMap();
 

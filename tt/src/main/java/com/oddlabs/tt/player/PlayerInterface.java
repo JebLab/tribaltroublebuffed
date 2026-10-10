@@ -35,6 +35,9 @@ public interface PlayerInterface {
     void placePalisade(Selectable<?> @NonNull [] selection, int template_id, int grid_x1, int grid_y1, int grid_x2,
             int grid_y2);
 
+    // Buffed's Lodge; ignored unless the ruleset offers it.
+    void trainChampions(@NonNull Building building, int num_champions, boolean infinite);
+
     void doMagic(@NonNull Unit chieftain, int magic);
 
     void exitTower(@NonNull Building building);

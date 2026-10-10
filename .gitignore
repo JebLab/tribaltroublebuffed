@@ -272,3 +272,6 @@ reports/REVIEW_DUE
 # Python bytecode (tools/blender, tools/scripts)
 __pycache__/
 *.pyc
+
+# LWJGL extracts its native libraries next to the game when it runs
+.lwjgl/

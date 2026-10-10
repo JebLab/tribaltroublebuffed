@@ -52,6 +52,10 @@ public final class NoOpPlayerInterface implements PlayerInterface {
     }
 
     @Override
+    public void trainChampions(@NonNull Building building, int num_champions, boolean infinite) {
+    }
+
+    @Override
     public void doMagic(@NonNull Unit chieftain, int magic) {
     }
 

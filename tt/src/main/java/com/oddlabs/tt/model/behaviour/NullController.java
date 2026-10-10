@@ -18,12 +18,16 @@ public final class NullController extends Controller {
     @Override
     public @NonNull Object getKey() {
         Abilities abilities = selectable.getAbilities();
-        // Walls have no job: their template tells them apart, finished or not.
+        // Walls have no job: their template tells them apart, finished or not. A finished Great Tower has the Tower's
+        // job, and its template tells them apart.
         return List.of(super.getKey(), abilities.hasAbilities(Abilities.BUILD_ARMIES),
                 abilities.hasAbilities(Abilities.REPRODUCE), abilities.hasAbilities(Abilities.ATTACK),
                 abilities.hasAbilities(Abilities.SAIL), abilities.hasAbilities(Abilities.BREED),
                 abilities.hasAbilities(Abilities.AURA), abilities.hasAbilities(Abilities.TRADE),
-                selectable instanceof Building building && building.isWall());
+                selectable instanceof Building wall && wall.isWall(),
+                abilities.hasAbilities(Abilities.SHELTER),
+                abilities.hasAbilities(Abilities.ATTACK) && selectable instanceof Building tower
+                        && tower.isGreatTower());
     }
 
     @Override

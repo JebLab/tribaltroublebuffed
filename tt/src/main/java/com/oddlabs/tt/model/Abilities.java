@@ -34,6 +34,8 @@ public final class Abilities {
     public static final int AURA = 4096;
     // Trades resources (the Market)
     public static final int TRADE = 8192;
+    // Shelters units, speeds spells nearby and trains Champions (the Lodge)
+    public static final int SHELTER = 16384;
 
     private int abilities;
 

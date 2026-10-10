@@ -15,5 +15,7 @@ public enum DeployType {
     PEON_TRANSPORT_RUBBER,
     // Buffed's gear. Last, because the ordinal goes into the world checksum.
     SHIELD_WARRIOR,
-    TORCH_WARRIOR
+    TORCH_WARRIOR,
+    // Buffed: a unit sheltered in the Lodge, let out as it went in.
+    SHELTERED
 }

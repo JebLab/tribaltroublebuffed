@@ -117,6 +117,8 @@ public final class Player implements PlayerInterface {
         can_build[Race.BUILDING_MARKET] = features.market();
         can_build[Race.BUILDING_PALISADE] = features.palisade();
         can_build[Race.BUILDING_GATE] = features.palisade();
+        can_build[Race.BUILDING_GREAT_TOWER] = features.great_tower();
+        can_build[Race.BUILDING_LODGE] = features.lodge();
         can_build_shields = features.shield();
         can_build_torches = features.torch();
         this.player_info = player_info;
@@ -650,6 +652,27 @@ public final class Player implements PlayerInterface {
     public void setTrade(@NonNull Building building, int give, int get) {
         if (isValid(building))
             building.setTrade(give, get);
+    }
+
+    @Override
+    public void trainChampions(@NonNull Building building, int num_champions, boolean infinite) {
+        if (isValid(building) && can_build[Race.BUILDING_LODGE])
+            building.trainChampions(num_champions, infinite);
+    }
+
+    /**
+     * This player's Champions (Buffed), wherever they are: in the world, sheltered in a Lodge or in training there. At
+     * most the Lodge's {@code max_champions} may be alive.
+     */
+    public int getChampionCount() {
+        int count = 0;
+        for (Selectable<?> s : units.getSet()) {
+            if (s instanceof Unit unit && !unit.isDead() && unit.isChampion())
+                count++;
+            else if (s instanceof LandBuilding building && !building.isDead() && building.getLodge() != null)
+                count += building.getLodge().getChampionsInside();
+        }
+        return count;
     }
 
     @Override

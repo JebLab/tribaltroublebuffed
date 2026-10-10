@@ -76,6 +76,22 @@
             <animation name="die" wpc="1" type="plain">vikings/warrior/warrior_die.xml</animation>
             <animation name="sit" wpc="1" type="loop">vikings/warrior/warrior_sitting.xml</animation>
         </sprite>
+        <sprite name="champion">
+            <skeleton>vikings/warrior/warrior_skeleton.xml</skeleton>
+            <model r="90" g="60" b="30">
+                vikings/champion/viking_champion_mesh.xml
+                <texture name="viking_warrior_champion" team="viking_warrior_champion_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/champion/viking_champion_low_poly_mesh.xml
+                <texture name="viking_warrior_champion" team="viking_warrior_champion_team"/>
+            </model>
+            <animation name="idle" wpc="1" type="loop">vikings/warrior/warrior_idle.xml</animation>
+            <animation name="run" wpc="5" type="loop">vikings/warrior/warrior_run.xml</animation>
+            <animation name="attack" wpc="1" type="plain">vikings/warrior/warrior_attack.xml</animation>
+            <animation name="die" wpc="1" type="plain">vikings/warrior/warrior_die.xml</animation>
+            <animation name="sit" wpc="1" type="loop">vikings/warrior/warrior_sitting.xml</animation>
+        </sprite>
         <sprite name="chieftain">
             <skeleton>vikings/chieftain/viking_chieftain_skeleton.xml</skeleton>
             <model r="90" g="60" b="30">
@@ -436,6 +452,66 @@
                 <texture name="viking_palisade" team="viking_palisade_team"/>
             </model>
         </sprite>
+        <sprite name="great_tower">
+            <model r="90" g="60" b="30">
+                vikings/great_tower/viking_great_tower_built_hi.xml
+                <texture name="viking_great_tower" team="viking_building_lookout_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/great_tower/viking_great_tower_built_lo.xml
+                <texture name="viking_great_tower" team="viking_building_lookout_team"/>
+            </model>
+        </sprite>
+        <sprite name="great_tower_halfbuilt">
+            <model r="90" g="60" b="30">
+                vikings/great_tower/viking_great_tower_build_hi.xml
+                <texture name="viking_great_tower" team="viking_building_lookout_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/great_tower/viking_great_tower_build_lo.xml
+                <texture name="viking_great_tower" team="viking_building_lookout_team"/>
+            </model>
+        </sprite>
+        <sprite name="great_tower_start">
+            <model r="90" g="60" b="30">
+                vikings/great_tower/viking_great_tower_start_hi.xml
+                <texture name="viking_great_tower" team="viking_building_lookout_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/great_tower/viking_great_tower_start_lo.xml
+                <texture name="viking_great_tower" team="viking_building_lookout_team"/>
+            </model>
+        </sprite>
+        <sprite name="lodge" scale="0.9">
+            <model r="90" g="60" b="30">
+                vikings/quarters/viking_main_built.xml
+                <texture name="viking_lodge_hi" team="viking_buildings_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/quarters/viking_main_built_lo.xml
+                <texture name="viking_lodge_lo" team="viking_buildings_lo_team"/>
+            </model>
+        </sprite>
+        <sprite name="lodge_halfbuilt" scale="0.9">
+            <model r="90" g="60" b="30">
+                vikings/quarters/viking_main_build.xml
+                <texture name="viking_lodge_hi" team="viking_buildings_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/quarters/viking_main_build_lo.xml
+                <texture name="viking_lodge_lo2" team="viking_buildings_lo2_team"/>
+            </model>
+        </sprite>
+        <sprite name="lodge_start" scale="0.9">
+            <model r="90" g="60" b="30">
+                vikings/quarters/viking_main_start.xml
+                <texture name="viking_lodge_hi" team="viking_buildings_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/quarters/viking_main_start_lo.xml
+                <texture name="viking_lodge_hi" team="viking_buildings_hi_team"/>
+            </model>
+        </sprite>
         <sprite name="rally_point">
             <model r="90" g="60" b="30">
                 vikings/misc/vikings_rally_point.xml
@@ -554,6 +630,22 @@
             <model r="90" g="60" b="30">
                 natives/torch_warrior/native_torch_warrior_low_poly_mesh.xml
                 <texture name="native_warrior_torch" team="native_warrior_rock_team"/>
+            </model>
+            <animation name="idle" wpc="1" type="loop">natives/warrior/native_warrior_idle.xml</animation>
+            <animation name="run" wpc="3.2" type="loop">natives/warrior/native_warrior_run.xml</animation>
+            <animation name="attack" wpc="1" type="plain">natives/warrior/native_warrior_attack.xml</animation>
+            <animation name="die" wpc="1" type="plain">natives/warrior/native_warrior_die.xml</animation>
+            <animation name="sit" wpc="1" type="loop">natives/warrior/native_warrior_sitting.xml</animation>
+        </sprite>
+        <sprite name="champion">
+            <skeleton>natives/warrior/native_warrior_skeleton.xml</skeleton>
+            <model r="90" g="60" b="30">
+                natives/champion/native_champion_mesh.xml
+                <texture name="native_warrior_champion" team="native_warrior_champion_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/champion/native_champion_low_poly_mesh.xml
+                <texture name="native_warrior_champion" team="native_warrior_champion_team"/>
             </model>
             <animation name="idle" wpc="1" type="loop">natives/warrior/native_warrior_idle.xml</animation>
             <animation name="run" wpc="3.2" type="loop">natives/warrior/native_warrior_run.xml</animation>
@@ -875,6 +967,66 @@
             <model r="90" g="60" b="30">
                 natives/gate/native_gate_start_lo.xml
                 <texture name="native_palisade" team="native_palisade_team"/>
+            </model>
+        </sprite>
+        <sprite name="great_tower">
+            <model r="90" g="60" b="30">
+                natives/great_tower/native_great_tower_built_hi.xml
+                <texture name="native_great_tower" team="native_tower_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/great_tower/native_great_tower_built_lo.xml
+                <texture name="native_great_tower" team="native_tower_team"/>
+            </model>
+        </sprite>
+        <sprite name="great_tower_halfbuilt">
+            <model r="90" g="60" b="30">
+                natives/great_tower/native_great_tower_build_hi.xml
+                <texture name="native_great_tower" team="native_tower_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/great_tower/native_great_tower_build_lo.xml
+                <texture name="native_great_tower" team="native_tower_team"/>
+            </model>
+        </sprite>
+        <sprite name="great_tower_start">
+            <model r="90" g="60" b="30">
+                natives/great_tower/native_great_tower_start_hi.xml
+                <texture name="native_great_tower" team="native_tower_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/great_tower/native_great_tower_start_lo.xml
+                <texture name="native_great_tower" team="native_tower_team"/>
+            </model>
+        </sprite>
+        <sprite name="lodge" scale="0.9">
+            <model r="90" g="60" b="30">
+                natives/quarters/native_built_hi.xml
+                <texture name="native_lodge_hi" team="native_building_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/quarters/native_built_lo.xml
+                <texture name="native_lodge_lo" team="native_building_lo_team"/>
+            </model>
+        </sprite>
+        <sprite name="lodge_halfbuilt" scale="0.9">
+            <model r="90" g="60" b="30">
+                natives/quarters/native_build_hi.xml
+                <texture name="native_lodge_hi" team="native_building_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/quarters/native_build_lo-new.xml
+                <texture name="native_lodge_lo" team="native_building_lo_team"/>
+            </model>
+        </sprite>
+        <sprite name="lodge_start" scale="0.9">
+            <model r="90" g="60" b="30">
+                natives/quarters/native_start_hi.xml
+                <texture name="native_lodge_hi" team="native_building_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/quarters/native_start_lo.xml
+                <texture name="native_lodge_hi" team="native_building_hi_team"/>
             </model>
         </sprite>
         <sprite name="rally_point">

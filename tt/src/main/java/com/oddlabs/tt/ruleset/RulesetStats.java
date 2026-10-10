@@ -30,16 +30,18 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
      * @param torch             the Armory makes Torches (the Firebrand / Torchbearer)
      * @param market            peons can build the Trading Post / Market
      * @param palisade          peons can build Palisade segments and Gates
+     * @param great_tower       peons can build the Great Tower
+     * @param lodge             peons can build the Spirit Lodge / Mead Hall, which trains the Champion
      */
     public record Features(boolean ships, boolean enormous_islands, boolean archipelago, int max_players,
                            boolean adjustable_limits, boolean chicken_coop, boolean totem, boolean shield,
-                           boolean torch, boolean market, boolean palisade) {
+                           boolean torch, boolean market, boolean palisade, boolean great_tower, boolean lodge) {
     }
 
     /**
      * One race's numbers. A building or unit that a ruleset does not offer still has its numbers here (the base file
      * must be complete); its {@link Features} flag keeps it out of the game. The shield and torch warriors fight hand
-     * to hand: their {@code hit_chance} is that of a blow.
+     * to hand, and so does the Champion: their {@code hit_chance} is that of a blow.
      */
     public record RaceStats(@NonNull UnitStats peon, @NonNull UnitStats rock_warrior, @NonNull UnitStats iron_warrior,
                             @NonNull UnitStats chicken_warrior, @NonNull UnitStats shield_warrior,
@@ -48,7 +50,9 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
                             @NonNull BuildingStats tower, @NonNull BuildingStats ship,
                             @NonNull ChickenCoopStats chicken_coop, @NonNull TotemStats totem,
                             @NonNull TorchStats torch, @NonNull MarketStats market,
-                            @NonNull PalisadeStats palisade, @NonNull BuildingStats gate) {
+                            @NonNull PalisadeStats palisade, @NonNull BuildingStats gate,
+                            @NonNull UnitStats champion, @NonNull GreatTowerStats great_tower,
+                            @NonNull LodgeStats lodge) {
     }
 
     /**
@@ -115,6 +119,31 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
      * @param max_segments Palisade segments and Gates one player may have at a time
      */
     public record PalisadeStats(int hit_points, int max_segments) {
+    }
+
+    /**
+     * A tower that several throwers man at once (docs/design/great-tower.md), each with the Tower's range and hit
+     * bonus. Built from wood, then finished with rock: every load, log or rock, is 5 of its hit points.
+     *
+     * @param rock     rocks that finish it, after the wood
+     * @param throwers warriors with thrown weapons it holds at once
+     */
+    public record GreatTowerStats(int hit_points, int rock, int throwers) {
+    }
+
+    /**
+     * Shelters units, speeds the spells of chieftains nearby and trains the Champion (lodge-and-champion.md in
+     * docs/design). Built from wood, then finished with iron: every load is 5 of its hit points.
+     *
+     * @param iron                iron that finishes it, after the wood
+     * @param shelter             units of its owner it holds
+     * @param spell_radius        meters within which a chieftain of its team charges faster
+     * @param spell_charge_factor how many times faster (2: half the charge time); several Lodges do not add up
+     * @param champion_seconds    seconds a Champion trains, while a peon is inside
+     * @param max_champions       Champions one player may have alive, sheltered or in training
+     */
+    public record LodgeStats(int hit_points, int iron, int shelter, float spell_radius, float spell_charge_factor,
+                             float champion_seconds, int max_champions) {
     }
 
     /** The chieftains' spells, by their in-game names. */

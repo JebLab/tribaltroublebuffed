@@ -6,6 +6,7 @@ import com.oddlabs.tt.model.Ship;
 import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.model.DeployType;
+import com.oddlabs.tt.model.weapon.Champion;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.IronSpearWeapon;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
@@ -33,6 +34,7 @@ public final class DensityMap {
     private final int RUBBER_WEIGHT = 8;
     private final int SHIELD_WEIGHT = 3;
     private final int TORCH_WEIGHT = 4;
+    private final int CHAMPION_WEIGHT = 6;
     private final int CHIEFTAIN_WEIGHT = 11;
     private final int OUTSIDE_SCALE = 2;
 
@@ -55,6 +57,8 @@ public final class DensityMap {
                 return RUBBER_WEIGHT * OUTSIDE_SCALE;
             } else if (type == Shield.class) {
                 return SHIELD_WEIGHT * OUTSIDE_SCALE;
+            } else if (type == Champion.class) {
+                return CHAMPION_WEIGHT * OUTSIDE_SCALE;
             } else if (type == Torch.class) {
                 return TORCH_WEIGHT * OUTSIDE_SCALE;
             } else {

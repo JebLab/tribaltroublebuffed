@@ -23,6 +23,7 @@ final class CensusTaker {
     private final boolean[] chicken_coop_bred;
     private final int[] fires_lit;
     private final int[] trades_made;
+    private final int[] great_tower_throwers;
 
     CensusTaker(int num_players) {
         for (int i = 0; i < num_players; i++) {
@@ -32,6 +33,7 @@ final class CensusTaker {
         chicken_coop_bred = new boolean[num_players];
         fires_lit = new int[num_players];
         trades_made = new int[num_players];
+        great_tower_throwers = new int[num_players];
     }
 
     void update(@NonNull Player @NonNull [] players) {
@@ -40,6 +42,9 @@ final class CensusTaker {
                 if (s instanceof LandBuilding building && !building.isDead() && building.isComplete()) {
                     completed_buildings.get(i).add(building.getTemplate().getTemplateID());
                     ChickenCoop coop = building.getChickenCoop();
+                    if (building.isGreatTower())
+                        great_tower_throwers[i] = Math.max(great_tower_throwers[i],
+                                building.getUnitContainer().getNumSupplies());
                     if (coop != null && coop.getNumChickens() > 0)
                         chicken_coop_bred[i] = true;
                 } else if (s instanceof Unit unit && !unit.isDead()) {
@@ -59,7 +64,7 @@ final class CensusTaker {
         List<HeadlessMatchResult.Census> census = new ArrayList<>();
         for (int i = 0; i < chicken_coop_bred.length; i++)
             census.add(new HeadlessMatchResult.Census(completed_buildings.get(i), chicken_coop_bred[i],
-                    unit_types.get(i), fires_lit[i], trades_made[i]));
+                    unit_types.get(i), fires_lit[i], trades_made[i], great_tower_throwers[i]));
         return census;
     }
 }

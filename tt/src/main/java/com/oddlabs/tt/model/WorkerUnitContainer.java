@@ -22,8 +22,9 @@ public final class WorkerUnitContainer extends UnitContainer {
 
     @Override
     public boolean canEnter(@NonNull Unit unit) {
+        // A Champion has no gear to hand back (Buffed): only a Lodge shelters it.
         return getTotalSupplies() != getMaxSupplyCount()
-                && (!peons_only || unit.getAbilities().hasAbilities(Abilities.BUILD));
+                && (!peons_only || unit.getAbilities().hasAbilities(Abilities.BUILD)) && !unit.isChampion();
     }
 
     private int getTotalSupplies() {

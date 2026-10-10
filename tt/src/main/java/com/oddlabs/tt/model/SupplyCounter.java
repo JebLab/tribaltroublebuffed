@@ -40,7 +40,7 @@ public class SupplyCounter {
         this.delta = delta;
     }
 
-    public final int getMaxSupplies() {
+    public int getMaxSupplies() {
         return !building.isDead() ? building.getSupplyContainer(supply_type).getMaxSupplyCount() : 0;
     }
 }

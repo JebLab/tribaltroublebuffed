@@ -9,7 +9,9 @@ import com.oddlabs.tt.input.InputPhase;
 import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.Building;
 import com.oddlabs.tt.model.Race;
+import com.oddlabs.tt.model.RacesResources;
 import com.oddlabs.tt.model.Unit;
+import com.oddlabs.tt.player.Player;
 import com.oddlabs.tt.render.LandscapeLocation;
 import com.oddlabs.tt.viewer.Cheat;
 import com.oddlabs.tt.viewer.WorldViewer;
@@ -80,6 +82,17 @@ public abstract class InGameDelegate extends CameraDelegate<Camera> {
             if (viewer.getLocalPlayer().getUnitCountContainer().getNumSupplies() != viewer.getParameters().getMaxUnitCount()) {
                 new Unit(viewer.getLocalPlayer(), landscape_x, landscape_y, null,
                         viewer.getLocalPlayer().getRace().getUnitTemplate(Race.UNIT_WARRIOR_TORCH));
+                return true;
+            }
+        }
+        // Shift+F4 creates a Champion where the ruleset offers the Lodge (Buffed), within the limit of five.
+        if (actions.contains(GameAction.CHEAT_12) && viewer.getWorld().getRuleset().getStats().features().lodge()) {
+            Player player = viewer.getLocalPlayer();
+            int max_champions = viewer.getWorld().getRuleset().getStats().race(
+                    player.getPlayerInfo().getRace() == RacesResources.RACE_VIKINGS).lodge().max_champions();
+            if (player.getUnitCountContainer().getNumSupplies() != viewer.getParameters().getMaxUnitCount()
+                    && player.getChampionCount() < max_champions) {
+                new Unit(player, landscape_x, landscape_y, null, player.getRace().getUnitTemplate(Race.UNIT_CHAMPION));
                 return true;
             }
         }

@@ -1,8 +1,8 @@
 package com.oddlabs.tt.gui;
 
-import com.oddlabs.tt.model.BuildProductionContainer;
 import com.oddlabs.tt.model.BuildSupplyContainer;
 import com.oddlabs.tt.model.Building;
+import com.oddlabs.tt.model.weapon.Champion;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
@@ -69,6 +69,8 @@ public final class BuildSpinner extends IconSpinner {
                 player_interface.buildShieldWeapons(current_building, num, infinite);
             } else if (type == Torch.class) {
                 player_interface.buildTorchWeapons(current_building, num, infinite);
+            } else if (type == Champion.class) {
+                player_interface.trainChampions(current_building, num, infinite);
             } else {
                 throw new IllegalArgumentException();
             }
@@ -83,8 +85,7 @@ public final class BuildSpinner extends IconSpinner {
 
     @Override
     protected float getProgress() {
-        return current_building.isDead() ? 0 : ((BuildProductionContainer) current_building.getBuildSupplyContainer(
-                type)).getBuildProgress();
+        return current_building.isDead() ? 0 : current_building.getBuildSupplyContainer(type).getBuildProgress();
     }
 
     Building getBuilding() {

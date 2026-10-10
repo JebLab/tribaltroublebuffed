@@ -58,6 +58,7 @@ public class BuildProductionContainer extends BuildSupplyContainer {
         }
     }
 
+    @Override
     public final float getBuildProgress() {
         return man_seconds / man_seconds_per_production;
     }

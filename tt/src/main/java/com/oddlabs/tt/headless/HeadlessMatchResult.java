@@ -37,9 +37,11 @@ public record HeadlessMatchResult(int winningTeam, int finalTick, int finalCheck
      * @param unitTypes          {@code Race.UNIT_*} ids of the units it had in the field
      * @param firesLit           buildings its torches set on fire (a fire started again counts again)
      * @param tradesMade         trades its Markets made
+     * @param greatTowerThrowers the most throwers it had in one Great Tower at once
      */
     public record Census(@NonNull Set<@NonNull Integer> completedBuildings, boolean chickenCoopBred,
-                         @NonNull Set<@NonNull Integer> unitTypes, int firesLit, int tradesMade) {
+                         @NonNull Set<@NonNull Integer> unitTypes, int firesLit, int tradesMade,
+                         int greatTowerThrowers) {
         public Census {
             completedBuildings = Collections.unmodifiableSortedSet(new TreeSet<>(completedBuildings));
             unitTypes = Collections.unmodifiableSortedSet(new TreeSet<>(unitTypes));

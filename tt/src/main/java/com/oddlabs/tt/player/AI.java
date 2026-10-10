@@ -50,6 +50,8 @@ public abstract class AI implements Animated {
     private int INDEX_TOTEMS;
     private int INDEX_MARKETS;
     private int INDEX_WALLS;
+    private int INDEX_GREAT_TOWERS;
+    private int INDEX_LODGES;
     private int INDEX_CONSTRUCTION_SITES;
     private int INDEX_PLACE_BUILDING_PEONS;
     private int INDEX_DEFENDING_UNITS;
@@ -62,6 +64,8 @@ public abstract class AI implements Animated {
     private boolean chicken_coop_under_construction = false;
     private boolean totem_under_construction = false;
     private boolean market_under_construction = false;
+    private boolean great_tower_under_construction = false;
+    private boolean lodge_under_construction = false;
     private boolean found_island = false;
     private float sleep_time;
 
@@ -256,6 +260,16 @@ public abstract class AI implements Animated {
         return INDEX_WALLS == -1 ? null : lists[INDEX_WALLS];
     }
 
+    /** Finished Great Towers (Buffed). */
+    protected final @NonNull Selectable<?> @Nullable [] getGreatTowers() {
+        return INDEX_GREAT_TOWERS == -1 ? null : lists[INDEX_GREAT_TOWERS];
+    }
+
+    /** Finished Lodges (Buffed). */
+    protected final @NonNull Selectable<?> @Nullable [] getLodges() {
+        return INDEX_LODGES == -1 ? null : lists[INDEX_LODGES];
+    }
+
     protected final @NonNull Selectable<?> @Nullable [] getConstructionSites() {
         return INDEX_CONSTRUCTION_SITES == -1 ? null : lists[INDEX_CONSTRUCTION_SITES];
     }
@@ -284,6 +298,8 @@ public abstract class AI implements Animated {
         INDEX_TOTEMS = -1;
         INDEX_MARKETS = -1;
         INDEX_WALLS = -1;
+        INDEX_GREAT_TOWERS = -1;
+        INDEX_LODGES = -1;
         INDEX_CONSTRUCTION_SITES = -1;
         INDEX_PLACE_BUILDING_PEONS = -1;
         INDEX_DEFENDING_UNITS = -1;
@@ -319,24 +335,31 @@ public abstract class AI implements Animated {
                 } else if (s.getAbilities().hasAbilities(Abilities.REPRODUCE)) {
                     INDEX_QUARTERS = i;
                     quarters_under_construction = false;
-                } else if (s.getAbilities().hasAbilities(Abilities.ATTACK)) {
-                    INDEX_TOWERS = i;
-                } else if (s.getAbilities().hasAbilities(Abilities.SAIL)) {
-                    INDEX_SHIPS = i;
-                    ship_under_construction = false;
-                } else if (s.getAbilities().hasAbilities(Abilities.BREED)) {
-                    INDEX_CHICKEN_COOPS = i;
-                    chicken_coop_under_construction = false;
-                } else if (s.getAbilities().hasAbilities(Abilities.AURA)) {
-                    INDEX_TOTEMS = i;
-                } else if (s.getAbilities().hasAbilities(Abilities.TRADE)) {
-                    INDEX_MARKETS = i;
-                    market_under_construction = false;
-                } else if (s instanceof Building building && building.isWall()) {
-                    INDEX_WALLS = i;
-                } else {
-                    INDEX_CONSTRUCTION_SITES = i;
-                }
+                } else if (s.getAbilities().hasAbilities(Abilities.ATTACK) && s instanceof Building tower
+                        && tower.isGreatTower()) {
+                            INDEX_GREAT_TOWERS = i;
+                            great_tower_under_construction = false;
+                        } else if (s.getAbilities().hasAbilities(Abilities.ATTACK)) {
+                            INDEX_TOWERS = i;
+                        } else if (s.getAbilities().hasAbilities(Abilities.SAIL)) {
+                            INDEX_SHIPS = i;
+                            ship_under_construction = false;
+                        } else if (s.getAbilities().hasAbilities(Abilities.BREED)) {
+                            INDEX_CHICKEN_COOPS = i;
+                            chicken_coop_under_construction = false;
+                        } else if (s.getAbilities().hasAbilities(Abilities.AURA)) {
+                            INDEX_TOTEMS = i;
+                        } else if (s.getAbilities().hasAbilities(Abilities.TRADE)) {
+                            INDEX_MARKETS = i;
+                            market_under_construction = false;
+                        } else if (s.getAbilities().hasAbilities(Abilities.SHELTER)) {
+                            INDEX_LODGES = i;
+                            lodge_under_construction = false;
+                        } else if (s instanceof Building building && building.isWall()) {
+                            INDEX_WALLS = i;
+                        } else {
+                            INDEX_CONSTRUCTION_SITES = i;
+                        }
             } else if (s.getPrimaryController() instanceof PlaceBuildingController) {
                 INDEX_PLACE_BUILDING_PEONS = i;
             } else if (s.getPrimaryController() instanceof DefendController) {
@@ -351,6 +374,8 @@ public abstract class AI implements Animated {
             chicken_coop_under_construction = false;
             totem_under_construction = false;
             market_under_construction = false;
+            great_tower_under_construction = false;
+            lodge_under_construction = false;
         }
     }
 
@@ -408,6 +433,22 @@ public abstract class AI implements Animated {
 
     protected final void setMarketUnderConstruction(boolean market_under_construction) {
         this.market_under_construction = market_under_construction;
+    }
+
+    protected final boolean greatTowerUnderConstruction() {
+        return great_tower_under_construction;
+    }
+
+    protected final void setGreatTowerUnderConstruction(boolean great_tower_under_construction) {
+        this.great_tower_under_construction = great_tower_under_construction;
+    }
+
+    protected final boolean lodgeUnderConstruction() {
+        return lodge_under_construction;
+    }
+
+    protected final void setLodgeUnderConstruction(boolean lodge_under_construction) {
+        this.lodge_under_construction = lodge_under_construction;
     }
 
     private void reset() {

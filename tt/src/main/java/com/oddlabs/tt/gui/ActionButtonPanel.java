@@ -14,6 +14,7 @@ import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.Action;
 import com.oddlabs.tt.model.Building;
 import com.oddlabs.tt.model.LandBuilding;
+import com.oddlabs.tt.model.Lodge;
 import com.oddlabs.tt.model.Market;
 import com.oddlabs.tt.model.Ship;
 import com.oddlabs.tt.model.DeployType;
@@ -25,6 +26,8 @@ import com.oddlabs.tt.model.RubberSupply;
 import com.oddlabs.tt.model.SupplyCounter;
 import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.model.WallLine;
+import com.oddlabs.tt.model.behaviour.RepairBehaviour;
+import com.oddlabs.tt.model.weapon.Champion;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
@@ -40,6 +43,7 @@ import com.oddlabs.tt.viewer.WorldViewer;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
@@ -84,6 +88,8 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
     private final Group gear_status_group = new NonFocusGroup();
     private final Group market_status_group = new NonFocusGroup();
     private final Group market_group = new NonFocusGroup();
+    private final Group lodge_status_group = new NonFocusGroup();
+    private final Group lodge_group = new NonFocusGroup();
 
     private final @NonNull NonFocusIconButton tower_attack_button;
     private final @NonNull NonFocusIconButton tower_exit_button;
@@ -120,6 +126,17 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
     private final @NonNull NonFocusIconButton market_rally_point_button;
     private int shown_sell = -1;
     private int shown_buy = -1;
+    // Buffed's Great Tower and Lodge (M8). A Lodge's panel: the units sheltered and the Champions alive, a spinner
+    // that lets the units out, the Champion spinner, and a rally point.
+    private final @NonNull NonFocusIconButton great_tower_button;
+    private final @NonNull NonFocusIconButton lodge_button;
+    private final boolean great_tower_enabled;
+    private final boolean lodge_enabled;
+    private final @NonNull StatusIcon lodge_unit_status;
+    private final @NonNull StatusIcon lodge_champion_status;
+    private final @NonNull DeploySpinner lodge_leave_button;
+    private final @NonNull BuildSpinner lodge_champion_button;
+    private final @NonNull NonFocusIconButton lodge_rally_point_button;
     // Buffed's gear: a second column in the Armory's weapon and army submenus, and its stock beside the status.
     private final boolean shield_enabled;
     private final boolean torch_enabled;
@@ -212,6 +229,7 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
     private boolean current_tower = false;
     private boolean current_chicken_coop = false;
     private boolean current_market = false;
+    private boolean current_lodge = false;
 //	private boolean[] magic_disabled = new boolean[2];
 
     public ActionButtonPanel(@NonNull WorldViewer viewer, @NonNull GameCamera camera) {
@@ -342,6 +360,33 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                     camera.getState(), Race.BUILDING_GATE)));
             gate_button.setIconDisabler(() -> !player.canBuild(Race.BUILDING_GATE));
         }
+        great_tower_enabled = stats.features().great_tower();
+        lodge_enabled = stats.features().lodge();
+        String great_tower_name = player.getRace().getBuildingTemplate(Race.BUILDING_GREAT_TOWER).getName();
+        great_tower_button = new NonFocusIconButton(race_icons.greatTowerIcon(), GameAction.UNIT_BUILD_GREAT_TOWER,
+                () -> i18n("great_tower_tip", great_tower_name, getBinding(GameAction.UNIT_BUILD_GREAT_TOWER),
+                        race_stats.great_tower().throwers(),
+                        race_stats.great_tower().hit_points() / RepairBehaviour.REPAIRS_PER_SUPPLY - race_stats.great_tower().rock(),
+                        race_stats.great_tower().rock()));
+        if (great_tower_enabled) {
+            peon_group.addChild(great_tower_button);
+            great_tower_button.addMouseClickListener((_, _, _, _) -> pushDelegate(new PlacingDelegate(viewer,
+                    camera.getState(), Race.BUILDING_GREAT_TOWER)));
+            great_tower_button.setIconDisabler(() -> !player.canBuild(Race.BUILDING_GREAT_TOWER));
+        }
+        String lodge_name = player.getRace().getBuildingTemplate(Race.BUILDING_LODGE).getName();
+        String champion_name = player.getRace().getUnitTemplate(Race.UNIT_CHAMPION).getName();
+        lodge_button = new NonFocusIconButton(race_icons.lodgeIcon(), GameAction.UNIT_BUILD_LODGE,
+                () -> i18n("lodge_tip", lodge_name, getBinding(GameAction.UNIT_BUILD_LODGE),
+                        race_stats.lodge().shelter(), champion_name,
+                        race_stats.lodge().hit_points() / RepairBehaviour.REPAIRS_PER_SUPPLY - race_stats.lodge().iron(),
+                        race_stats.lodge().iron()));
+        if (lodge_enabled) {
+            peon_group.addChild(lodge_button);
+            lodge_button.addMouseClickListener((_, _, _, _) -> pushDelegate(new PlacingDelegate(viewer,
+                    camera.getState(), Race.BUILDING_LODGE)));
+            lodge_button.setIconDisabler(() -> !player.canBuild(Race.BUILDING_LODGE));
+        }
 
         gather_repair_button.place();
         quarters_button.place(gather_repair_button, Placement.BOTTOM_MID);
@@ -363,6 +408,13 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         if (palisade_enabled) {
             palisade_button.place(tower_button, Placement.LEFT_MID);
             gate_button.place(palisade_button, Placement.BOTTOM_MID);
+        }
+        // A third column for the late buildings, left of the Market and the coop's column.
+        if (great_tower_enabled) {
+            great_tower_button.place(market_enabled ? market_button : gather_repair_button, Placement.LEFT_MID);
+        }
+        if (lodge_enabled) {
+            lodge_button.place(chicken_coop_enabled ? chicken_coop_button : quarters_button, Placement.LEFT_MID);
         }
         peon_group.compileCanvas(GROUP_LEFT_OFFSET, GROUP_BOTTOM_OFFSET, GROUP_RIGHT_OFFSET, 0);
 
@@ -511,6 +563,35 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         market_rally_point_button.place(market_buy_buttons[0], Placement.BOTTOM_MID);
         market_group.compileCanvas(GROUP_LEFT_OFFSET, GROUP_BOTTOM_OFFSET, GROUP_RIGHT_OFFSET, GROUP_TOP_OFFSET);
         removeTradeButtons();
+
+        lodge_unit_status = new StatusIcon(label_width, race_icons.unitStatusIcon(), i18n("lodge_units_tip"));
+        lodge_status_group.addChild(lodge_unit_status);
+        lodge_unit_status.place();
+        lodge_champion_status = new StatusIcon(label_width, race_icons.championIcon().quad(ModeIconQuads.Mode.NORMAL),
+                i18n(
+                        "lodge_champions_tip", champion_name));
+        lodge_status_group.addChild(lodge_champion_status);
+        lodge_champion_status.place(lodge_unit_status, Placement.BOTTOM_MID);
+        lodge_status_group.compileCanvas(5, 5, 5, 5);
+
+        lodge_leave_button = new DeploySpinner(viewer, player_interface, race_icons.towerExitIcon(), i18n(
+                "lodge_leave_tip"), List.of(race_icons.unitStatusIcon()), GameAction.TRAIN_PEON,
+                GameAction.TRAIN_PEON_DEC, null, null);
+        lodge_group.addChild(lodge_leave_button);
+        lodge_leave_button.place();
+        List<IconQuad> champion_cost = new ArrayList<>(List.of(race_icons.unitStatusIcon()));
+        champion_cost.addAll(Lodge.COST_CHAMPION.iconList());
+        lodge_champion_button = new BuildSpinner(viewer, player_interface, race_icons.championIcon(), i18n(
+                "train_champion_tip", champion_name, race_stats.lodge().max_champions()), champion_cost,
+                GameAction.TRAIN_CHAMPION, GameAction.TRAIN_CHAMPION_DEC);
+        lodge_group.addChild(lodge_champion_button);
+        lodge_champion_button.place(lodge_leave_button, Placement.BOTTOM_MID);
+        lodge_rally_point_button = new NonFocusIconButton(race_icons.rallyPointIcon(), GameAction.UNIT_SET_RALLY,
+                () -> i18n("rally_point_tip", getBinding(GameAction.UNIT_SET_RALLY)));
+        lodge_group.addChild(lodge_rally_point_button);
+        lodge_rally_point_button.addMouseClickListener(this::setRallyPoint);
+        lodge_rally_point_button.place(lodge_champion_button, Placement.BOTTOM_MID);
+        lodge_group.compileCanvas(GROUP_LEFT_OFFSET, GROUP_BOTTOM_OFFSET, GROUP_RIGHT_OFFSET, GROUP_TOP_OFFSET);
 
         harvest_button = new NonFocusIconButton(icons.getHarvestIcon(), GameAction.PROD_HARVEST,
                 () -> i18n("gather_resources_tip", getBinding(GameAction.PROD_HARVEST)));
@@ -803,10 +884,13 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                 && current_building.getAbilities().hasAbilities(Abilities.BREED);
         boolean new_market = current_building != null
                 && current_building.getAbilities().hasAbilities(Abilities.TRADE);
+        boolean new_lodge = current_building != null
+                && current_building.getAbilities().hasAbilities(Abilities.SHELTER);
         update = update || different_building || different_chieftain || new_quarters != current_quarters
                 || new_armory != current_armory || new_ship != current_ship || new_unit != current_unit
                 || new_peon != current_peon || new_tower != current_tower
-                || new_chicken_coop != current_chicken_coop || new_market != current_market;
+                || new_chicken_coop != current_chicken_coop || new_market != current_market
+                || new_lodge != current_lodge;
         if (update) {
             current_quarters = new_quarters;
             current_armory = new_armory;
@@ -814,6 +898,7 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
             current_tower = new_tower;
             current_chicken_coop = new_chicken_coop;
             current_market = new_market;
+            current_lodge = new_lodge;
             current_unit = new_unit;
             current_peon = new_peon;
             update = false;
@@ -872,6 +957,16 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                 market_peon_button.setContainers(current_building, DeployType.PEON, null);
                 market_peon_button.setIconDisabler(() -> unit_counter.getNumSupplies() == 0);
                 removeTradeButtons();
+            }
+            if (current_lodge) {
+                addChild(lodge_status_group);
+                addChild(lodge_group);
+                SupplyCounter unit_counter = new SupplyCounter(current_building, Unit.class);
+                lodge_unit_status.setCounter(unit_counter);
+                lodge_champion_status.setCounter(new ChampionCounter(current_building, player));
+                lodge_leave_button.setContainers(current_building, DeployType.SHELTERED, null);
+                lodge_leave_button.setIconDisabler(() -> unit_counter.getNumSupplies() == 0);
+                lodge_champion_button.setBuildSupplyContainer(current_building, Champion.class);
             }
             if (current_armory) {
                 addChild(status_group);
@@ -988,6 +1083,12 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                     if (shown_buy >= 0)
                         market_buy_buttons[shown_buy].doUpdate();
                     market_rally_point_button.doUpdate();
+                } else if (current_lodge) {
+                    lodge_unit_status.doUpdate();
+                    lodge_champion_status.doUpdate();
+                    lodge_leave_button.doUpdate();
+                    lodge_champion_button.doUpdate();
+                    lodge_rally_point_button.doUpdate();
                 } else if (current_peon) {
                     quarters_button.doUpdate();
                     armory_button.doUpdate();
@@ -1007,6 +1108,12 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                     if (palisade_enabled) {
                         palisade_button.doUpdate();
                         gate_button.doUpdate();
+                    }
+                    if (great_tower_enabled) {
+                        great_tower_button.doUpdate();
+                    }
+                    if (lodge_enabled) {
+                        lodge_button.doUpdate();
                     }
                 }
         if (current_unit) {
@@ -1039,6 +1146,8 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         gear_status_group.remove();
         market_status_group.remove();
         market_group.remove();
+        lodge_status_group.remove();
+        lodge_group.remove();
         current_submenu = null;
     }
 
@@ -1205,6 +1314,8 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                 height - chicken_coop_status_group.getHeight());
         market_status_group.setPos(width - market_status_group.getWidth(), height - market_status_group.getHeight());
         market_group.setPos(width - market_group.getWidth(), market_status_group.getY() - market_group.getHeight());
+        lodge_status_group.setPos(width - lodge_status_group.getWidth(), height - lodge_status_group.getHeight());
+        lodge_group.setPos(width - lodge_group.getWidth(), lodge_status_group.getY() - lodge_group.getHeight());
     }
 
     @Override
@@ -1279,144 +1390,184 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                                             if (palisade_enabled) {
                                                 activate(event, gate_button);
                                             }
-                                        } else if (current_market && event.consumeAction(GameAction.MARKET_SELL)) {
-                                            if (shown_sell >= 0) {
-                                                activate(event, market_sell_buttons[shown_sell]);
-                                            }
-                                        } else if (current_market && event.consumeAction(GameAction.MARKET_BUY)) {
-                                            if (shown_buy >= 0) {
-                                                activate(event, market_buy_buttons[shown_buy]);
-                                            }
-                                        } else if ((current_unit || current_tower) && event.consumeAction(
-                                                GameAction.UNIT_ATTACK)) {
-                                                    if (current_unit) {
-                                                        activate(event, attack_button);
-                                                    } else if (current_tower) {
-                                                        activate(event, tower_attack_button);
+                                        } else if (current_unit && current_peon && event.consumeAction(
+                                                GameAction.UNIT_BUILD_GREAT_TOWER)) {
+                                                    if (great_tower_enabled) {
+                                                        activate(event, great_tower_button);
                                                     }
-                                                } else if ((current_unit || current_armory || current_ship)
-                                                        && (event.consumeAction(
-                                                                GameAction.UNIT_GATHER)
-                                                                || event.consumeAction(GameAction.PROD_HARVEST))) {
-                                                                    // G - Gather or Harvest
-                                                                    if (current_unit) {
-                                                                        activate(event, gather_repair_button);
-                                                                    } else if (current_armory
-                                                                            && current_submenu == null) {
-                                                                                // Legacy gather alias only works from the top level; direct submenu
-                                                                                // switching is reserved for the PROD_HARVEST binding handled above.
-                                                                                activate(event, harvest_button);
-                                                                            } else if (current_ship
-                                                                                    && current_submenu == null) {
-                                                                                        activate(event,
-                                                                                                ship_harvest_button);
-                                                                                    }
-                                                                } else if ((current_peon || current_armory
-                                                                        || current_ship) && event.consumeAction(
-                                                                                GameAction.UNIT_BUILD_TOWER)) {
-                                                                                    if (current_peon) {
-                                                                                        activate(event, tower_button);
-                                                                                    }
-                                                                                } else if (current_quarters
-                                                                                        && event.consumeAction(
-                                                                                                GameAction.TRAIN_CHIEFTAIN)) {
-                                                                                                    activate(event,
-                                                                                                            quarters_chieftain_button);
-                                                                                                } else if (current_ship
-                                                                                                        && current_submenu == ship_army_group
-                                                                                                        && event.consumeAction(
-                                                                                                                GameAction.DEPLOY_CHIEFTAIN)) {
+                                                } else if (current_unit && current_peon && event.consumeAction(
+                                                        GameAction.UNIT_BUILD_LODGE)) {
+                                                            if (lodge_enabled) {
+                                                                activate(event, lodge_button);
+                                                            }
+                                                        } else if (current_market && event.consumeAction(
+                                                                GameAction.MARKET_SELL)) {
+                                                                    if (shown_sell >= 0) {
+                                                                        activate(event,
+                                                                                market_sell_buttons[shown_sell]);
+                                                                    }
+                                                                } else if (current_market && event.consumeAction(
+                                                                        GameAction.MARKET_BUY)) {
+                                                                            if (shown_buy >= 0) {
+                                                                                activate(event,
+                                                                                        market_buy_buttons[shown_buy]);
+                                                                            }
+                                                                        } else if ((current_unit || current_tower)
+                                                                                && event.consumeAction(
+                                                                                        GameAction.UNIT_ATTACK)) {
+                                                                                            if (current_unit) {
+                                                                                                activate(event,
+                                                                                                        attack_button);
+                                                                                            } else if (current_tower) {
+                                                                                                activate(event,
+                                                                                                        tower_attack_button);
+                                                                                            }
+                                                                                        } else if ((current_unit
+                                                                                                || current_armory
+                                                                                                || current_ship)
+                                                                                                && (event.consumeAction(
+                                                                                                        GameAction.UNIT_GATHER)
+                                                                                                        || event.consumeAction(
+                                                                                                                GameAction.PROD_HARVEST))) {
+                                                                                                                    // G - Gather or Harvest
+                                                                                                                    if (current_unit) {
+                                                                                                                        activate(
+                                                                                                                                event,
+                                                                                                                                gather_repair_button);
+                                                                                                                    } else
+                                                                                                                        if (current_armory
+                                                                                                                                && current_submenu == null) {
+                                                                                                                                    // Legacy gather alias only works from the top level; direct submenu
+                                                                                                                                    // switching is reserved for the PROD_HARVEST binding handled above.
+                                                                                                                                    activate(
+                                                                                                                                            event,
+                                                                                                                                            harvest_button);
+                                                                                                                                } else
+                                                                                                                            if (current_ship
+                                                                                                                                    && current_submenu == null) {
+                                                                                                                                        activate(
+                                                                                                                                                event,
+                                                                                                                                                ship_harvest_button);
+                                                                                                                                    }
+                                                                                                                } else
+                                                                                            if ((current_peon
+                                                                                                    || current_armory
+                                                                                                    || current_ship)
+                                                                                                    && event.consumeAction(
+                                                                                                            GameAction.UNIT_BUILD_TOWER)) {
+                                                                                                                if (current_peon) {
                                                                                                                     activate(
                                                                                                                             event,
-                                                                                                                            ship_army_chieftain_button);
+                                                                                                                            tower_button);
+                                                                                                                }
+                                                                                                            } else
+                                                                                                if (current_quarters
+                                                                                                        && event.consumeAction(
+                                                                                                                GameAction.TRAIN_CHIEFTAIN)) {
+                                                                                                                    activate(
+                                                                                                                            event,
+                                                                                                                            quarters_chieftain_button);
                                                                                                                 } else
-                                                                                                    if (current_chieftain != null
+                                                                                                    if (current_ship
+                                                                                                            && current_submenu == ship_army_group
                                                                                                             && event.consumeAction(
-                                                                                                                    GameAction.MAGIC_2)) {
-                                                                                                                        if (player.canDoMagic(
-                                                                                                                                1)) {
-                                                                                                                            activate(
-                                                                                                                                    event,
-                                                                                                                                    magic2_button);
-                                                                                                                        }
+                                                                                                                    GameAction.DEPLOY_CHIEFTAIN)) {
+                                                                                                                        activate(
+                                                                                                                                event,
+                                                                                                                                ship_army_chieftain_button);
                                                                                                                     } else
-                                                                                                        if ((current_armory
-                                                                                                                || current_ship)
-                                                                                                                && current_submenu != null
+                                                                                                        if (current_chieftain != null
                                                                                                                 && event.consumeAction(
-                                                                                                                        GameAction.GAMEPLAY_BACK)) {
-                                                                                                                            if (current_submenu == harvest_group)
+                                                                                                                        GameAction.MAGIC_2)) {
+                                                                                                                            if (player.canDoMagic(
+                                                                                                                                    1)) {
                                                                                                                                 activate(
                                                                                                                                         event,
-                                                                                                                                        harvest_back_button);
-                                                                                                                            else if (current_submenu == build_group)
-                                                                                                                                activate(
-                                                                                                                                        event,
-                                                                                                                                        build_back_button);
-                                                                                                                            else if (current_submenu == army_group)
-                                                                                                                                activate(
-                                                                                                                                        event,
-                                                                                                                                        army_back_button);
-                                                                                                                            else if (current_submenu == ship_army_group)
-                                                                                                                                activate(
-                                                                                                                                        event,
-                                                                                                                                        ship_army_back_button);
-                                                                                                                            else if (current_submenu == transport_group)
-                                                                                                                                activate(
-                                                                                                                                        event,
-                                                                                                                                        transport_back_button);
+                                                                                                                                        magic2_button);
+                                                                                                                            }
                                                                                                                         } else
-                                                                                                            if (current_building == null
-                                                                                                                    && current_peon
+                                                                                                            if ((current_armory
+                                                                                                                    || current_ship)
+                                                                                                                    && current_submenu != null
                                                                                                                     && event.consumeAction(
-                                                                                                                            GameAction.UNIT_BUILD_ARMORY)) {
-                                                                                                                                activate(
-                                                                                                                                        event,
-                                                                                                                                        armory_button);
+                                                                                                                            GameAction.GAMEPLAY_BACK)) {
+                                                                                                                                if (current_submenu == harvest_group)
+                                                                                                                                    activate(
+                                                                                                                                            event,
+                                                                                                                                            harvest_back_button);
+                                                                                                                                else if (current_submenu == build_group)
+                                                                                                                                    activate(
+                                                                                                                                            event,
+                                                                                                                                            build_back_button);
+                                                                                                                                else if (current_submenu == army_group)
+                                                                                                                                    activate(
+                                                                                                                                            event,
+                                                                                                                                            army_back_button);
+                                                                                                                                else if (current_submenu == ship_army_group)
+                                                                                                                                    activate(
+                                                                                                                                            event,
+                                                                                                                                            ship_army_back_button);
+                                                                                                                                else if (current_submenu == transport_group)
+                                                                                                                                    activate(
+                                                                                                                                            event,
+                                                                                                                                            transport_back_button);
                                                                                                                             } else
-                                                                                                                if (current_building != null
+                                                                                                                if (current_building == null
+                                                                                                                        && current_peon
                                                                                                                         && event.consumeAction(
-                                                                                                                                GameAction.UNIT_SET_RALLY)) {
-                                                                                                                                    if (current_armory
-                                                                                                                                            && current_submenu == null) {
-                                                                                                                                        activate(
-                                                                                                                                                event,
-                                                                                                                                                rally_point_button);
-                                                                                                                                    } else
-                                                                                                                                        if (current_ship
-                                                                                                                                                && current_submenu == null) {
-                                                                                                                                                    activate(
-                                                                                                                                                            event,
-                                                                                                                                                            ship_rally_point_button);
-                                                                                                                                                } else
-                                                                                                                                            if (current_quarters) {
-                                                                                                                                                activate(
-                                                                                                                                                        event,
-                                                                                                                                                        quarters_rally_point_button);
-                                                                                                                                            } else
-                                                                                                                                                if (current_market) {
-                                                                                                                                                    activate(
-                                                                                                                                                            event,
-                                                                                                                                                            market_rally_point_button);
-                                                                                                                                                }
+                                                                                                                                GameAction.UNIT_BUILD_ARMORY)) {
+                                                                                                                                    activate(
+                                                                                                                                            event,
+                                                                                                                                            armory_button);
                                                                                                                                 } else
-                                                                                                                    if (current_tower
+                                                                                                                    if (current_building != null
                                                                                                                             && event.consumeAction(
-                                                                                                                                    GameAction.UNIT_EXIT_TOWER)) {
-                                                                                                                                        activate(
-                                                                                                                                                event,
-                                                                                                                                                tower_exit_button);
+                                                                                                                                    GameAction.UNIT_SET_RALLY)) {
+                                                                                                                                        if (current_armory
+                                                                                                                                                && current_submenu == null) {
+                                                                                                                                            activate(
+                                                                                                                                                    event,
+                                                                                                                                                    rally_point_button);
+                                                                                                                                        } else
+                                                                                                                                            if (current_ship
+                                                                                                                                                    && current_submenu == null) {
+                                                                                                                                                        activate(
+                                                                                                                                                                event,
+                                                                                                                                                                ship_rally_point_button);
+                                                                                                                                                    } else
+                                                                                                                                                if (current_quarters) {
+                                                                                                                                                    activate(
+                                                                                                                                                            event,
+                                                                                                                                                            quarters_rally_point_button);
+                                                                                                                                                } else
+                                                                                                                                                    if (current_market) {
+                                                                                                                                                        activate(
+                                                                                                                                                                event,
+                                                                                                                                                                market_rally_point_button);
+                                                                                                                                                    } else
+                                                                                                                                                        if (current_lodge) {
+                                                                                                                                                            activate(
+                                                                                                                                                                    event,
+                                                                                                                                                                    lodge_rally_point_button);
+                                                                                                                                                        }
                                                                                                                                     } else
-                                                                                                                        if (current_chieftain != null
+                                                                                                                        if (current_tower
                                                                                                                                 && event.consumeAction(
-                                                                                                                                        GameAction.MAGIC_1)) {
-                                                                                                                                            if (player.canDoMagic(
-                                                                                                                                                    0)) {
-                                                                                                                                                activate(
-                                                                                                                                                        event,
-                                                                                                                                                        magic1_button);
+                                                                                                                                        GameAction.UNIT_EXIT_TOWER)) {
+                                                                                                                                            activate(
+                                                                                                                                                    event,
+                                                                                                                                                    tower_exit_button);
+                                                                                                                                        } else
+                                                                                                                            if (current_chieftain != null
+                                                                                                                                    && event.consumeAction(
+                                                                                                                                            GameAction.MAGIC_1)) {
+                                                                                                                                                if (player.canDoMagic(
+                                                                                                                                                        0)) {
+                                                                                                                                                    activate(
+                                                                                                                                                            event,
+                                                                                                                                                            magic1_button);
+                                                                                                                                                }
                                                                                                                                             }
-                                                                                                                                        }
 
                 if (event.isConsumed()) return;
             }
@@ -1424,6 +1575,9 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
             // Clear remaining actions after a match to prevent global actions (e.g. screenshot)
             // from also firing on the same key combo. Mirrors upstreams return-true behavior.
             if (current_building != null) {
+                // First, since its key doubles as the chicken row's in the Armory's submenus.
+                if (championShortcut(event, true))
+                    event.getActions().clear();
                 var peon = checkResourceAction(event, GameAction.TRAIN_PEON, GameAction.TRAIN_PEON_DEC,
                         GameAction.TRAIN_PEON_BATCH, GameAction.TRAIN_PEON_BATCH_DEC);
                 if (peon.active()) {
@@ -1432,6 +1586,9 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                         event.getActions().clear(); // Prevent fallthrough to resource/global handlers when peon shortcut is handled.
                     } else if (current_market) {
                         market_peon_button.shortcutPressed(peon.decrement(), peon.batch());
+                        event.getActions().clear();
+                    } else if (current_lodge) {
+                        lodge_leave_button.shortcutPressed(peon.decrement(), peon.batch());
                         event.getActions().clear();
                     } else if (current_armory && current_submenu == army_group) {
                         army_peon_button.shortcutPressed(peon.decrement(), peon.batch());
@@ -1481,7 +1638,7 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                     event.getActions().clear();
             }
         } else if (released) {
-            if (gearShortcut(event, false))
+            if (gearShortcut(event, false) || championShortcut(event, false))
                 return;
             var chicken = checkResourceAction(event, GameAction.RES_CHICKEN, GameAction.RES_CHICKEN_DEC,
                     GameAction.RES_CHICKEN_BATCH, GameAction.RES_CHICKEN_BATCH_DEC);
@@ -1498,6 +1655,9 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                         event.getActions().clear(); // Prevent fallthrough to resource/global handlers when peon shortcut is handled.
                     } else if (current_market) {
                         market_peon_button.shortcutReleased(peon.decrement(), peon.batch());
+                        event.getActions().clear();
+                    } else if (current_lodge) {
+                        lodge_leave_button.shortcutReleased(peon.decrement(), peon.batch());
                         event.getActions().clear();
                     } else if (current_armory && current_submenu == army_group) {
                         army_peon_button.shortcutReleased(peon.decrement(), peon.batch());
@@ -1605,6 +1765,42 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
             }
         }
         return false;
+    }
+
+    /** The Champion spinner of a selected Lodge (Buffed); returns whether the event was its. */
+    private boolean championShortcut(@NonNull InputEvent event, boolean pressed) {
+        if (!current_lodge)
+            return false;
+        var champion = checkResourceAction(event, GameAction.TRAIN_CHAMPION, GameAction.TRAIN_CHAMPION_DEC,
+                GameAction.TRAIN_CHAMPION_BATCH, GameAction.TRAIN_CHAMPION_BATCH_DEC);
+        if (!champion.active())
+            return false;
+        if (pressed)
+            lodge_champion_button.shortcutPressed(champion.decrement(), champion.batch());
+        else
+            lodge_champion_button.shortcutReleased(champion.decrement(), champion.batch());
+        return true;
+    }
+
+    /** The Champions a player has alive, sheltered or in training, out of the Lodge's limit. */
+    private static final class ChampionCounter extends SupplyCounter {
+        private final @NonNull Player player;
+
+        ChampionCounter(@NonNull Building lodge, @NonNull Player player) {
+            super(lodge, Unit.class);
+            this.player = player;
+        }
+
+        @Override
+        public int getNumSupplies() {
+            return player.getChampionCount();
+        }
+
+        @Override
+        public int getMaxSupplies() {
+            Lodge lodge = Lodge.of(getBuilding());
+            return lodge != null ? lodge.getStats().max_champions() : 0;
+        }
     }
 
     @Override

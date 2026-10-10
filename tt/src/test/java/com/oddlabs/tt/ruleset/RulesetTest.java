@@ -6,10 +6,14 @@ import com.oddlabs.tt.gamemode.PresetLibrary;
 import com.oddlabs.tt.landscape.TreeSupply;
 import com.oddlabs.tt.model.IronSupply;
 import com.oddlabs.tt.model.LandBuilding;
+import com.oddlabs.tt.model.Lodge;
 import com.oddlabs.tt.model.RockSupply;
+import com.oddlabs.tt.model.RubberSupply;
 import com.oddlabs.tt.model.behaviour.RepairBehaviour;
 import com.oddlabs.tt.ruleset.RulesetStats.BuildingStats;
 import com.oddlabs.tt.ruleset.RulesetStats.ChickenCoopStats;
+import com.oddlabs.tt.ruleset.RulesetStats.GreatTowerStats;
+import com.oddlabs.tt.ruleset.RulesetStats.LodgeStats;
 import com.oddlabs.tt.ruleset.RulesetStats.MarketStats;
 import com.oddlabs.tt.ruleset.RulesetStats.PalisadeStats;
 import com.oddlabs.tt.ruleset.RulesetStats.RaceStats;
@@ -89,20 +93,26 @@ final class RulesetTest {
 
     /**
      * 2004 had no boats, Small/Medium/Large islands only, six players (MAX_PLAYERS = 6) and fixed limits. Neither
-     * 2004 nor Resurrected has the Chicken Coop, the Totem, the Shield, the Torch, the Market or the Palisade.
+     * 2004 nor Resurrected has the Chicken Coop, the Totem, the Shield, the Torch, the Market, the Palisade, the Great
+     * Tower or the Lodge.
      */
     @Test
     void classicOffersOnly2004WorldOptions() {
-        assertEquals(new RulesetStats.Features(false, false, false, 6, false, false, false, false, false, false, false),
+        assertEquals(new RulesetStats.Features(false, false, false, 6, false, false, false, false, false, false, false,
+                false,
+                false),
                 Ruleset.CLASSIC.getStats().features());
-        assertEquals(new RulesetStats.Features(true, true, true, 12, true, false, false, false, false, false, false),
+        assertEquals(new RulesetStats.Features(true, true, true, 12, true, false, false, false, false, false, false,
+                false,
+                false),
                 Ruleset.RESURRECTED.getStats().features());
     }
 
-    /** Buffed offers Resurrected's world options plus its own buildings, gear, Market and walls. */
+    /** Buffed offers Resurrected's world options plus its own buildings, gear, Market, walls, Great Tower and Lodge. */
     @Test
     void buffedOffersItsBuildings() {
-        assertEquals(new RulesetStats.Features(true, true, true, 12, true, true, true, true, true, true, true),
+        assertEquals(new RulesetStats.Features(true, true, true, 12, true, true, true, true, true, true, true, true,
+                true),
                 Ruleset.BUFFED.getStats().features());
     }
 
@@ -153,6 +163,45 @@ final class RulesetTest {
                     () -> assertEquals(new PalisadeStats(40, 100), race.palisade(), "palisade"),
                     () -> assertEquals(new BuildingStats(120), race.gate(), "gate"));
         }
+    }
+
+    /**
+     * PLAN.md sections 4.4 and 4.5, docs/design/great-tower.md and lodge-and-champion.md: the Great Tower (300 hit
+     * points, three throwers), the Lodge (200 hit points, 30 units, half the charge time within 30 m, a Champion in 30
+     * s, five alive) and the Champion (speed 5, dodge 0.75, hit 0.9). The same for both races.
+     */
+    @Test
+    void buffedGreatTowerLodgeAndChampionMatchThePlan() {
+        for (boolean vikings : new boolean[]{false, true}) {
+            RaceStats race = Ruleset.BUFFED.getStats().race(vikings);
+            assertAll(
+                    () -> assertEquals(new GreatTowerStats(300, 10, 3), race.great_tower(), "great_tower"),
+                    () -> assertEquals(new LodgeStats(200, 5, 30, 30f, 2f, 30f, 5), race.lodge(), "lodge"),
+                    () -> assertUnit(race.champion(), 1, 5f, .75f, .9f));
+        }
+    }
+
+    /** The Champion's recipe: 2 wood + 1 iron + 1 chicken, taken from the nearest Armory. */
+    @Test
+    void championCostsWhatThePlanSays() {
+        assertEquals(List.of(TreeSupply.class, IronSupply.class, RubberSupply.class),
+                List.of(Lodge.COST_CHAMPION.getSupplyTypes()));
+        assertArrayEquals(new int[]{2, 1, 1}, Lodge.COST_CHAMPION.getSupplyAmounts());
+    }
+
+    /**
+     * The plan's recipes do not add up at 5 hit points a load (R-35): the hit points stand, every load is 5 of them,
+     * and the plan's rock or iron is the last of them, so the Great Tower takes 50 logs and 10 rocks and the Lodge 35
+     * logs and 5 iron.
+     */
+    @Test
+    void greatTowerAndLodgeLoadsAddUpToTheirHitPoints() {
+        RaceStats race = Ruleset.BUFFED.getStats().natives();
+        assertEquals(50,
+                race.great_tower().hit_points() / RepairBehaviour.REPAIRS_PER_SUPPLY - race.great_tower().rock(),
+                "great tower wood");
+        assertEquals(35, race.lodge().hit_points() / RepairBehaviour.REPAIRS_PER_SUPPLY - race.lodge().iron(),
+                "lodge wood");
     }
 
     /** A building's hit points are built 5 per log, so the plan's wood cost is its hit points over 5. */

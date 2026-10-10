@@ -7,6 +7,7 @@ import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.global.Headless;
 import com.oddlabs.tt.gui.GUIIcons;
 import com.oddlabs.tt.landscape.TreeSupply;
+import com.oddlabs.tt.model.weapon.Champion;
 import com.oddlabs.tt.model.weapon.GearFactory;
 import com.oddlabs.tt.model.weapon.InstantHitFactory;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
@@ -41,6 +42,8 @@ import com.oddlabs.tt.resource.SpriteFile;
 import com.oddlabs.tt.resource.TextureFile;
 import com.oddlabs.tt.ruleset.RulesetStats;
 import com.oddlabs.tt.ruleset.RulesetStats.CracklingCloudStats;
+import com.oddlabs.tt.ruleset.RulesetStats.GreatTowerStats;
+import com.oddlabs.tt.ruleset.RulesetStats.LodgeStats;
 import com.oddlabs.tt.ruleset.RulesetStats.RaceStats;
 import com.oddlabs.tt.ruleset.RulesetStats.RavagingRoarStats;
 import com.oddlabs.tt.ruleset.RulesetStats.SpellStats;
@@ -69,8 +72,12 @@ public final class RacesResources {
     // The Market covers 3 x 3 cells like the coop; a Palisade segment or a Gate one cell like the totem.
     public static final int MARKET_SIZE = 3;
     public static final int WALL_SIZE = 2;
+    // The Great Tower and the Lodge cover 7 x 7 cells like the Quarters and the Armory.
+    public static final int GREAT_TOWER_SIZE = 5;
+    public static final int LODGE_SIZE = 5;
     public static final int MAX_BUILDING_SIZE = IntStream.of(QUARTERS_SIZE, ARMORY_SIZE,
-            TOWER_SIZE, CHICKEN_COOP_SIZE, TOTEM_SIZE, MARKET_SIZE, WALL_SIZE).max().orElseThrow();
+            TOWER_SIZE, CHICKEN_COOP_SIZE, TOTEM_SIZE, MARKET_SIZE, WALL_SIZE, GREAT_TOWER_SIZE,
+            LODGE_SIZE).max().orElseThrow();
 
     public static final int RACE_NATIVES = 0;
     public static final int RACE_VIKINGS = 1;
@@ -280,6 +287,80 @@ public final class RacesResources {
                 0f, 0f, 3f,
                 is_vikings,
                 name);
+    }
+
+    /**
+     * Numbers of a placeholder building model: selection radius and height of the built, halfbuilt and start stages,
+     * shadow, where hits land per stage, where a thrower stands, the rally flag and the chimney.
+     */
+    private record BuildingModel(float @NonNull [] selection, float shadow_diameter, float ring_thickness,
+                                 float @NonNull [] hit_offset_z, float mount_offset, float @NonNull [] rally,
+                                 float @NonNull [] chimney) {
+    }
+
+    // M8's placeholders, measured on the models: the Great Tower is the race's Tower widened (x 3.1 / 2.5, y 3 / 2.3)
+    // and 1.2 times as tall, its throwers on the top's floor; the Lodge is the race's Quarters at 0.9.
+    private static final BuildingModel NATIVE_GREAT_TOWER = new BuildingModel(
+            new float[]{3f, 17f, 3f, 17f, 4.5f, 2.5f}, 16f, .004f, new float[]{0f, 13.8f, 13.8f}, 15.6f,
+            new float[]{2.9f, 0f, 15.6f}, new float[]{0f, 0f, 0f});
+    private static final BuildingModel VIKING_GREAT_TOWER = new BuildingModel(
+            new float[]{3f, 13f, 4.5f, 8.5f, 6f, 1.2f}, 22f, .001f, new float[]{0f, 2.4f, 9f}, 11.46f,
+            new float[]{2.1f, 2f, 11.4f}, new float[]{0f, 0f, 0f});
+    private static final BuildingModel NATIVE_LODGE = new BuildingModel(
+            new float[]{3.6f, 7.2f, 3.6f, 5.4f, 4.5f, .9f}, 16f, .004f, new float[]{0f, .9f, 2.7f}, 0f,
+            new float[]{-1.04f, -.69f, 9.9f}, new float[]{1.53f, 2.15f, 8.5f});
+    private static final BuildingModel VIKING_LODGE = new BuildingModel(
+            new float[]{3.15f, 6.3f, 3.15f, 5.4f, 4.5f, .9f}, 22f, .001f, new float[]{0f, .9f, 2.7f}, 0f,
+            new float[]{3.29f, .23f, 7.2f}, new float[]{-.2f, .25f, 7.8f});
+
+    private static @NonNull BuildingTemplate createModelBuildingTemplate(@NonNull RenderQueues queues,
+            int template_id, @NonNull String path, @NonNull BuildingModel model, float smoke_height,
+            int max_hit_points, @NonNull UnitContainerFactory unit_container_factory, @NonNull Abilities abilities,
+            boolean is_vikings, @NonNull String name) {
+        float[] s = model.selection();
+        return createBuildingTemplate(
+                queues,
+                template_id,
+                BuildingTemplate.TYPE_BUILDING,
+                path + ".binsprite",
+                s[0], s[1],
+                path + "_halfbuilt.binsprite",
+                s[2], s[3],
+                path + "_start.binsprite",
+                s[4], s[5],
+                model.shadow_diameter(), model.ring_thickness(), 5, 6f, smoke_height, 30, max_hit_points,
+                unit_container_factory,
+                abilities,
+                model.hit_offset_z(), model.mount_offset(), 6f,
+                model.rally()[0], model.rally()[1], model.rally()[2],
+                model.chimney()[0], model.chimney()[1], model.chimney()[2],
+                is_vikings,
+                name);
+    }
+
+    /**
+     * The Great Tower (Buffed): a tower for several throwers on the Quarters' footprint. Placeholder models: the race's
+     * Tower stages widened and recoloured.
+     */
+    private static @NonNull BuildingTemplate createGreatTowerTemplate(@NonNull RenderQueues queues,
+            @NonNull String race, @NonNull GreatTowerStats stats, boolean is_vikings, @NonNull String name) {
+        return createModelBuildingTemplate(queues, Race.BUILDING_GREAT_TOWER, "/geometry/" + race + "/great_tower",
+                is_vikings ? VIKING_GREAT_TOWER : NATIVE_GREAT_TOWER, 14f, stats.hit_points(),
+                new MountUnitContainerFactory(stats.throwers()),
+                new Abilities(Abilities.ATTACK | Abilities.RALLY_TO | Abilities.TARGET), is_vikings, name);
+    }
+
+    /**
+     * The Spirit Lodge / Mead Hall (Buffed): shelters units, speeds spells and trains Champions. Placeholder models:
+     * the
+     * race's Quarters stages at 0.9, recoloured.
+     */
+    private static @NonNull BuildingTemplate createLodgeTemplate(@NonNull RenderQueues queues, @NonNull String race,
+            @NonNull LodgeStats stats, boolean is_vikings, @NonNull String name) {
+        return createModelBuildingTemplate(queues, Race.BUILDING_LODGE, "/geometry/" + race + "/lodge",
+                is_vikings ? VIKING_LODGE : NATIVE_LODGE, 9f, stats.hit_points(),
+                new ShelterUnitContainerFactory(stats.shelter()),
+                new Abilities(Abilities.SHELTER | Abilities.RALLY_TO | Abilities.TARGET), is_vikings, name);
     }
 
     /** A Palisade segment or a Gate: one cell, no job, nobody inside. */
@@ -714,6 +795,15 @@ public final class RacesResources {
                 3.5f, natives.gate().hit_points(), false, i18n("gate_natives"));
         BuildingTemplate viking_gate_template = createWallTemplate(queues, "vikings", Race.BUILDING_GATE, "gate",
                 3.5f, vikings.gate().hit_points(), true, i18n("gate_vikings"));
+        // M8. Placeholder models: the race's Tower widened, and its Quarters recoloured (the model numbers above).
+        BuildingTemplate native_great_tower_template = createGreatTowerTemplate(queues, "natives",
+                natives.great_tower(), false, i18n("great_tower"));
+        BuildingTemplate viking_great_tower_template = createGreatTowerTemplate(queues, "vikings",
+                vikings.great_tower(), true, i18n("great_tower"));
+        BuildingTemplate native_lodge_template = createLodgeTemplate(queues, "natives", natives.lodge(), false,
+                i18n("lodge_natives"));
+        BuildingTemplate viking_lodge_template = createLodgeTemplate(queues, "vikings", vikings.lodge(), true,
+                i18n("lodge_vikings"));
 
         final float shadow_diameter_warrior = 1.9f;
         final float shadow_diameter_peon = 1.6f;
@@ -1002,6 +1092,15 @@ public final class RacesResources {
                 vikings.torch_warrior(), new GearFactory(Torch.class, vikings.torch_warrior().hit_chance(),
                         29f / 58f, vikings.torch(), unit_hit_sounds),
                 default_shadow_list, death_viking2_sound, i18n("torch_warrior_vikings"), 6);
+        // Buffed's Champion, trained at the Lodge: hand to hand like the gear.
+        UnitTemplate native_champion_template = createGearWarriorTemplate(queues, "natives", "champion",
+                natives.champion(), new GearFactory(Champion.class, natives.champion().hit_chance(), 46f / 100f, null,
+                        unit_hit_sounds),
+                default_shadow_list, death_native1_sound, i18n("champion_natives"), 8);
+        UnitTemplate viking_champion_template = createGearWarriorTemplate(queues, "vikings", "champion",
+                vikings.champion(), new GearFactory(Champion.class, vikings.champion().hit_chance(), 29f / 58f, null,
+                        unit_hit_sounds),
+                default_shadow_list, death_viking1_sound, i18n("champion_vikings"), 8);
 
         StinkingStewStats stew = spells.stinking_stew();
         CracklingCloudStats cloud = spells.crackling_cloud();
@@ -1033,6 +1132,8 @@ public final class RacesResources {
                 native_market_template,
                 native_palisade_template,
                 native_gate_template,
+                native_great_tower_template,
+                native_lodge_template,
                 native_warrior_rock_template,
                 native_warrior_iron_template,
                 native_warrior_rubber_template,
@@ -1040,6 +1141,7 @@ public final class RacesResources {
                 native_chieftain_template,
                 native_warrior_shield_template,
                 native_warrior_torch_template,
+                native_champion_template,
                 queues.register(new SpriteFile("/geometry/natives/rally_point.binsprite",
                         Globals.NO_MIPMAP_CUTOFF,
                         true, true, true, false)),
@@ -1058,6 +1160,8 @@ public final class RacesResources {
                 viking_market_template,
                 viking_palisade_template,
                 viking_gate_template,
+                viking_great_tower_template,
+                viking_lodge_template,
                 viking_warrior_rock_template,
                 viking_warrior_iron_template,
                 viking_warrior_rubber_template,
@@ -1065,6 +1169,7 @@ public final class RacesResources {
                 viking_chieftain_template,
                 viking_warrior_shield_template,
                 viking_warrior_torch_template,
+                viking_champion_template,
                 queues.register(new SpriteFile("/geometry/vikings/rally_point.binsprite",
                         Globals.NO_MIPMAP_CUTOFF,
                         true, true, true, false)),

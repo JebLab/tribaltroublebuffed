@@ -1,6 +1,6 @@
 {
-  "description": "Tribal Trouble: Resurrected's numbers at the time of the fork (October 2026). The complete base the other rulesets extend; campaign, tutorials and multiplayer play under it. The chicken_coop, totem, shield_warrior, torch_warrior, torch, market, palisade and gate numbers belong to buildings and units Resurrected does not have: they are here because the base must be complete, and their features flags keep them out of the game. Field reference: docs/rulesets.md.",
-  "features": { "ships": true, "enormous_islands": true, "archipelago": true, "max_players": 12, "adjustable_limits": true, "chicken_coop": false, "totem": false, "shield": false, "torch": false, "market": false, "palisade": false },
+  "description": "Tribal Trouble: Resurrected's numbers at the time of the fork (October 2026). The complete base the other rulesets extend; campaign, tutorials and multiplayer play under it. The chicken_coop, totem, shield_warrior, torch_warrior, torch, market, palisade, gate, champion, great_tower and lodge numbers belong to buildings and units Resurrected does not have: they are here because the base must be complete, and their features flags keep them out of the game. Field reference: docs/rulesets.md.",
+  "features": { "ships": true, "enormous_islands": true, "archipelago": true, "max_players": 12, "adjustable_limits": true, "chicken_coop": false, "totem": false, "shield": false, "torch": false, "market": false, "palisade": false, "great_tower": false, "lodge": false },
   "natives": {
     "peon": { "hit_points": 1, "speed": 5.0, "defense_chance": 0.0, "hit_chance": 0.2 },
     "rock_warrior": { "hit_points": 1, "speed": 4.0, "defense_chance": 0.5, "hit_chance": 0.5 },
@@ -18,7 +18,10 @@
     "torch": { "building_damage": 6, "fire_seconds": 15.0, "fire_damage": 2.0 },
     "market": { "hit_points": 150, "give": 3, "get": 1, "seconds": 20.0 },
     "palisade": { "hit_points": 40, "max_segments": 100 },
-    "gate": { "hit_points": 120 }
+    "gate": { "hit_points": 120 },
+    "champion": { "hit_points": 1, "speed": 5.0, "defense_chance": 0.75, "hit_chance": 0.9 },
+    "great_tower": { "hit_points": 300, "rock": 10, "throwers": 3 },
+    "lodge": { "hit_points": 200, "iron": 5, "shelter": 30, "spell_radius": 30.0, "spell_charge_factor": 2.0, "champion_seconds": 30.0, "max_champions": 5 }
   },
   "vikings": {
     "peon": { "hit_points": 1, "speed": 5.0, "defense_chance": 0.0, "hit_chance": 0.2 },
@@ -37,7 +40,10 @@
     "torch": { "building_damage": 6, "fire_seconds": 15.0, "fire_damage": 2.0 },
     "market": { "hit_points": 150, "give": 3, "get": 1, "seconds": 20.0 },
     "palisade": { "hit_points": 40, "max_segments": 100 },
-    "gate": { "hit_points": 120 }
+    "gate": { "hit_points": 120 },
+    "champion": { "hit_points": 1, "speed": 5.0, "defense_chance": 0.75, "hit_chance": 0.9 },
+    "great_tower": { "hit_points": 300, "rock": 10, "throwers": 3 },
+    "lodge": { "hit_points": 200, "iron": 5, "shelter": 30, "spell_radius": 30.0, "spell_charge_factor": 2.0, "champion_seconds": 30.0, "max_champions": 5 }
   },
   "spells": {
     "stinking_stew": { "radius": 26.0, "hit_chance": 0.5, "interval": 2.0, "seconds": 20.0, "damage": 10 },

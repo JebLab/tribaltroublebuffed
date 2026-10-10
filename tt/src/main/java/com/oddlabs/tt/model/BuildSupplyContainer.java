@@ -19,4 +19,9 @@ public abstract class BuildSupplyContainer extends SupplyContainer {
     public final int getNumOrders() {
         return num_orders;
     }
+
+    /** The work done towards the next one, from 0 to 1, for the spinner that orders them. */
+    public float getBuildProgress() {
+        return 0f;
+    }
 }

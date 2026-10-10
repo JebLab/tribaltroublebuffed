@@ -18,6 +18,8 @@ import org.joml.Vector4f;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.opengl.GL11;
 
+import java.util.List;
+
 public final class Stun implements Magic {
     private final float hit_radius;
     private final float stun_time_closest;
@@ -72,31 +74,31 @@ public final class Stun implements Magic {
     @Override
     public void animate(float t) {
         for (Selectable<?> selectable : target_list) {
-            Unit unit = null;
-            if (selectable instanceof Unit unit1) {
-                unit = unit1;
+            if (selectable instanceof Unit unit) {
+                stun(unit);
             } else if (selectable instanceof Building building) {
                 if (!building.isDead() && building.getAbilities().hasAbilities(Abilities.ATTACK)) {
+                    // The throwers manning a tower: one, or up to three in a Great Tower (Buffed).
                     MountUnitContainer muc = (MountUnitContainer) building.getUnitContainer();
-                    if (muc.getNumSupplies() > 0) {
-                        unit = muc.getUnit();
-                    }
+                    for (Unit unit : List.copyOf(muc.getUnits()))
+                        stun(unit);
                 }
-            }
-
-            if (unit == null || unit.isDead())
-                continue;
-
-            float dx = unit.getPositionX() - start_x;
-            float dy = unit.getPositionY() - start_y;
-            float squared_dist = dx * dx + dy * dy;
-            if (owner.isEnemy(unit.getOwner()) && squared_dist < hit_radius * hit_radius) {
-                float dist = (float) Math.sqrt(squared_dist);
-                float time = calculateValueFromCurrentRadius(dist, stun_time_closest, stun_time_farthest);
-                unit.stun(time);
             }
         }
         interrupt();
+    }
+
+    private void stun(@NonNull Unit unit) {
+        if (unit.isDead())
+            return;
+        float dx = unit.getPositionX() - start_x;
+        float dy = unit.getPositionY() - start_y;
+        float squared_dist = dx * dx + dy * dy;
+        if (owner.isEnemy(unit.getOwner()) && squared_dist < hit_radius * hit_radius) {
+            float dist = (float) Math.sqrt(squared_dist);
+            float time = calculateValueFromCurrentRadius(dist, stun_time_closest, stun_time_farthest);
+            unit.stun(time);
+        }
     }
 
     private float calculateValueFromCurrentRadius(float current_radius, float max, float min) {

@@ -11,6 +11,7 @@ import com.oddlabs.tt.model.behaviour.NullController;
 import com.oddlabs.tt.model.behaviour.RepairBehaviour;
 import com.oddlabs.tt.model.behaviour.StunController;
 import com.oddlabs.tt.model.behaviour.TransferUnitController;
+import com.oddlabs.tt.model.weapon.Champion;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.IronSpearWeapon;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
@@ -39,6 +40,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -71,7 +73,7 @@ public final class LandBuilding extends Building implements Gate {
     private static final float DAMAGED_PARTICLE_ALPHA = 3f;
 
     private final Map<@NonNull Class<?>, @NonNull SupplyContainer> supply_containers = new HashMap<>();
-    private final Map<@NonNull Class<?>, @NonNull BuildProductionContainer> build_containers = new HashMap<>();
+    private final Map<@NonNull Class<?>, @NonNull BuildSupplyContainer> build_containers = new HashMap<>();
     private final Map<@NonNull DeployType, @NonNull DeployContainer> deploy_containers = new EnumMap<>(
             DeployType.class);
     private final @NonNull LinearEmitter damaged_emitter;
@@ -81,7 +83,9 @@ public final class LandBuilding extends Building implements Gate {
     private @Nullable WeaponsProducer weapons_producer = null;
     private @Nullable ChickenCoop chicken_coop = null;
     private @Nullable Market market = null;
-    private int rocks_delivered = 0;
+    private @Nullable Lodge lodge = null;
+    // Loads of rock or iron worked into a Totem, Great Tower or Lodge after its wood (Buffed).
+    private int finishing_delivered = 0;
     private float remove_delay = 0;
     private int hit_points = 1;
     private int build_points = 0;
@@ -182,6 +186,9 @@ public final class LandBuilding extends Building implements Gate {
             }
             if (chicken_coop != null) {
                 chicken_coop.animate(t);
+            }
+            if (lodge != null) {
+                lodge.animate(t);
             }
 
             int num_deploying = 0;
@@ -535,6 +542,12 @@ public final class LandBuilding extends Building implements Gate {
                 } else if (getAbilities().hasAbilities(Abilities.TRADE)) {
                     market = new Market(this, getRaceStats().market(), production_emitter);
                     deploy_containers.put(DeployType.PEON, new DeployContainer(this, .5f, DeployType.PEON, null));
+                } else if (getAbilities().hasAbilities(Abilities.SHELTER)) {
+                    lodge = new Lodge(this, getRaceStats().lodge(), production_emitter);
+                    build_containers.put(Champion.class, lodge.getOrders());
+                    deploy_containers.put(DeployType.SHELTERED, new DeployContainer(this, .5f, DeployType.SHELTERED,
+                            null));
+                    getOwner().getWorld().getLodges().add(this);
                 }
             }
         }
@@ -544,17 +557,38 @@ public final class LandBuilding extends Building implements Gate {
         return getOwner().getWorld().getRuleset().getStats().race(getTemplate().isVikings());
     }
 
-    /** Rocks the Totem still needs: each one is the last 5 of its build points, after the wood. */
-    private int getRocksMissing() {
-        if (getTemplate().getTemplateID() != Race.BUILDING_TOTEM || isComplete())
-            return 0;
-        return getRaceStats().totem().rock() - rocks_delivered;
+    /**
+     * What finishes this building after its wood (Buffed): rock for the Totem and the Great Tower, iron for the Lodge;
+     * null for every other building.
+     */
+    private @Nullable Class<? extends Supply> getFinishingMaterial() {
+        return switch (getTemplate().getTemplateID()) {
+            case Race.BUILDING_TOTEM, Race.BUILDING_GREAT_TOWER -> RockSupply.class;
+            case Race.BUILDING_LODGE -> IronSupply.class;
+            default -> null;
+        };
     }
 
-    private boolean isWaitingForRock() {
-        int rocks_missing = getRocksMissing();
-        return rocks_missing > 0
-                && build_points >= getTemplate().getMaxHitPoints() - rocks_missing * RepairBehaviour.REPAIRS_PER_SUPPLY;
+    private int getFinishingLoads() {
+        return switch (getTemplate().getTemplateID()) {
+            case Race.BUILDING_TOTEM -> getRaceStats().totem().rock();
+            case Race.BUILDING_GREAT_TOWER -> getRaceStats().great_tower().rock();
+            case Race.BUILDING_LODGE -> getRaceStats().lodge().iron();
+            default -> 0;
+        };
+    }
+
+    /** Loads of the finishing material still needed: each one is the last 5 of the build points, after the wood. */
+    private int getFinishingLoadsMissing() {
+        if (getFinishingMaterial() == null || isComplete())
+            return 0;
+        return getFinishingLoads() - finishing_delivered;
+    }
+
+    private boolean isWaitingForFinish() {
+        int missing = getFinishingLoadsMissing();
+        return missing > 0
+                && build_points >= getTemplate().getMaxHitPoints() - missing * RepairBehaviour.REPAIRS_PER_SUPPLY;
     }
 
     /** The finished Chicken Coop's breeding, or null for any other building or an unfinished coop. */
@@ -577,10 +611,41 @@ public final class LandBuilding extends Building implements Gate {
         market.setTrade(give, get);
     }
 
+    /** The finished Lodge's training, or null for any other building or an unfinished Lodge. */
+    public @Nullable Lodge getLodge() {
+        return lodge;
+    }
+
+    @Override
+    public void trainChampions(int num_champions, boolean infinite) {
+        assert !isDead();
+        if (lodge == null)
+            return;
+        getOwner().getWorld().updateGlobalChecksum(infinite ? num_champions : 1000000);
+        lodge.order(num_champions, infinite);
+    }
+
+    /** Lets out the unit that went into the Lodge first, as what it was, towards the rally point. */
+    @Override
+    public void createSheltered() {
+        assert !isDead();
+        checkRallyPoint();
+        ShelterUnitContainer shelter = (ShelterUnitContainer) getUnitContainer();
+        shelter.prepareDeploy(-1);
+        UnitTemplate template = shelter.exitSheltered();
+        createUnit(hasRallyPoint() ? rally_point : null, template);
+    }
+
+    /** A Champion trained here steps out towards the rally point; the Lodge has taken its peon. */
+    void createChampion() {
+        checkRallyPoint();
+        createUnit(hasRallyPoint() ? rally_point : null, getOwner().getRace().getUnitTemplate(Race.UNIT_CHAMPION));
+    }
+
     @Override
     public @NonNull Class<? extends Supply> getWorkMaterial() {
-        if (isWaitingForRock())
-            return RockSupply.class;
+        if (isWaitingForFinish())
+            return getFinishingMaterial();
         if (!isDamaged() && chicken_coop != null && chicken_coop.needsStock())
             return RubberSupply.class;
         return TreeSupply.class;
@@ -589,22 +654,20 @@ public final class LandBuilding extends Building implements Gate {
     @Override
     public boolean needsMaterial(@NonNull Class<? extends Supply> material) {
         if (material == TreeSupply.class)
-            return isDamaged() && !isWaitingForRock();
-        if (material == RockSupply.class)
-            return isWaitingForRock();
+            return isDamaged() && !isWaitingForFinish();
         if (material == RubberSupply.class)
             return chicken_coop != null && chicken_coop.needsStock();
-        return false;
+        return material == getFinishingMaterial() && isWaitingForFinish();
     }
 
     @Override
     public void deliverMaterial(@NonNull Class<? extends Supply> material) {
         assert !isDead() && needsMaterial(material) && material != TreeSupply.class : material;
-        if (material == RockSupply.class) {
-            rocks_delivered++;
-            repair(RepairBehaviour.REPAIRS_PER_SUPPLY);
-        } else if (material == RubberSupply.class) {
+        if (material == RubberSupply.class) {
             chicken_coop.addStock();
+        } else {
+            finishing_delivered++;
+            repair(RepairBehaviour.REPAIRS_PER_SUPPLY);
         }
     }
 
@@ -685,10 +748,12 @@ public final class LandBuilding extends Building implements Gate {
     protected void setTarget(@NonNull Target target, @NonNull Action action, boolean aggressive) {
         if (getAbilities().hasAbilities(Abilities.ATTACK)) {
             if (target != this) {
-                Unit unit = ((MountUnitContainer) getUnitContainer()).getUnit();
+                // Every thrower inside: one in a Tower, up to three in a Great Tower (Buffed).
                 boolean kill_friendly = action == Action.ATTACK;
-                if (unit != null && unit.canAttack(target, kill_friendly))
-                    unit.pushController(new AttackController(unit, (Selectable<?>) target));
+                for (Unit unit : List.copyOf(((MountUnitContainer) getUnitContainer()).getUnits())) {
+                    if (unit.canAttack(target, kill_friendly))
+                        unit.pushController(new AttackController(unit, (Selectable<?>) target));
+                }
             }
         } else {
             setRallyPoint(target);
@@ -759,6 +824,7 @@ public final class LandBuilding extends Building implements Gate {
         free();
         undoLandscape();
         getOwner().getWorld().getTotems().remove(this);
+        getOwner().getWorld().getLodges().remove(this);
         if (fire_emitter != null) {
             extinguish();
             fire_emitter.done();
@@ -1000,13 +1066,14 @@ public final class LandBuilding extends Building implements Gate {
     @Override
     public int getStatusValue() {
         return getAbilities().hasAbilities(Abilities.REPRODUCE) || getAbilities().hasAbilities(
-                Abilities.TRADE) ? getUnitContainer().getNumSupplies() : getAbilities().hasAbilities(
-                        Abilities.BUILD_ARMIES) ? getUnitContainer().getNumSupplies() + getSupplyContainer(
-                                RockAxeWeapon.class).getNumSupplies() + getSupplyContainer(
-                                        IronAxeWeapon.class).getNumSupplies() * 3 + getSupplyContainer(
-                                                RubberAxeWeapon.class).getNumSupplies() * 8 + getSupplyContainer(
-                                                        Shield.class).getNumSupplies() + getSupplyContainer(
-                                                                Torch.class).getNumSupplies() * 3 : 0;
+                Abilities.TRADE) || getAbilities().hasAbilities(
+                        Abilities.SHELTER) ? getUnitContainer().getNumSupplies() : getAbilities().hasAbilities(
+                                Abilities.BUILD_ARMIES) ? getUnitContainer().getNumSupplies() + getSupplyContainer(
+                                        RockAxeWeapon.class).getNumSupplies() + getSupplyContainer(
+                                                IronAxeWeapon.class).getNumSupplies() * 3 + getSupplyContainer(
+                                                        RubberAxeWeapon.class).getNumSupplies() * 8 + getSupplyContainer(
+                                                                Shield.class).getNumSupplies() + getSupplyContainer(
+                                                                        Torch.class).getNumSupplies() * 3 : 0;
     }
 
     public void printDebugInfo() {

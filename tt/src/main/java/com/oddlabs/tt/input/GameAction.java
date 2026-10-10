@@ -63,6 +63,8 @@ public enum GameAction {
     UNIT_BUILD_MARKET,
     UNIT_BUILD_PALISADE,
     UNIT_BUILD_GATE,
+    UNIT_BUILD_GREAT_TOWER,
+    UNIT_BUILD_LODGE,
     UNIT_EXIT_TOWER,
     UNIT_BEACON,
     UNIT_NEXT_IDLE,
@@ -136,6 +138,12 @@ public enum GameAction {
     MARKET_SELL,
     MARKET_BUY,
 
+    // Buffed's Lodge: training Champions
+    TRAIN_CHAMPION,
+    TRAIN_CHAMPION_DEC,
+    TRAIN_CHAMPION_BATCH,
+    TRAIN_CHAMPION_BATCH_DEC,
+
     // Unit Specific
     TRAIN_PEON,
     TRAIN_PEON_DEC,
@@ -165,6 +173,7 @@ public enum GameAction {
     CHEAT_9,
     CHEAT_10,
     CHEAT_11,
+    CHEAT_12,
 
     // Observer mode
     SPECTATOR_NEXT_PLAYER,

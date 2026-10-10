@@ -8,10 +8,12 @@ import com.oddlabs.tt.model.BuildingTemplate;
 import com.oddlabs.tt.model.ChickenCoop;
 import com.oddlabs.tt.model.DeployType;
 import com.oddlabs.tt.model.LandBuilding;
+import com.oddlabs.tt.model.Lodge;
 import com.oddlabs.tt.model.Market;
 import com.oddlabs.tt.model.Race;
 import com.oddlabs.tt.model.Selectable;
 import com.oddlabs.tt.model.Ship;
+import com.oddlabs.tt.model.ShelterUnitContainer;
 import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.model.WallLine;
 import com.oddlabs.tt.model.behaviour.Controller;
@@ -19,6 +21,7 @@ import com.oddlabs.tt.model.behaviour.EnterController;
 import com.oddlabs.tt.model.behaviour.IdleController;
 import com.oddlabs.tt.model.behaviour.PlaceBuildingController;
 import com.oddlabs.tt.model.behaviour.RepairController;
+import com.oddlabs.tt.model.weapon.Champion;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.IronSpearWeapon;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
@@ -101,6 +104,22 @@ public final class AdvancedAI extends AI {
     private static final int[] TORCH_STOCK = new int[]{0, 3, 5};
     private static final int SHIELD_SHARE = 4;
     private static final int TORCH_SHARE = 5;
+
+    // Buffed's Great Tower (docs/design/great-tower.md): one, above this many units, GREAT_TOWER_DISTANCE cells from
+    // the Armory towards the island's centre, kept manned with as many throwers as it holds.
+    private static final int[] MAX_GREAT_TOWERS = new int[]{0, 1, 1};
+    private static final int[] UNITS_FOR_GREAT_TOWER = new int[]{1000, 50, 40};
+    private static final int GREAT_TOWER_BUILDERS = 10;
+    private static final float GREAT_TOWER_DISTANCE = 12f;
+    // Buffed's Lodge (docs/design/lodge-and-champion.md): one by the Quarters, above this many units, when the home
+    // island has iron to finish it. It keeps LODGE_TRAINEES peons inside and orders Champions while it has fewer than
+    // CHAMPIONS.
+    private static final int[] MAX_LODGES = new int[]{0, 1, 1};
+    private static final int[] UNITS_FOR_LODGE = new int[]{1000, 45, 35};
+    private static final int LODGE_BUILDERS = 8;
+    private static final int LODGE_TRAINEES = 1;
+    private static final int[] CHAMPIONS = new int[]{0, 3, 5};
+    private static final int SCORE_CHAMPION = 8;
 
     private static final int SHIP_PEONS = 26;
     private static final int SHIP_WARRIORS = 50;
@@ -317,6 +336,8 @@ public final class AdvancedAI extends AI {
                                     return SCORE_WARRIOR_SHIELD;
                                 } else if (unit.getWeaponFactory().getType() == Torch.class) {
                                     return SCORE_WARRIOR_TORCH;
+                                } else if (unit.isChampion()) {
+                                    return SCORE_CHAMPION;
                                 }
         throw new RuntimeException();
     }
@@ -366,13 +387,18 @@ public final class AdvancedAI extends AI {
         boolean totem = getOwner().canBuild(Race.BUILDING_TOTEM);
         boolean market = getOwner().canBuild(Race.BUILDING_MARKET);
         boolean palisade = getOwner().canBuild(Race.BUILDING_PALISADE) && getOwner().canBuild(Race.BUILDING_GATE);
-        if (!chicken_coop && !totem && !market && !palisade && getMarkets() == null)
+        boolean great_tower = getOwner().canBuild(Race.BUILDING_GREAT_TOWER);
+        boolean lodge = getOwner().canBuild(Race.BUILDING_LODGE);
+        if (!chicken_coop && !totem && !market && !palisade && !great_tower && !lodge && getMarkets() == null
+                && getGreatTowers() == null && getLodges() == null)
             return;
         reclassify();
         if (!baseBuildingsDone())
             return;
         nodeStockChickenCoops();
         nodeRunMarkets();
+        nodeManGreatTowers();
+        nodeRunLodges();
         int units = getOwner().getUnitCountContainer().getNumSupplies();
         if (market && !marketUnderConstruction() && count(getMarkets()) < MAX_MARKETS[difficulty]
                 && units > (homeIslandLacksRockOrIron() ? MARKET_UNITS_LOPSIDED : UNITS_FOR_MARKET[difficulty])) {
@@ -402,6 +428,95 @@ public final class AdvancedAI extends AI {
             setTotemUnderConstruction(buildBuilding(Race.BUILDING_TOTEM, builders, origin.getGridX(),
                     origin.getGridY()));
             reclassify();
+        }
+        if (great_tower && !greatTowerUnderConstruction()
+                && count(getGreatTowers()) < MAX_GREAT_TOWERS[difficulty]
+                && units > UNITS_FOR_GREAT_TOWER[difficulty]) {
+            Selectable<?>[] builders = firstN(getPeons(GREAT_TOWER_BUILDERS), GREAT_TOWER_BUILDERS);
+            Building armory = (Building) getArmory()[0];
+            int[] site = towardsCentre(armory, GREAT_TOWER_DISTANCE);
+            setGreatTowerUnderConstruction(buildBuilding(Race.BUILDING_GREAT_TOWER, builders, site[0], site[1]));
+            reclassify();
+        }
+        if (lodge && !lodgeUnderConstruction() && count(getLodges()) < MAX_LODGES[difficulty]
+                && units > UNITS_FOR_LODGE[difficulty] && homeIslandHasIron()) {
+            Selectable<?>[] builders = firstN(getPeons(LODGE_BUILDERS), LODGE_BUILDERS);
+            Building quarters = (Building) getQuarters()[0];
+            setLodgeUnderConstruction(buildBuilding(Race.BUILDING_LODGE, builders, quarters.getGridX(),
+                    quarters.getGridY()));
+            reclassify();
+        }
+    }
+
+    /**
+     * The grid cell {@code distance} cells from a building towards the island's centre (its own cell at the centre).
+     */
+    private int @NonNull [] towardsCentre(@NonNull Building origin, float distance) {
+        int ox = origin.getGridX();
+        int oy = origin.getGridY();
+        int center = getOwner().getWorld().getHeightMap().getGridUnitsPerWorld() / 2;
+        int dx = center - ox;
+        int dy = center - oy;
+        if (dx == 0 && dy == 0)
+            return new int[]{ox, oy};
+        float inv_dist = 1f / (float) Math.sqrt(dx * dx + dy * dy);
+        return new int[]{(int) (ox + distance * dx * inv_dist), (int) (oy + distance * dy * inv_dist)};
+    }
+
+    /** Whether the home island has iron to gather: the Lodge's last hit points are iron. */
+    private boolean homeIslandHasIron() {
+        int island = homeIsland();
+        return island != -1 && getUnitGrid().getIslandIronCount(island) > 0;
+    }
+
+    /**
+     * Keeps each finished Great Tower manned: idle throwers go to the places that nobody is walking to, and a warrior
+     * is deployed from the Armory when none is idle.
+     */
+    private void nodeManGreatTowers() {
+        if (getGreatTowers() == null)
+            return;
+        for (Selectable<?> s : getGreatTowers()) {
+            Building tower = (Building) s;
+            int missing = tower.getUnitContainer().getMaxSupplyCount() - tower.getUnitContainer().getNumSupplies() - countEntering(
+                    tower);
+            if (missing <= 0)
+                continue;
+            Selectable<?>[] throwers = getIdleThrowers();
+            if (throwers != null) {
+                getOwner().setTarget(firstN(throwers, missing), tower, Action.DEFAULT, false);
+                reclassify();
+            } else {
+                nodeDeployUnitsInArmory(missing);
+            }
+        }
+    }
+
+    /**
+     * Keeps a peon in each finished Lodge to become a Champion, and orders Champions while there are fewer than the
+     * difficulty's number.
+     */
+    private void nodeRunLodges() {
+        if (getLodges() == null)
+            return;
+        for (Selectable<?> s : getLodges()) {
+            LandBuilding building = (LandBuilding) s;
+            Lodge lodge = building.getLodge();
+            if (lodge == null)
+                continue;
+            int champions = getOwner().getChampionCount();
+            if (champions >= CHAMPIONS[difficulty])
+                continue;
+            ShelterUnitContainer shelter = (ShelterUnitContainer) building.getUnitContainer();
+            int missing = LODGE_TRAINEES - shelter.count(getOwner().getRace().getUnitTemplate(
+                    Race.UNIT_PEON)) - countEntering(building);
+            if (missing > 0) {
+                Selectable<?>[] peons = firstN(getPeons(missing), missing);
+                if (peons.length > 0)
+                    getOwner().setTarget(peons, building, Action.DEFAULT, false);
+            }
+            if (building.getBuildSupplyContainer(Champion.class).getNumSupplies() == 0)
+                getOwner().trainChampions(building, CHAMPIONS[difficulty] - champions, false);
         }
     }
 
@@ -570,8 +685,8 @@ public final class AdvancedAI extends AI {
                 getOwner().setTarget(getIdlePeons(), getConstructionSites()[0], Action.DEFAULT, false);
             } else if (shipUnderConstruction() && getConstructionSites() != null) {
                 getOwner().setTarget(getIdlePeons(), getConstructionSites()[0], Action.DEFAULT, false);
-            } else if ((chickenCoopUnderConstruction() || totemUnderConstruction() || marketUnderConstruction())
-                    && getConstructionSites() != null) {
+            } else if ((chickenCoopUnderConstruction() || totemUnderConstruction() || marketUnderConstruction()
+                    || greatTowerUnderConstruction() || lodgeUnderConstruction()) && getConstructionSites() != null) {
                         getOwner().setTarget(getIdlePeons(), getConstructionSites()[0], Action.DEFAULT, false);
                     } else if (getQuarters() != null && !getQuarters()[0].isDead()) {
                         getOwner().setTarget(getIdlePeons(), getQuarters()[0], Action.DEFAULT, false);
@@ -629,7 +744,8 @@ public final class AdvancedAI extends AI {
         List<Selectable<?>> others = new ArrayList<>();
         for (Selectable<?> s : warriors) {
             Class<?> type = s instanceof Unit unit ? unit.getWeaponFactory().getType() : null;
-            if (type == Shield.class)
+            // Champions march at the front with the shields.
+            if (type == Shield.class || type == Champion.class)
                 shields.add(s);
             else if (type == Torch.class)
                 torches.add(s);

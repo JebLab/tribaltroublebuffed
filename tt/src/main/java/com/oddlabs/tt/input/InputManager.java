@@ -129,6 +129,8 @@ public final class InputManager {
         def(GameAction.UNIT_BUILD_MARKET, Key.E);
         def(GameAction.UNIT_BUILD_PALISADE, Key.P);
         def(GameAction.UNIT_BUILD_GATE, Key.O);
+        def(GameAction.UNIT_BUILD_GREAT_TOWER, Key.W);
+        def(GameAction.UNIT_BUILD_LODGE, Key.L);
         def(GameAction.UNIT_EXIT_TOWER, Key.X);
         def(GameAction.UNIT_BEACON, Key.B, Modifier.CONTROL);
         def(GameAction.UNIT_NEXT_IDLE, Key.N);
@@ -200,6 +202,11 @@ public final class InputManager {
         def(GameAction.MARKET_SELL, Key.S);
         def(GameAction.MARKET_BUY, Key.B);
 
+        def(GameAction.TRAIN_CHAMPION, Key.C);
+        def(GameAction.TRAIN_CHAMPION_DEC, Key.C, Modifier.SHIFT);
+        def(GameAction.TRAIN_CHAMPION_BATCH, Key.C, Modifier.CONTROL);
+        def(GameAction.TRAIN_CHAMPION_BATCH_DEC, Key.C, Modifier.SHIFT, Modifier.CONTROL);
+
         // Units
         def(GameAction.TRAIN_PEON, Key.P);
         def(GameAction.TRAIN_PEON_DEC, Key.P, Modifier.SHIFT);
@@ -231,6 +238,7 @@ public final class InputManager {
         def(GameAction.CHEAT_9, Key.F9);
         def(GameAction.CHEAT_10, Key.F2, Modifier.SHIFT);
         def(GameAction.CHEAT_11, Key.F3, Modifier.SHIFT);
+        def(GameAction.CHEAT_12, Key.F4, Modifier.SHIFT);
 
         // Observer mode
         def(GameAction.SPECTATOR_NEXT_PLAYER, Key.RBRACKET);

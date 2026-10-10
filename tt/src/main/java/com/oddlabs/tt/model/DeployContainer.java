@@ -101,6 +101,9 @@ public class DeployContainer extends SupplyContainer {
             case TORCH_WARRIOR:
                 building.createGearArmy(0, 1);
                 break;
+            case SHELTERED:
+                building.createSheltered();
+                break;
         }
     }
 

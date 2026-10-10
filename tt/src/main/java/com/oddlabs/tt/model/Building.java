@@ -78,9 +78,26 @@ public abstract class Building extends Selectable<BuildingTemplate> implements O
     public void setTrade(int give, int get) {
     }
 
+    /**
+     * Orders Champions at a finished Lodge (Buffed), as weapons are ordered at an Armory: {@code infinite} keeps
+     * training. Other buildings ignore it.
+     */
+    public void trainChampions(int num_champions, boolean infinite) {
+    }
+
+    /** Lets out the unit that went into a Lodge first (Buffed); only a Lodge shelters units. */
+    public void createSheltered() {
+        throw new IllegalStateException(this + " shelters nobody");
+    }
+
     /** Whether this is a Palisade segment or a Gate (Buffed). */
     public final boolean isWall() {
         return Race.isWall(getTemplate().getTemplateID());
+    }
+
+    /** Whether this is a Great Tower (Buffed), which has the Tower's job for several throwers. */
+    public final boolean isGreatTower() {
+        return getTemplate().getTemplateID() == Race.BUILDING_GREAT_TOWER;
     }
 
     public abstract void createTransporters(int num_tree, int num_rock, int num_iron, int num_rubber);

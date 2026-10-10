@@ -6,7 +6,7 @@ A *ruleset* is the set of gameplay numbers a game is played with. Three ship wit
 |---|---|---|
 | **Classic (2004)** | [`classic.json`](../tt/src/main/resources/rulesets/classic.json) | The numbers of the 2004 Oddlabs release. |
 | **Resurrected** | [`resurrected.json`](../tt/src/main/resources/rulesets/resurrected.json) | Tribal Trouble: Resurrected's numbers when this fork was made (October 2026). The complete base file. |
-| **Buffed** | [`buffed.json`](../tt/src/main/resources/rulesets/buffed.json) | This fork's new content on top of Resurrected's numbers, which it keeps: so far the Chicken Coop / Henhouse and the Totem / Runestone (M5), the Shield and Torch gear (M6), and the Trading Post / Market, Palisade and Gate (M7). |
+| **Buffed** | [`buffed.json`](../tt/src/main/resources/rulesets/buffed.json) | This fork's new content on top of Resurrected's numbers, which it keeps: so far the Chicken Coop / Henhouse and the Totem / Runestone (M5), the Shield and Torch gear (M6), the Trading Post / Market, Palisade and Gate (M7), and the Great Tower, the Spirit Lodge / Mead Hall and its Champion (M8). |
 
 The skirmish menu preselects Buffed. Everything else plays under **Resurrected**: the campaign and tutorials (their islands were tuned for those numbers) and multiplayer (every client and the inherited servers expect them, so the pulldown is hidden there). Presets saved before rulesets existed load as Resurrected.
 
@@ -41,11 +41,11 @@ Reverting any of these behind Classic is possible later, per item, if it turns o
 
 ## Fields
 
-**Features** (`features`): `ships`, `enormous_islands`, `archipelago` (true/false), `max_players` (6–12), `adjustable_limits` (false = the 2004 limits). `TerrainMenu.enforceRulesetFeatures()` applies them. `chicken_coop` and `totem` say whether peons may build Buffed's buildings: `Player` sets its build permissions from them, and the peon panel shows their buttons only when they are on. `shield` and `torch` say whether the Armory makes Buffed's gear (`Player.canBuildShields` / `canBuildTorches`; the Armory's submenus show their buttons only when they are on). `market` and `palisade` say whether peons may build the Market, and Palisade segments and Gates (both behind the one flag).
+**Features** (`features`): `ships`, `enormous_islands`, `archipelago` (true/false), `max_players` (6–12), `adjustable_limits` (false = the 2004 limits). `TerrainMenu.enforceRulesetFeatures()` applies them. `chicken_coop` and `totem` say whether peons may build Buffed's buildings: `Player` sets its build permissions from them, and the peon panel shows their buttons only when they are on. `shield` and `torch` say whether the Armory makes Buffed's gear (`Player.canBuildShields` / `canBuildTorches`; the Armory's submenus show their buttons only when they are on). `market` and `palisade` say whether peons may build the Market, and Palisade segments and Gates (both behind the one flag). `great_tower` and `lodge` say whether peons may build the Great Tower and the Lodge; the Lodge's flag also lets it train the Champion.
 
 Every number is per race (`natives`, `vikings`) except the spells, which belong to one race each.
 
-**Units** (`peon`, `rock_warrior`, `iron_warrior`, `chicken_warrior`, `shield_warrior`, `torch_warrior`, `chieftain`). The shield and torch warriors are Buffed's ([design/gear.md](design/gear.md)); like its buildings, their numbers are also in `resurrected.json`, where the `features` keep them out. They fight hand to hand, so their `hit_chance` is that of a blow:
+**Units** (`peon`, `rock_warrior`, `iron_warrior`, `chicken_warrior`, `shield_warrior`, `torch_warrior`, `champion`, `chieftain`). The shield and torch warriors ([design/gear.md](design/gear.md)) and the Champion ([design/lodge-and-champion.md](design/lodge-and-champion.md)) are Buffed's; like its buildings, their numbers are also in `resurrected.json`, where the `features` keep them out. They fight hand to hand, so their `hit_chance` is that of a blow:
 
 | Key | Meaning |
 |---|---|
@@ -75,8 +75,17 @@ Every number is per race (`natives`, `vikings`) except the spells, which belong 
 | Palisade (`palisade`, [design/palisade.md](design/palisade.md)) | `hit_points` | 40: 8 logs. One grid cell. |
 | | `max_segments` | Palisade segments and Gates a player may have at a time (100); they do not count against the building limit. |
 | Gate (`gate`) | `hit_points` | 120: 24 logs (every building is built at 5 hit points a log). One grid cell; lets its owner's team through. |
+| Great Tower (`great_tower`, [design/great-tower.md](design/great-tower.md)) | `hit_points` | 300. |
+| | `rock` | rocks that finish it (10). Every load, log or rock, is 5 hit points, so the recipe is 50 logs and then 10 rocks (R-35). |
+| | `throwers` | warriors with thrown weapons it holds at once (3), each with the Tower's +8 m and triple hit chance. |
+| Spirit Lodge / Mead Hall (`lodge`, [design/lodge-and-champion.md](design/lodge-and-champion.md)) | `hit_points` | 200. |
+| | `iron` | iron that finishes it (5): 35 logs and then 5 iron. |
+| | `shelter` | units of its owner it holds (30): anyone but the chieftain, out of the world while inside. |
+| | `spell_radius`, `spell_charge_factor` | a chieftain of its team within this many meters (30) charges its spells this many times faster (2: half the time). Several Lodges do not add up. |
+| | `champion_seconds` | seconds a Champion trains (30), while a peon is inside to become it. |
+| | `max_champions` | a player's Champions alive, sheltered or in training (5). |
 
-**The torch** (`torch`, Buffed's): `building_damage`, what its blow takes from any building, always (6); `fire_seconds` (15) and `fire_damage` (2 per second): the fire it lights, which takes its `fire_seconds × fire_damage` hit points one at a time, is started again by another blow, and goes out when a peon repairs the building. The gear's recipes (Shield: 2 wood + 1 rock in 40 man-seconds; Torch: 2 wood + 1 rock + 1 iron in 80) and deploy times (1 s, 1.5 s) are constants in `LandBuilding`, as the 2004 weapons' are.
+**The torch** (`torch`, Buffed's): `building_damage`, what its blow takes from any building, always (6); `fire_seconds` (15) and `fire_damage` (2 per second): the fire it lights, which takes its `fire_seconds × fire_damage` hit points one at a time, is started again by another blow, and goes out when a peon repairs the building. The gear's recipes (Shield: 2 wood + 1 rock in 40 man-seconds; Torch: 2 wood + 1 rock + 1 iron in 80) and deploy times (1 s, 1.5 s) are constants in `LandBuilding`, as the 2004 weapons' are; the Champion's (2 wood + 1 iron + 1 chicken, taken from the nearest Armory) is a constant in `Lodge`.
 
 **Spells** (by their in-game names):
 
