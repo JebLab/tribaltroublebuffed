@@ -8,4 +8,6 @@ public interface ToolTipVisitor {
     void visitSupply(Supply model);
 
     void visitSceneryModel(SceneryModel model);
+
+    void visitAnimal(Animal animal);
 }

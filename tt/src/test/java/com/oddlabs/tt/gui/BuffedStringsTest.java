@@ -33,8 +33,8 @@ final class BuffedStringsTest {
             Map.entry("build_drum_tip", new Object[]{"Hornblower", 12f}),
             Map.entry("build_net_tip", new Object[]{"Fowler"}),
             Map.entry("lay_snare_tip", new Object[]{"D", 3, 4f}));
-    private static final String[] NAMES = {"great_tower", "lodge_natives", "lodge_vikings", "champion_natives", "champion_vikings", "drum_warrior_natives", "drum_warrior_vikings", "net_warrior_natives", "net_warrior_vikings", "snare"};
-    private static final String[] ACTIONS = {"UNIT_BUILD_GREAT_TOWER", "UNIT_BUILD_LODGE", "TRAIN_CHAMPION", "TRAIN_CHAMPION_DEC", "TRAIN_CHAMPION_BATCH", "TRAIN_CHAMPION_BATCH_DEC", "CHEAT_12", "RES_DRUM", "RES_DRUM_DEC", "RES_DRUM_BATCH", "RES_DRUM_BATCH_DEC", "RES_NET", "RES_NET_DEC", "RES_NET_BATCH", "RES_NET_BATCH_DEC", "UNIT_LAY_SNARE", "CHEAT_13", "CHEAT_14"};
+    private static final String[] NAMES = {"great_tower", "lodge_natives", "lodge_vikings", "champion_natives", "champion_vikings", "drum_warrior_natives", "drum_warrior_vikings", "net_warrior_natives", "net_warrior_vikings", "snare", "crab", "monkey", "boar", "wolf"};
+    private static final String[] ACTIONS = {"UNIT_BUILD_GREAT_TOWER", "UNIT_BUILD_LODGE", "TRAIN_CHAMPION", "TRAIN_CHAMPION_DEC", "TRAIN_CHAMPION_BATCH", "TRAIN_CHAMPION_BATCH_DEC", "CHEAT_12", "RES_DRUM", "RES_DRUM_DEC", "RES_DRUM_BATCH", "RES_DRUM_BATCH_DEC", "RES_NET", "RES_NET_DEC", "RES_NET_BATCH", "RES_NET_BATCH_DEC", "UNIT_LAY_SNARE", "CHEAT_13", "CHEAT_14", "CHEAT_15", "CHEAT_16", "CHEAT_17"};
 
     @ParameterizedTest
     @ValueSource(strings = {"en", "da", "de", "es", "it", "pt"})

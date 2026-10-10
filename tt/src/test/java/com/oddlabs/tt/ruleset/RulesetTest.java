@@ -12,12 +12,17 @@ import com.oddlabs.tt.model.RubberSupply;
 import com.oddlabs.tt.model.behaviour.RepairBehaviour;
 import com.oddlabs.tt.ruleset.RulesetStats.BuildingStats;
 import com.oddlabs.tt.ruleset.RulesetStats.ChickenCoopStats;
+import com.oddlabs.tt.ruleset.RulesetStats.CountBySize;
+import com.oddlabs.tt.ruleset.RulesetStats.CrabStats;
 import com.oddlabs.tt.ruleset.RulesetStats.DrumStats;
+import com.oddlabs.tt.ruleset.RulesetStats.FaunaStats;
 import com.oddlabs.tt.ruleset.RulesetStats.GreatTowerStats;
 import com.oddlabs.tt.ruleset.RulesetStats.LodgeStats;
 import com.oddlabs.tt.ruleset.RulesetStats.MarketStats;
+import com.oddlabs.tt.ruleset.RulesetStats.MonkeyStats;
 import com.oddlabs.tt.ruleset.RulesetStats.NetStats;
 import com.oddlabs.tt.ruleset.RulesetStats.PalisadeStats;
+import com.oddlabs.tt.ruleset.RulesetStats.PredatorStats;
 import com.oddlabs.tt.ruleset.RulesetStats.RaceStats;
 import com.oddlabs.tt.ruleset.RulesetStats.SpellStats;
 import com.oddlabs.tt.ruleset.RulesetStats.TotemStats;
@@ -96,17 +101,17 @@ final class RulesetTest {
     /**
      * 2004 had no boats, Small/Medium/Large islands only, six players (MAX_PLAYERS = 6) and fixed limits. Neither
      * 2004 nor Resurrected has the Chicken Coop, the Totem, the Shield, the Torch, the Market, the Palisade, the Great
-     * Tower, the Lodge, the Drum or the Net.
+     * Tower, the Lodge, the Drum or the Net, nor wild animals.
      */
     @Test
     void classicOffersOnly2004WorldOptions() {
         assertEquals(new RulesetStats.Features(false, false, false, 6, false, false, false, false, false, false, false,
                 false,
-                false, false, false),
+                false, false, false, false),
                 Ruleset.CLASSIC.getStats().features());
         assertEquals(new RulesetStats.Features(true, true, true, 12, true, false, false, false, false, false, false,
                 false,
-                false, false, false),
+                false, false, false, false),
                 Ruleset.RESURRECTED.getStats().features());
     }
 
@@ -114,7 +119,7 @@ final class RulesetTest {
     @Test
     void buffedOffersItsBuildings() {
         assertEquals(new RulesetStats.Features(true, true, true, 12, true, true, true, true, true, true, true, true,
-                true, true, true),
+                true, true, true, true),
                 Ruleset.BUFFED.getStats().features());
     }
 
@@ -198,6 +203,26 @@ final class RulesetTest {
                     () -> assertEquals(new DrumStats(.1f, .15f, 12f), race.drum(), "drum"),
                     () -> assertEquals(new NetStats(3, 4f), race.net(), "net"));
         }
+    }
+
+    /**
+     * docs/design/fauna.md: one hit point and dodge 0.3; no animal within 40 m of a start; crabs 2 per 100 m of shore
+     * up to 20; monkeys 3 / 5 / 8 / 12 that steal within 4 m at 6 m/s and rest 30 s; boars or wolves 2 / 3 / 5 / 8 that
+     * charge a peon within 6 m with no company within 8 m at 6 m/s, strike at 0.5 and rest 20 s, giving up 12 m from
+     * home. The same for both races, which hold them for their terrains.
+     */
+    @Test
+    void buffedFaunaMatchesTheDesign() {
+        FaunaStats expected = new FaunaStats(40f, .3f, new CrabStats(2f, 20, 3f, 3f),
+                new MonkeyStats(new CountBySize(3, 5, 8, 12), 6f, 4f, 12f, 30f),
+                new PredatorStats(new CountBySize(2, 3, 5, 8), 6f, 6f, 8f, 12f, .5f, 20f));
+        for (boolean vikings : new boolean[]{false, true}) {
+            assertEquals(expected, Ruleset.BUFFED.getStats().race(vikings).fauna());
+            assertEquals(expected, Ruleset.RESURRECTED.getStats().race(vikings).fauna());
+        }
+        CountBySize monkeys = expected.monkey().count();
+        assertEquals(List.of(3, 5, 8, 12, 12), List.of(monkeys.forMetersPerWorld(256), monkeys.forMetersPerWorld(512),
+                monkeys.forMetersPerWorld(1024), monkeys.forMetersPerWorld(2048), monkeys.forMetersPerWorld(4096)));
     }
 
     /** The Drum's and the Net's recipes: 3 wood + 1 iron, and 2 wood + 1 chicken. */

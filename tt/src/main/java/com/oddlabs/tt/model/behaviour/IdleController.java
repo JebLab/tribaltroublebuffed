@@ -3,7 +3,7 @@ package com.oddlabs.tt.model.behaviour;
 import com.oddlabs.tt.landscape.LandscapeTarget;
 import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.AttackScanFilter;
-import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Hittable;
 import com.oddlabs.tt.model.Unit;
 import org.jspecify.annotations.NonNull;
 
@@ -40,7 +40,7 @@ public final class IdleController extends Controller {
         redecide_time = MIN_SCAN_DELAY + unit.getOwner().getWorld().getRandom().nextFloat() * (MAX_SCAN_DELAY - MIN_SCAN_DELAY);
         if (unit.getAbilities().hasAbilities(Abilities.ATTACK))
             unit.scanVicinity(scan_filter);
-        Selectable<?> s = scan_filter.removeTarget();
+        Hittable s = scan_filter.removeTarget();
         if (s != null) {
             if (can_move)
                 unit.pushControllers(new WalkController(unit, new LandscapeTarget(unit.getGridX(), unit.getGridY()),

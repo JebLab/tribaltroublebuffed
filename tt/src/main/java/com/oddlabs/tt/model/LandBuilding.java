@@ -781,7 +781,7 @@ public final class LandBuilding extends Building implements Gate {
                 boolean kill_friendly = action == Action.ATTACK;
                 for (Unit unit : List.copyOf(((MountUnitContainer) getUnitContainer()).getUnits())) {
                     if (unit.canAttack(target, kill_friendly))
-                        unit.pushController(new AttackController(unit, (Selectable<?>) target));
+                        unit.pushController(new AttackController(unit, (Hittable) target));
                 }
             }
         } else {

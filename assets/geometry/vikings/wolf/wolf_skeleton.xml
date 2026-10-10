@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!DOCTYPE skeleton [
+        <!ELEMENT skeleton   (bones, init_pose)>
+        <!ELEMENT bones      (bone+)>
+        <!ELEMENT init_pose  (transform+)>
+        <!ELEMENT bone        EMPTY>
+        <!ELEMENT transform   EMPTY>
+        <!ATTLIST transform name CDATA #REQUIRED>
+        <!ATTLIST transform m00 CDATA #REQUIRED>
+        <!ATTLIST transform m01 CDATA #REQUIRED>
+        <!ATTLIST transform m02 CDATA #REQUIRED>
+        <!ATTLIST transform m03 CDATA #REQUIRED>
+        <!ATTLIST transform m10 CDATA #REQUIRED>
+        <!ATTLIST transform m11 CDATA #REQUIRED>
+        <!ATTLIST transform m12 CDATA #REQUIRED>
+        <!ATTLIST transform m13 CDATA #REQUIRED>
+        <!ATTLIST transform m20 CDATA #REQUIRED>
+        <!ATTLIST transform m21 CDATA #REQUIRED>
+        <!ATTLIST transform m22 CDATA #REQUIRED>
+        <!ATTLIST transform m23 CDATA #REQUIRED>
+        <!ATTLIST transform m30 CDATA #REQUIRED>
+        <!ATTLIST transform m31 CDATA #REQUIRED>
+        <!ATTLIST transform m32 CDATA #REQUIRED>
+        <!ATTLIST transform m33 CDATA #REQUIRED>
+        <!ATTLIST bone name CDATA #REQUIRED>
+        <!ATTLIST bone parent CDATA #REQUIRED>
+        ]>
+
+<skeleton>
+    <bones>
+        <bone name="wolf Chest" parent="wolf Pelvis"/>
+        <bone name="wolf Head" parent="wolf Neck"/>
+        <bone name="wolf Jaw" parent="wolf Head"/>
+        <bone name="wolf L Front1" parent="wolf Chest"/>
+        <bone name="wolf L Front2" parent="wolf L Front1"/>
+        <bone name="wolf L Hind1" parent="wolf Pelvis"/>
+        <bone name="wolf L Hind2" parent="wolf L Hind1"/>
+        <bone name="wolf Neck" parent="wolf Chest"/>
+        <bone name="wolf Pelvis" parent=""/>
+        <bone name="wolf R Front1" parent="wolf Chest"/>
+        <bone name="wolf R Front2" parent="wolf R Front1"/>
+        <bone name="wolf R Hind1" parent="wolf Pelvis"/>
+        <bone name="wolf R Hind2" parent="wolf R Hind1"/>
+        <bone name="wolf Tail1" parent="wolf Pelvis"/>
+        <bone name="wolf Tail2" parent="wolf Tail1"/>
+    </bones>
+    <init_pose>
+        <transform name="wolf Chest" m00="0.99920106" m01="0" m02="0.039968006" m03="0" m10="-0.0015974896"
+                   m11="0.999201" m12="0.039936073" m13="0" m20="-0.039936066" m21="-0.039968003" m22="0.99840254"
+                   m23="0" m30="-0.099999994" m31="0" m32="0.87" m33="1"/>
+        <transform name="wolf Head" m00="0.9778026" m01="0" m02="-0.20952895" m03="0" m10="-0.043902427" m11="0.9778026"
+                   m12="-0.20487794" m13="0" m20="0.20487797" m21="0.20952898" m22="0.95609766" m23="0" m30="0.62"
+                   m31="-2.5893443e-09" m32="1.06" m33="1"/>
+        <transform name="wolf Jaw" m00="0.966235" m01="-6.519258e-09" m02="-0.2576628" m03="0" m10="-0.06639015"
+                   m11="0.966235" m12="-0.24896276" m13="0" m20="0.24896285" m21="0.25766277" m22="0.9336099" m23="0"
+                   m30="0.70000005" m31="-2.7939677e-09" m32="0.97999996" m33="1"/>
+        <transform name="wolf L Front1" m00="-0.32368773" m01="8.568168e-08" m02="-0.946164" m03="0" m10="-0.8952264"
+                   m11="-0.32368764" m12="0.3062616" m13="0" m20="-0.3062617" m21="0.946164" m22="0.104773745" m23="0"
+                   m30="0.3" m31="0.15" m32="0.8" m33="1"/>
+        <transform name="wolf L Front2" m00="0.29568374" m01="1.4901161e-08" m02="-0.9552857" m03="0" m10="-0.9125712"
+                   m11="0.29568392" m12="-0.28246254" m13="0" m20="0.28246257" m21="0.95528585" m22="0.08742893" m23="0"
+                   m30="0.16999999" m31="0.15000004" m32="0.42" m33="1"/>
+        <transform name="wolf L Hind1" m00="0.3624462" m01="1.1175871e-08" m02="-0.9320047" m03="0" m10="-0.86863273"
+                   m11="0.3624462" m12="-0.33780158" m13="0" m20="0.33780152" m21="0.9320047" m22="0.13136728" m23="0"
+                   m30="-0.48" m31="0.13999999" m32="0.8" m33="1"/>
+        <transform name="wolf L Hind2" m00="-0.34174302" m01="2.9802322e-08" m02="-0.9397935" m03="0" m10="-0.8832117"
+                   m11="-0.34174308" m12="0.3211679" m13="0" m20="-0.32116792" m21="0.93979347" m22="0.116788305"
+                   m23="0" m30="-0.34000003" m31="0.13999999" m32="0.44000003" m33="1"/>
+        <transform name="wolf Neck" m00="0.79128516" m01="-9.313226e-09" m02="0.6114475" m03="0" m10="-0.3738681"
+                   m11="0.7912851" m12="0.48382923" m13="0" m20="-0.4838293" m21="-0.6114475" m22="0.626132" m23="0"
+                   m30="0.39999998" m31="0" m32="0.89" m33="1"/>
+        <transform name="wolf Pelvis" m00="0.9996876" m01="0" m02="0.024992166" m03="0" m10="-0.0006246567"
+                   m11="0.9996876" m12="0.02498436" m13="0" m20="-0.02498436" m21="-0.024992166" m22="0.9993754" m23="0"
+                   m30="-0.5" m31="0" m32="0.86" m33="1"/>
+        <transform name="wolf R Front1" m00="-0.32368767" m01="9.313226e-08" m02="-0.94616413" m03="0" m10="-0.8952264"
+                   m11="-0.32368773" m12="0.3062615" m13="0" m20="-0.30626184" m21="0.9461641" m22="0.104773626" m23="0"
+                   m30="0.29999998" m31="-0.15" m32="0.8" m33="1"/>
+        <transform name="wolf R Front2" m00="0.29568383" m01="2.9802322e-08" m02="-0.9552858" m03="0" m10="-0.91257125"
+                   m11="0.29568392" m12="-0.2824626" m13="0" m20="0.2824626" m21="0.9552859" m22="0.08742888" m23="0"
+                   m30="0.16999997" m31="-0.14999996" m32="0.41999993" m33="1"/>
+        <transform name="wolf R Hind1" m00="0.3624462" m01="-1.8626451e-08" m02="-0.9320047" m03="0" m10="-0.86863273"
+                   m11="0.3624462" m12="-0.33780155" m13="0" m20="0.33780146" m21="0.9320047" m22="0.13136731" m23="0"
+                   m30="-0.48" m31="-0.13999999" m32="0.8" m33="1"/>
+        <transform name="wolf R Hind2" m00="-0.34174302" m01="-2.9802322e-08" m02="-0.93979347" m03="0"
+                   m10="-0.88321173" m11="-0.34174296" m12="0.32116783" m13="0" m20="-0.32116795" m21="0.9397935"
+                   m22="0.11678835" m23="0" m30="-0.34000003" m31="-0.13999999" m32="0.44" m33="1"/>
+        <transform name="wolf Tail1" m00="-0.8320503" m01="1.6763806e-08" m02="-0.5547" m03="0" m10="-0.3076921"
+                   m11="-0.8320503" m12="0.46153846" m13="0" m20="-0.4615385" m21="0.5547002" m22="0.69230783" m23="0"
+                   m30="-0.61999995" m31="0" m32="0.9" m33="1"/>
+        <transform name="wolf Tail2" m00="-0.59001637" m01="0" m02="-0.80739117" m03="0" m10="-0.6518805"
+                   m11="-0.59001637" m12="0.47637415" m13="0" m20="-0.47637418" m21="0.8073913" m22="0.34811938" m23="0"
+                   m30="-0.8599999" m31="4.8354205e-09" m32="0.74" m33="1"/>
+    </init_pose>
+</skeleton>

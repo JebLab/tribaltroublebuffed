@@ -1,6 +1,6 @@
 package com.oddlabs.tt.model.behaviour;
 
-import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Hittable;
 import com.oddlabs.tt.model.Building;
 import com.oddlabs.tt.model.Ship;
 import com.oddlabs.tt.model.ShipAllocation;
@@ -16,14 +16,14 @@ public final class AttackBehaviour implements Behaviour {
         RELEASED
     }
 
-    private final @NonNull Selectable<?> target;
+    private final @NonNull Hittable target;
     private final @NonNull Unit unit;
     private final ShipAllocation allocation;
     private final Ship ship;
     private float anim_time;
     private @NonNull AttackState state = AttackState.THROWING;
 
-    public AttackBehaviour(@NonNull Unit unit, @NonNull Selectable<?> target) {
+    public AttackBehaviour(@NonNull Unit unit, @NonNull Hittable target) {
         this.unit = unit;
         if (target instanceof Building t) {
             this.target = t.getBase();
@@ -36,7 +36,7 @@ public final class AttackBehaviour implements Behaviour {
         unit.switchAnimation(1f / SECONDS_PER_ATTACK, Unit.Animation.THROWING);
     }
 
-    public AttackBehaviour(@NonNull Unit unit, @NonNull Selectable target, ShipAllocation allocation, Ship ship) {
+    public AttackBehaviour(@NonNull Unit unit, @NonNull Hittable target, ShipAllocation allocation, Ship ship) {
         this.unit = unit;
         if (target instanceof Building t) {
             this.target = t.getBase();

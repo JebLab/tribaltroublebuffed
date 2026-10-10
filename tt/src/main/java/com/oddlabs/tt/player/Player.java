@@ -80,6 +80,11 @@ public final class Player implements PlayerInterface {
     private int fires_lit;
     private int snares_laid;
     private int snares_sprung;
+    private int units_lost_to_animals;
+    private int last_loss_to_animal_x;
+    private int last_loss_to_animal_y;
+    private int loads_stolen;
+    private int animals_killed;
     private int trades_made;
     private int magics;
 
@@ -928,6 +933,43 @@ public final class Player implements PlayerInterface {
 
     public int getSnaresSprung() {
         return snares_sprung;
+    }
+
+    /** A unit of this player was killed by a wild animal on this cell (Buffed); no one is credited with the kill. */
+    public void unitLostToAnimal(int grid_x, int grid_y) {
+        units_lost_to_animals++;
+        last_loss_to_animal_x = grid_x;
+        last_loss_to_animal_y = grid_y;
+    }
+
+    public int getLastLossToAnimalX() {
+        return last_loss_to_animal_x;
+    }
+
+    public int getLastLossToAnimalY() {
+        return last_loss_to_animal_y;
+    }
+
+    public int getUnitsLostToAnimals() {
+        return units_lost_to_animals;
+    }
+
+    /** A monkey took a load from a unit of this player (Buffed). */
+    public void loadStolen() {
+        loads_stolen++;
+    }
+
+    public int getLoadsStolen() {
+        return loads_stolen;
+    }
+
+    /** A unit of this player killed a wild animal (Buffed). It is not one of the units killed. */
+    public void animalKilled() {
+        animals_killed++;
+    }
+
+    public int getAnimalsKilled() {
+        return animals_killed;
     }
 
     public void tradeMade() {

@@ -6,10 +6,9 @@ import com.oddlabs.tt.audio.Audio;
 import com.oddlabs.tt.audio.AudioParameters;
 import com.oddlabs.tt.audio.AudioPlayer;
 import com.oddlabs.tt.model.Accessories;
-import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Hittable;
 import com.oddlabs.tt.model.Ship;
 import com.oddlabs.tt.model.Unit;
-import com.oddlabs.tt.model.UnitTemplate;
 import com.oddlabs.tt.player.Player;
 import com.oddlabs.tt.render.SpriteKey;
 import com.oddlabs.tt.util.StateChecksum;
@@ -32,7 +31,7 @@ public abstract class ThrowingWeapon extends Accessories implements Animated {
     private float miss_y = 0.0f;
     private float damage_ratio = 1.0f;
 
-    private @NonNull Selectable<?> target;
+    private @NonNull Hittable target;
     private float start_x;
     private float start_y;
     private float end_x;
@@ -44,9 +43,9 @@ public abstract class ThrowingWeapon extends Accessories implements Animated {
     private float z_speed;
     private float deterministic_z;
 
-    public ThrowingWeapon(boolean hit, @NonNull Unit src, @NonNull Selectable<?> target,
+    public ThrowingWeapon(boolean hit, @NonNull Unit src, @NonNull Hittable target,
             @NonNull SpriteKey sprite_renderer, @NonNull Audio throw_sound, @NonNull Audio @NonNull [] hit_sounds) {
-        super(target.getOwner().getWorld(), sprite_renderer);
+        super(src.getOwner().getWorld(), sprite_renderer);
         this.hit = hit;
         this.hit_sounds = hit_sounds;
         this.unit = src;
@@ -60,7 +59,7 @@ public abstract class ThrowingWeapon extends Accessories implements Animated {
         setTarget(target);
 
         reinsert();
-        audio_player = target.getOwner().getWorld().getAudio().newAudio(new AudioParameters<>(
+        audio_player = src.getOwner().getWorld().getAudio().newAudio(new AudioParameters<>(
                 throw_sound,
                 getPositionX(),
                 getPositionY(),
@@ -69,8 +68,8 @@ public abstract class ThrowingWeapon extends Accessories implements Animated {
                 AudioPlayer.AUDIO_DISTANCE_WEAPON_ATTACK,
                 AudioPlayer.AUDIO_GAIN_WEAPON_ATTACK,
                 AudioPlayer.AUDIO_RADIUS_WEAPON_ATTACK,
-                target.getOwner().getWorld().getRandom().nextFloat() * .2f + .9f));
-        target.getOwner().getWorld().getAnimationManagerGameTime().registerAnimation(this);
+                src.getOwner().getWorld().getRandom().nextFloat() * .2f + .9f));
+        src.getOwner().getWorld().getAnimationManagerGameTime().registerAnimation(this);
 
         // stats
         src.getOwner().weaponThrown();
@@ -81,9 +80,9 @@ public abstract class ThrowingWeapon extends Accessories implements Animated {
         return "ThrowingWeapon: start_x = " + start_x + " | start_y = " + start_y + " | end_x = " + end_x + " | end_y = " + end_y + " | target = " + target + "  " + super.toString();
     }
 
-    protected final void setTarget(@NonNull Selectable<?> target) {
+    protected final void setTarget(@NonNull Hittable target) {
         if (target instanceof Ship ship) {
-            Selectable shipVictim = ship.pickVictim();
+            Hittable shipVictim = ship.pickVictim();
             if (shipVictim != null) {
                 target = shipVictim;
             }
@@ -170,7 +169,7 @@ public abstract class ThrowingWeapon extends Accessories implements Animated {
         audio_player.setPos(getPositionX(), getPositionY(), getPositionZ());
     }
 
-    protected void hitTarget(boolean hit, @NonNull Player owner, @NonNull Selectable<?> target) {
+    protected void hitTarget(boolean hit, @NonNull Player owner, @NonNull Hittable target) {
         owner.getWorld().getAnimationManagerGameTime().removeAnimation(this);
         audio_player.stop();
         remove();
@@ -178,15 +177,15 @@ public abstract class ThrowingWeapon extends Accessories implements Animated {
             damageTarget(target);
     }
 
-    protected final void damageTarget(@NonNull Selectable<?> target) {
-        if (target instanceof Unit) {
+    protected final void damageTarget(@NonNull Hittable target) {
+        if (target instanceof Unit victim) {
             owner.getWorld().getAudio().newAudio(new AudioParameters<>(hit_sounds[owner.getWorld().getRandom().nextInt(
                     hit_sounds.length)], target.getPositionX(), target.getPositionY(), target.getPositionZ(),
                     AudioPlayer.AUDIO_RANK_DEATH,
                     AudioPlayer.AUDIO_DISTANCE_DEATH,
                     AudioPlayer.AUDIO_GAIN_DEATH,
                     AudioPlayer.AUDIO_RADIUS_DEATH,
-                    1f + (owner.getWorld().getRandom().nextFloat() - .5f) * ((UnitTemplate) target.getTemplate()).getDeathPitch()));
+                    1f + (owner.getWorld().getRandom().nextFloat() - .5f) * victim.getTemplate().getDeathPitch()));
         }
         target.hit(StrictMath.round(getDamage() * damage_ratio), dir_x, dir_y, owner);
     }

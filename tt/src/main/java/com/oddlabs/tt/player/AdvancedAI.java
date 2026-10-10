@@ -3,6 +3,7 @@ package com.oddlabs.tt.player;
 import com.oddlabs.tt.landscape.LandscapeTarget;
 import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.Action;
+import com.oddlabs.tt.model.Animal;
 import com.oddlabs.tt.model.Building;
 import com.oddlabs.tt.model.BuildingTemplate;
 import com.oddlabs.tt.model.ChickenCoop;
@@ -10,6 +11,7 @@ import com.oddlabs.tt.model.DeployType;
 import com.oddlabs.tt.model.LandBuilding;
 import com.oddlabs.tt.model.Lodge;
 import com.oddlabs.tt.model.Market;
+import com.oddlabs.tt.model.Predator;
 import com.oddlabs.tt.model.Race;
 import com.oddlabs.tt.model.RacesResources;
 import com.oddlabs.tt.model.Selectable;
@@ -117,6 +119,10 @@ public final class AdvancedAI extends AI {
     private static final float SNARE_RING = 10f;
     private static final int SCORE_WARRIOR_DRUM = 3;
     private static final int SCORE_WARRIOR_NET = 3;
+    // Buffed's fauna (docs/design/fauna.md): after a boar or wolf kills one of its peons, this many idle throwers hunt
+    // down the one nearest to where it happened, if it is within HUNT_RANGE cells.
+    private static final int[] HUNTERS = new int[]{0, 2, 3};
+    private static final int HUNT_RANGE = 20;
 
     // Buffed's Great Tower (docs/design/great-tower.md): one, above this many units, GREAT_TOWER_DISTANCE cells from
     // the Armory towards the island's centre, kept manned with as many throwers as it holds.
@@ -162,6 +168,8 @@ public final class AdvancedAI extends AI {
     private final List<@NonNull Selectable<?>> followers = new ArrayList<>();
     private int followers_target_x;
     private int followers_target_y;
+    // Buffed: the peons lost to animals when the AI last sent hunters.
+    private int hunted_losses;
 
     public AdvancedAI(@NonNull Player owner, UnitInfo unit_info, int difficulty) {
         super(owner, unit_info);
@@ -202,6 +210,7 @@ public final class AdvancedAI extends AI {
         nodeBuildBuffedBuildings();
         nodeBuildGear();
         nodeRunCatchers();
+        nodeHuntPredators();
 
         reclassify();
         nodeAttackWithWarriorsAndChieftain(NUM_WARRIORS[difficulty],
@@ -804,6 +813,34 @@ public final class AdvancedAI extends AI {
         followers.clear();
         if (idle.length > 0)
             getOwner().setLandscapeTarget(idle, followers_target_x, followers_target_y, Action.ATTACK, true);
+    }
+
+    /**
+     * Buffed's fauna: once a boar or wolf has killed one of its peons, Normal and Hard send idle throwers after the one
+     * nearest to where it happened. A no-op until an animal kills a peon, so worlds without animals play as before.
+     */
+    private void nodeHuntPredators() {
+        int losses = getOwner().getUnitsLostToAnimals();
+        if (HUNTERS[difficulty] == 0 || losses == hunted_losses)
+            return;
+        Selectable<?>[] throwers = getIdleThrowers();
+        if (throwers == null || throwers.length == 0)
+            return;
+        hunted_losses = losses;
+        int x = getOwner().getLastLossToAnimalX();
+        int y = getOwner().getLastLossToAnimalY();
+        Predator nearest = null;
+        int nearest_distance = HUNT_RANGE * HUNT_RANGE + 1;
+        for (Animal animal : getOwner().getWorld().getAnimals()) {
+            int dx = animal.getGridX() - x;
+            int dy = animal.getGridY() - y;
+            if (animal instanceof Predator predator && dx * dx + dy * dy < nearest_distance) {
+                nearest = predator;
+                nearest_distance = dx * dx + dy * dy;
+            }
+        }
+        if (nearest != null)
+            getOwner().setTarget(firstN(throwers, HUNTERS[difficulty]), nearest, Action.ATTACK, true);
     }
 
     /** Buffed: the idle drummers, for the next attack. */

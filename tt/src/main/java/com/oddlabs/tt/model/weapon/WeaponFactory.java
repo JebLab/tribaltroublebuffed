@@ -2,7 +2,7 @@ package com.oddlabs.tt.model.weapon;
 
 import com.oddlabs.tt.landscape.HeightMap;
 import com.oddlabs.tt.model.DrumAura;
-import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Hittable;
 import com.oddlabs.tt.model.TotemAura;
 import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.util.Target;
@@ -39,7 +39,7 @@ public abstract class WeaponFactory {
         return bonus;
     }
 
-    public final void attack(@NonNull Unit src, @NonNull Selectable<?> target, float factor) {
+    public final void attack(@NonNull Unit src, @NonNull Hittable target, float factor) {
         /* GAMEPLAY: Terrain bonus, according to who is positioned highest */
         float terrain_bonus = computeTerrainBonus(src.getOwner().getWorld().getHeightMap(), src, target);
         float difficulty_bonus = src.getOwner().getHitBonus();
@@ -52,15 +52,15 @@ public abstract class WeaponFactory {
         float drum_bonus = DrumAura.getHitBonus(src);
         if (drum_bonus != 0f)
             chance += drum_bonus;
-        boolean hit = target.getOwner().getWorld().getRandom().nextFloat() < factor * chance * (1 - target.getDefenseChance());
+        boolean hit = src.getOwner().getWorld().getRandom().nextFloat() < factor * chance * (1 - target.getDefenseChance());
         doAttack(hit, src, target);
     }
 
-    public final void attack(@NonNull Unit src, @NonNull Selectable<?> target) {
+    public final void attack(@NonNull Unit src, @NonNull Hittable target) {
         attack(src, target, 1f);
     }
 
-    protected abstract void doAttack(boolean hit, @NonNull Unit src, @NonNull Selectable<?> target);
+    protected abstract void doAttack(boolean hit, @NonNull Unit src, @NonNull Hittable target);
 
     /** The weapon in the Armory's stock this unit carries (a thrown weapon's class or a gear key), or null. */
     public abstract @Nullable Class<?> getType();

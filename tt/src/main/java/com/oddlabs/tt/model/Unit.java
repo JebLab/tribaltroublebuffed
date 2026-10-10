@@ -135,7 +135,8 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
                 owner.getWorld().getDrummers().add(this);
         }
 
-        pushController(new IdleController(this, new AttackScanFilter(getOwner(), AttackScanFilter.UNIT_RANGE), true));
+        pushController(new IdleController(this, new AttackScanFilter(getOwner(), AttackScanFilter.UNIT_RANGE,
+                isWarrior()), true));
         if (!getAbilities().hasAbilities(Abilities.MAGIC) && !imaginary) {
             int result = getOwner().getUnitCountContainer().increaseSupply(1);
             assert (result == 1) : "No room for new unit in player unit container.";
@@ -282,7 +283,8 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
     public final void unmount() {
         assert !isDead();
         clearControllerStack();
-        swapController(new IdleController(this, new AttackScanFilter(getOwner(), AttackScanFilter.UNIT_RANGE), true));
+        swapController(new IdleController(this, new AttackScanFilter(getOwner(), AttackScanFilter.UNIT_RANGE,
+                isWarrior()), true));
         mounted = false;
         on_ship = false;
         mount_offset = 0;
@@ -316,7 +318,8 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
         setPosition(x, y);
         mounted = true;
         clearControllerStack();
-        swapController(new IdleController(this, new AttackScanFilter(getOwner(), AttackScanFilter.TOWER_RANGE), false));
+        swapController(new IdleController(this, new AttackScanFilter(getOwner(), AttackScanFilter.TOWER_RANGE, true),
+                false));
     }
 
     public final void mount(Ship ship, ShipAllocation ship_allocation) {
@@ -534,18 +537,55 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
         if (mounted && !on_ship) {
             mounted_building.hit(damage, direction_x, direction_y, owner);
         } else if (!isDead()) {
-            hit_points = Math.clamp(hit_points - damage, 0, getTemplate().getMaxHitPoints());
-            if (hit_points == 0) {
-                owner.unitKilled();
-                if (mounted_building instanceof Ship ship) {
-                    ship.getShipHR().removeUnit(this);
-                    drown();
-                } else {
-                    startDying();
-                    setDirection(-direction_x, -direction_y);
-                }
+            takeDamage(damage, direction_x, direction_y, owner);
+        }
+    }
+
+    /**
+     * A blow from one of Buffed's wild animals (docs/design/fauna.md), which strike only units on the ground: like
+     * {@link #hit}, but no player is credited with the kill.
+     */
+    public final void hitByAnimal(int damage, float direction_x, float direction_y) {
+        assert !mounted;
+        if (isDead())
+            return;
+        getOwner().getWorld().getNotificationListener().newAttackNotification(this);
+        takeDamage(damage, direction_x, direction_y, null);
+        if (hit_points == 0)
+            getOwner().unitLostToAnimal(getGridX(), getGridY());
+    }
+
+    private void takeDamage(int damage, float direction_x, float direction_y, @Nullable Player killer) {
+        hit_points = Math.clamp(hit_points - damage, 0, getTemplate().getMaxHitPoints());
+        if (hit_points == 0) {
+            if (killer != null)
+                killer.unitKilled();
+            if (mounted_building instanceof Ship ship) {
+                ship.getShipHR().removeUnit(this);
+                drown();
+            } else {
+                startDying();
+                setDirection(-direction_x, -direction_y);
             }
         }
+    }
+
+    /**
+     * Buffed's monkeys: the unit's load is taken from it and lost, and it goes back to work at once instead of
+     * carrying nothing to a building.
+     */
+    public final void loseLoad() {
+        assert !isDead() && supply_container != null;
+        supply_container.increaseSupply(-supply_container.getNumSupplies(), supply_container.getSupplyType());
+        redecide();
+    }
+
+    /** Whether the unit walks the island carrying a load a monkey could take (wood, rock, iron or a chicken). */
+    public final boolean isCarrying() {
+        if (isDead() || mounted || supply_container == null || supply_container.getNumSupplies() == 0)
+            return false;
+        Class<?> type = supply_container.getSupplyType();
+        return type != LeftPaddle.class && type != RightPaddle.class;
     }
 
     public final void startDying() {
@@ -643,6 +683,9 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
 
     public final boolean canAttack(@NonNull Target target, boolean kill_friendly) {
         assert !isDead();
+        // Buffed: a warrior, or a thrower in a tower, may be sent at a wild animal that can be hunted.
+        if (target instanceof Animal animal)
+            return animal.isPrey() && isWarrior() && getAbilities().hasAbilities(Abilities.ATTACK);
         if (!(target instanceof Selectable<?> selectable) || !getAbilities().hasAbilities(Abilities.ATTACK))
             return false;
         Player target_player = selectable.getOwner();
@@ -723,7 +766,7 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
                 } else if (canEnter(target)) {
                     pushController(new EnterController(this, (Building) target));
                 } else if (canAttack(target, false)) {
-                    pushController(new HuntController(this, (Selectable<?>) target));
+                    pushController(new HuntController(this, (Hittable) target));
                 } else {
                     walkToTarget(target, aggressive);
                 }
@@ -737,7 +780,7 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
                 break;
             case ATTACK:
                 if (canAttack(target, true)) {
-                    pushController(new HuntController(this, (Selectable<?>) target));
+                    pushController(new HuntController(this, (Hittable) target));
                 } else {
                     walkToTarget(target, true);
                 }

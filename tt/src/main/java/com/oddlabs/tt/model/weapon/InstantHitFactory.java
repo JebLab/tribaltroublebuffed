@@ -6,9 +6,8 @@ import com.oddlabs.tt.audio.AudioPlayer;
 import com.oddlabs.tt.landscape.World;
 import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.Building;
-import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Hittable;
 import com.oddlabs.tt.model.Unit;
-import com.oddlabs.tt.model.UnitTemplate;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -21,15 +20,15 @@ public final class InstantHitFactory extends WeaponFactory {
     }
 
     @Override
-    protected void doAttack(boolean hit, @NonNull Unit src, @NonNull Selectable<?> target) {
+    protected void doAttack(boolean hit, @NonNull Unit src, @NonNull Hittable target) {
         blow(hit, src, target, sounds);
     }
 
     /** A blow: a tower always takes 6, anything else 1 if the blow hit. */
-    static void blow(boolean hit, @NonNull Unit src, @NonNull Selectable<?> target,
+    static void blow(boolean hit, @NonNull Unit src, @NonNull Hittable target,
             @NonNull Audio @NonNull [] sounds) {
         int damage = 1;
-        if (target instanceof Building && target.getTemplate().getAbilities().hasAbilities(Abilities.ATTACK))
+        if (target instanceof Building building && building.getTemplate().getAbilities().hasAbilities(Abilities.ATTACK))
             damage = 6;
         else if (!hit)
             return;
@@ -37,12 +36,12 @@ public final class InstantHitFactory extends WeaponFactory {
     }
 
     /** A blow that lands, with the death sound for a unit. */
-    static void strike(@NonNull Unit src, @NonNull Selectable<?> target, int damage,
+    static void strike(@NonNull Unit src, @NonNull Hittable target, int damage,
             @NonNull Audio @NonNull [] sounds) {
         float dx = target.getPositionX() - src.getPositionX();
         float dy = target.getPositionY() - src.getPositionY();
         float dir_len_inv = 1f / (float) Math.sqrt(dx * dx + dy * dy);
-        if (target instanceof Unit) {
+        if (target instanceof Unit victim) {
             World world = src.getOwner().getWorld();
             world.getAudio().newAudio(new AudioParameters<>(sounds[world.getRandom().nextInt(sounds.length)],
                     target.getPositionX(), target.getPositionY(), target.getPositionZ(),
@@ -50,7 +49,7 @@ public final class InstantHitFactory extends WeaponFactory {
                     AudioPlayer.AUDIO_DISTANCE_DEATH,
                     AudioPlayer.AUDIO_GAIN_DEATH,
                     AudioPlayer.AUDIO_RADIUS_DEATH,
-                    1f + (world.getRandom().nextFloat() - .5f) * ((UnitTemplate) target.getTemplate()).getDeathPitch()));
+                    1f + (world.getRandom().nextFloat() - .5f) * victim.getTemplate().getDeathPitch()));
         }
         target.hit(damage, dx * dir_len_inv, dy * dir_len_inv, src.getOwner());
     }

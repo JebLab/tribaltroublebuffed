@@ -276,6 +276,8 @@ final class BuffedDrumNetTest {
         int sx = snare.getGridX();
         int sy = snare.getGridY();
         assertTrue(Math.abs(sx - x) <= 2 && Math.abs(sy - y) <= 2, "laid at " + sx + "," + sy);
+        // The catcher walks off, out of reach of the enemy it is about to stun, which it would otherwise strike.
+        order(catcher, x - 20, y, Action.MOVE);
 
         Unit friend = unit(natives, UnitGrid.coordinateFromGrid(sx - 4), UnitGrid.coordinateFromGrid(sy),
                 Race.UNIT_PEON);

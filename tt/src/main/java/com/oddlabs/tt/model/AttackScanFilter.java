@@ -9,15 +9,18 @@ import org.jspecify.annotations.Nullable;
 public final class AttackScanFilter implements ScanFilter {
     public enum Priority {
         NONE(0),
-        QUARTERS(1),
-        ARMORY(1),
-        TOWER(2),
-        PEON(3),
-        WARRIOR(4),
-        // Ships stay first; only the order of the values matters, and moving SHIP from 5 to 6 keeps it.
-        SHIP(6),
+        // Only the order of the values matters: every player's target moved up by one to make room for ANIMAL.
+        QUARTERS(2),
+        ARMORY(2),
+        TOWER(3),
+        PEON(4),
+        WARRIOR(5),
+        // Ships stay first.
+        SHIP(7),
         // Buffed: a drummer is taken before every other unit (docs/design/drum-and-net.md).
-        DRUMMER(5);
+        DRUMMER(6),
+        // Buffed: a wild animal is taken only when nothing of a player is in reach (docs/design/fauna.md).
+        ANIMAL(1);
 
         public final int value;
 
@@ -32,17 +35,24 @@ public final class AttackScanFilter implements ScanFilter {
     private final int max_range;
 
     private final @NonNull Player owner;
+    private final boolean hunts_animals;
 
-    private @Nullable Selectable<?> target = null;
+    private @Nullable Hittable target = null;
     private @NonNull Priority target_priority = Priority.NONE;
 
     public AttackScanFilter(@NonNull Player owner, int max_range) {
-        this.owner = owner;
-        this.max_range = max_range;
+        this(owner, max_range, false);
     }
 
-    public @Nullable Selectable<?> removeTarget() {
-        Selectable<?> result = target;
+    /** @param hunts_animals whether wild animals are targets too: for warriors and towers (Buffed's fauna) */
+    public AttackScanFilter(@NonNull Player owner, int max_range, boolean hunts_animals) {
+        this.owner = owner;
+        this.max_range = max_range;
+        this.hunts_animals = hunts_animals;
+    }
+
+    public @Nullable Hittable removeTarget() {
+        Hittable result = target;
         target = null;
         target_priority = Priority.NONE;
         return result;
@@ -65,6 +75,11 @@ public final class AttackScanFilter implements ScanFilter {
             if (target_priority.value < priority.value) {
                 target_priority = priority;
                 target = s;
+            }
+        } else if (hunts_animals && occ instanceof Animal animal && animal.isPrey() && !animal.isDead()) {
+            if (target_priority.value < Priority.ANIMAL.value) {
+                target_priority = Priority.ANIMAL;
+                target = animal;
             }
         }
         return false;

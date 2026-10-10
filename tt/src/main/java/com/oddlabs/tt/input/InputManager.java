@@ -252,6 +252,9 @@ public final class InputManager {
         def(GameAction.CHEAT_12, Key.F4, Modifier.SHIFT);
         def(GameAction.CHEAT_13, Key.F5, Modifier.SHIFT);
         def(GameAction.CHEAT_14, Key.F6, Modifier.SHIFT);
+        def(GameAction.CHEAT_15, Key.F7, Modifier.SHIFT);
+        def(GameAction.CHEAT_16, Key.F8, Modifier.SHIFT);
+        def(GameAction.CHEAT_17, Key.F9, Modifier.SHIFT);
 
         // Observer mode
         def(GameAction.SPECTATOR_NEXT_PLAYER, Key.RBRACKET);

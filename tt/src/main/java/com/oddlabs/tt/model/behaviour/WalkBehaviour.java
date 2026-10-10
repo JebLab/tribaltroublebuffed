@@ -3,7 +3,7 @@ package com.oddlabs.tt.model.behaviour;
 import com.oddlabs.tt.gui.ToolTipBox;
 import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.AttackScanFilter;
-import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Hittable;
 import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.pathfinder.Movable;
 import com.oddlabs.tt.pathfinder.Occupant;
@@ -35,7 +35,7 @@ public final class WalkBehaviour implements Behaviour {
         this.unit = unit;
         this.tracker_algorithm = tracker_algorithm;
         this.scan_attack = scan_attack;
-        scan_filter = new AttackScanFilter(unit.getOwner(), AttackScanFilter.UNIT_RANGE);
+        scan_filter = new AttackScanFilter(unit.getOwner(), AttackScanFilter.UNIT_RANGE, unit.isWarrior());
         retry_delay = WAIT_RETRY_DELAY;
         unit.getTracker().setTarget(tracker_algorithm);
     }
@@ -111,7 +111,7 @@ public final class WalkBehaviour implements Behaviour {
         // Buffed: a drummer has no attack, so it walks on where it was sent.
         if (scan_attack && unit.getAbilities().hasAbilities(Abilities.ATTACK)) {
             unit.scanVicinity(scan_filter);
-            Selectable<?> s = scan_filter.removeTarget();
+            Hittable s = scan_filter.removeTarget();
             if (s != null) {
                 unit.getCurrentController().resetGiveUpCounters();
                 unit.pushController(new HuntController(unit, s));

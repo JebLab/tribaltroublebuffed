@@ -4,6 +4,7 @@ import com.oddlabs.tt.camera.CameraState;
 import com.oddlabs.tt.global.Globals;
 import com.oddlabs.tt.landscape.LandscapeTargetRespond;
 import com.oddlabs.tt.model.Abilities;
+import com.oddlabs.tt.model.Animal;
 import com.oddlabs.tt.model.Building;
 import com.oddlabs.tt.model.ElementVisitor;
 import com.oddlabs.tt.model.Element;
@@ -301,6 +302,34 @@ final class RenderState implements ElementVisitor {
         ModelState<RubberSupply> state = getCachedState(rubber_model_visitor, model, z_offset);
         addToRenderList(state);
         if (!picking && !model.isHit())
+            default_shadow_renderer.addToShadowList(state);
+    }
+
+    private static final ModelVisitor<Animal> animal_model_visitor = new WhiteModelVisitor<>() {
+        @Override
+        public void getTransform(@NonNull ElementRenderState<Animal> render_state, @NonNull Matrix4f dest) {
+            Animal model = render_state.getModel();
+            float angle = (float) Math.atan2(model.getDirectionY(), model.getDirectionX());
+            // A dead animal falls over onto its side (about its forward axis), then sinks.
+            dest.translation(model.getPositionX(), model.getPositionY(), render_state.f).rotate(angle, 0f, 0f,
+                    1f).rotate(model.getFallAngle(), 1f, 0f, 0f);
+        }
+
+        @Override
+        public void markDetailPoint(@NonNull ElementRenderState<Animal> render_state) {
+            // Like a chicken: one model, drawn at every distance.
+            markDetailPolygon(render_state, PolyDetail.LOW_POLY);
+        }
+    };
+
+    @Override
+    public void visitAnimal(final @NonNull Animal model) {
+        if (picking && model.isDead())
+            return;
+        float z_offset = getVisuallyCorrectHeight(model.getPositionX(), model.getPositionY()) + model.getOffsetZ();
+        ModelState<Animal> state = getCachedState(animal_model_visitor, model, z_offset);
+        addToRenderList(state);
+        if (!picking && !model.isDead())
             default_shadow_renderer.addToShadowList(state);
     }
 

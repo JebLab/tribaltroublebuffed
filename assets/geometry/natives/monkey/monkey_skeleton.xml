@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!DOCTYPE skeleton [
+        <!ELEMENT skeleton   (bones, init_pose)>
+        <!ELEMENT bones      (bone+)>
+        <!ELEMENT init_pose  (transform+)>
+        <!ELEMENT bone        EMPTY>
+        <!ELEMENT transform   EMPTY>
+        <!ATTLIST transform name CDATA #REQUIRED>
+        <!ATTLIST transform m00 CDATA #REQUIRED>
+        <!ATTLIST transform m01 CDATA #REQUIRED>
+        <!ATTLIST transform m02 CDATA #REQUIRED>
+        <!ATTLIST transform m03 CDATA #REQUIRED>
+        <!ATTLIST transform m10 CDATA #REQUIRED>
+        <!ATTLIST transform m11 CDATA #REQUIRED>
+        <!ATTLIST transform m12 CDATA #REQUIRED>
+        <!ATTLIST transform m13 CDATA #REQUIRED>
+        <!ATTLIST transform m20 CDATA #REQUIRED>
+        <!ATTLIST transform m21 CDATA #REQUIRED>
+        <!ATTLIST transform m22 CDATA #REQUIRED>
+        <!ATTLIST transform m23 CDATA #REQUIRED>
+        <!ATTLIST transform m30 CDATA #REQUIRED>
+        <!ATTLIST transform m31 CDATA #REQUIRED>
+        <!ATTLIST transform m32 CDATA #REQUIRED>
+        <!ATTLIST transform m33 CDATA #REQUIRED>
+        <!ATTLIST bone name CDATA #REQUIRED>
+        <!ATTLIST bone parent CDATA #REQUIRED>
+        ]>
+
+<skeleton>
+    <bones>
+        <bone name="monkey Chest" parent="monkey Pelvis"/>
+        <bone name="monkey Head" parent="monkey Neck"/>
+        <bone name="monkey L Arm1" parent="monkey Chest"/>
+        <bone name="monkey L Arm2" parent="monkey L Arm1"/>
+        <bone name="monkey L Leg1" parent="monkey Pelvis"/>
+        <bone name="monkey L Leg2" parent="monkey L Leg1"/>
+        <bone name="monkey Neck" parent="monkey Chest"/>
+        <bone name="monkey Pelvis" parent=""/>
+        <bone name="monkey R Arm1" parent="monkey Chest"/>
+        <bone name="monkey R Arm2" parent="monkey R Arm1"/>
+        <bone name="monkey R Leg1" parent="monkey Pelvis"/>
+        <bone name="monkey R Leg2" parent="monkey R Leg1"/>
+        <bone name="monkey Tail1" parent="monkey Pelvis"/>
+        <bone name="monkey Tail2" parent="monkey Tail1"/>
+        <bone name="monkey Tail3" parent="monkey Tail2"/>
+        <bone name="monkey Tail4" parent="monkey Tail3"/>
+        <bone name="monkey Tail5" parent="monkey Tail4"/>
+    </bones>
+    <init_pose>
+        <transform name="monkey Chest" m00="0.9662349" m01="1.8626451e-09" m02="0.2576626" m03="0" m10="-0.06639015"
+                   m11="0.9662349" m12="0.24896261" m13="0" m20="-0.2489626" m21="-0.2576626" m22="0.93361" m23="0"
+                   m30="0" m31="0" m32="0.66" m33="1"/>
+        <transform name="monkey Head" m00="0.96476376" m01="-2.9802322e-08" m02="0.26311737" m03="0" m10="-0.069230855"
+                   m11="0.9647637" m12="0.25384617" m13="0" m20="-0.2538461" m21="-0.26311746" m22="0.9307692" m23="0"
+                   m30="0.40000004" m31="2.9059566e-09" m32="0.86" m33="1"/>
+        <transform name="monkey L Arm1" m00="-0.31606984" m01="0.031606913" m02="-0.9482091" m03="0" m10="-0.9031606"
+                   m11="-0.31606978" m12="0.29051805" m13="0" m20="-0.29051787" m21="0.94820905" m22="0.12844642"
+                   m23="0" m30="0.24000001" m31="0.15" m32="0.68000007" m33="1"/>
+        <transform name="monkey L Arm2" m00="0.32368767" m01="-1.4901161e-08" m02="-0.9461638" m03="0" m10="-0.8952261"
+                   m11="0.32368743" m12="-0.30626154" m13="0" m20="0.30626148" m21="0.94616383" m22="0.104773745"
+                   m23="0" m30="0.13999999" m31="0.15999998" m32="0.38000014" m33="1"/>
+        <transform name="monkey L Leg1" m00="0.5543671" m01="0.03464791" m02="-0.8315507" m03="0" m10="-0.7029686"
+                   m11="0.5543672" m12="-0.44554713" m13="0" m20="0.44554704" m21="0.8315506" m22="0.33167934" m23="0"
+                   m30="-0.24000001" m31="0.120000005" m32="0.58" m33="1"/>
+        <transform name="monkey L Leg2" m00="-0.4257971" m01="5.9604645e-08" m02="-0.9048187" m03="0" m10="-0.8186969"
+                   m11="-0.4257969" m12="0.38526922" m13="0" m20="-0.3852692" m21="0.9048188" m22="0.18130305" m23="0"
+                   m30="-0.08000001" m31="0.13" m32="0.33999997" m33="1"/>
+        <transform name="monkey Neck" m00="0.6401845" m01="1.4901161e-08" m02="0.7682213" m03="0" m10="-0.59016407"
+                   m11="0.6401842" m12="0.49180338" m13="0" m20="-0.4918031" m21="-0.7682214" m22="0.40983602" m23="0"
+                   m30="0.3" m31="0" m32="0.74" m33="1"/>
+        <transform name="monkey Pelvis" m00="0.9899494" m01="0" m02="0.14142142" m03="0" m10="-0.020000162"
+                   m11="0.9899494" m12="0.14000008" m13="0" m20="-0.14000006" m21="-0.14142144" m22="0.97999996" m23="0"
+                   m30="-0.28" m31="0" m32="0.62" m33="1"/>
+        <transform name="monkey R Arm1" m00="-0.31606978" m01="-0.03160706" m02="-0.94820917" m03="0" m10="-0.8968392"
+                   m11="-0.3160696" m12="0.30948228" m13="0" m20="-0.30948195" m21="0.9482092" m22="0.07155378" m23="0"
+                   m30="0.24" m31="-0.14999999" m32="0.68" m33="1"/>
+        <transform name="monkey R Arm2" m00="0.3236877" m01="1.4901161e-08" m02="-0.94616395" m03="0" m10="-0.8952261"
+                   m11="0.3236875" m12="-0.30626154" m13="0" m20="0.3062615" m21="0.9461639" m22="0.104773775" m23="0"
+                   m30="0.14" m31="-0.16000001" m32="0.38000008" m33="1"/>
+        <transform name="monkey R Leg1" m00="0.5543672" m01="-0.034647956" m02="-0.8315507" m03="0" m10="-0.6816467"
+                   m11="0.55436724" m12="-0.47752982" m13="0" m20="0.4775298" m21="0.8315506" m22="0.28370526" m23="0"
+                   m30="-0.24000002" m31="-0.12" m32="0.58" m33="1"/>
+        <transform name="monkey R Leg2" m00="-0.42579705" m01="2.9802322e-08" m02="-0.9048187" m03="0" m10="-0.8186968"
+                   m11="-0.425797" m12="0.38526925" m13="0" m20="-0.38526917" m21="0.90481865" m22="0.1813031" m23="0"
+                   m30="-0.08000001" m31="-0.13" m32="0.33999997" m33="1"/>
+        <transform name="monkey Tail1" m00="-0.98386997" m01="3.7252903e-09" m02="0.1788855" m03="0" m10="-0.031999856"
+                   m11="-0.9838698" m12="-0.17600004" m13="0" m20="0.17600022" m21="-0.17888565" m22="0.9680002" m23="0"
+                   m30="-0.32000002" m31="0" m32="0.64" m33="1"/>
+        <transform name="monkey Tail2" m00="-0.7893523" m01="2.2351742e-08" m02="0.61394054" m03="0" m10="-0.37692288"
+                   m11="-0.7893522" m12="-0.48461545" m13="0" m20="0.4846155" m21="-0.61394054" m22="0.62307733" m23="0"
+                   m30="-0.5400001" m31="0" m32="0.68" m33="1"/>
+        <transform name="monkey Tail3" m00="-0.3162275" m01="2.9802322e-08" m02="0.94868356" m03="0" m10="-0.9000002"
+                   m11="-0.31622732" m12="-0.29999998" m13="0" m20="0.2999999" m21="-0.9486834" m22="0.100000024"
+                   m23="0" m30="-0.7200001" m31="5.9299814e-09" m32="0.82" m33="1"/>
+        <transform name="monkey Tail4" m00="0.55470026" m01="-4.4703484e-08" m02="0.83205056" m03="0" m10="-0.6923079"
+                   m11="0.5547002" m12="0.46153837" m13="0" m20="-0.46153826" m21="-0.8320503" m22="0.30769235" m23="0"
+                   m30="-0.78000003" m31="1.1584573e-08" m32="1" m33="1"/>
+        <transform name="monkey Tail5" m00="0.9863939" m01="2.9802322e-08" m02="-0.16439885" m03="0" m10="-0.027027309"
+                   m11="0.9863939" m12="-0.1621618" m13="0" m20="0.16216221" m21="0.16439846" m22="0.9729732" m23="0"
+                   m30="-0.70000005" m31="5.1373474e-09" m32="1.12" m33="1"/>
+    </init_pose>
+</skeleton>

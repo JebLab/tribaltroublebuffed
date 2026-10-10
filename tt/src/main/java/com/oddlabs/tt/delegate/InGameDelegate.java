@@ -6,13 +6,21 @@ import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.input.GameAction;
 import com.oddlabs.tt.input.InputEvent;
 import com.oddlabs.tt.input.InputPhase;
+import com.oddlabs.tt.landscape.World;
 import com.oddlabs.tt.model.Abilities;
+import com.oddlabs.tt.model.Animal;
 import com.oddlabs.tt.model.Building;
+import com.oddlabs.tt.model.Crab;
+import com.oddlabs.tt.model.Monkey;
+import com.oddlabs.tt.model.Predator;
 import com.oddlabs.tt.model.Race;
 import com.oddlabs.tt.model.RacesResources;
 import com.oddlabs.tt.model.Unit;
+import com.oddlabs.tt.pathfinder.UnitGrid;
 import com.oddlabs.tt.player.Player;
+import com.oddlabs.tt.procedural.Landscape;
 import com.oddlabs.tt.render.LandscapeLocation;
+import com.oddlabs.tt.util.Target;
 import com.oddlabs.tt.viewer.Cheat;
 import com.oddlabs.tt.viewer.WorldViewer;
 import org.jspecify.annotations.NonNull;
@@ -110,6 +118,23 @@ public abstract class InGameDelegate extends CameraDelegate<Camera> {
                         viewer.getLocalPlayer().getRace().getUnitTemplate(Race.UNIT_WARRIOR_NET));
                 return true;
             }
+        }
+        // Shift+F7, Shift+F8 and Shift+F9 put a boar (a wolf on northern islands), a monkey and a crab on the free cell
+        // under the pointer where the ruleset has wild animals (Buffed).
+        if (viewer.getWorld().getRuleset().getStats().features().fauna() && (actions.contains(GameAction.CHEAT_15)
+                || actions.contains(GameAction.CHEAT_16) || actions.contains(GameAction.CHEAT_17))) {
+            World world = viewer.getWorld();
+            Target cell = world.getUnitGrid().findGridTargets(UnitGrid.toGridCoordinate(landscape_x),
+                    UnitGrid.toGridCoordinate(landscape_y), 1, false)[0];
+            if (actions.contains(GameAction.CHEAT_15))
+                new Predator(world,
+                        world.getTerrain() == Landscape.TerrainType.VIKING ? Animal.Species.WOLF : Animal.Species.BOAR,
+                        cell.getGridX(), cell.getGridY());
+            else if (actions.contains(GameAction.CHEAT_16))
+                new Monkey(world, cell.getGridX(), cell.getGridY());
+            else
+                new Crab(world, cell.getGridX(), cell.getGridY());
+            return true;
         }
         if (actions.contains(GameAction.CHEAT_5)) {
             // F5 creates a chieftain at the center of the view unless the player already has one or is training one

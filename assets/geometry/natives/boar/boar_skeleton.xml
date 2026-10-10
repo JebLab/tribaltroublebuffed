@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!DOCTYPE skeleton [
+        <!ELEMENT skeleton   (bones, init_pose)>
+        <!ELEMENT bones      (bone+)>
+        <!ELEMENT init_pose  (transform+)>
+        <!ELEMENT bone        EMPTY>
+        <!ELEMENT transform   EMPTY>
+        <!ATTLIST transform name CDATA #REQUIRED>
+        <!ATTLIST transform m00 CDATA #REQUIRED>
+        <!ATTLIST transform m01 CDATA #REQUIRED>
+        <!ATTLIST transform m02 CDATA #REQUIRED>
+        <!ATTLIST transform m03 CDATA #REQUIRED>
+        <!ATTLIST transform m10 CDATA #REQUIRED>
+        <!ATTLIST transform m11 CDATA #REQUIRED>
+        <!ATTLIST transform m12 CDATA #REQUIRED>
+        <!ATTLIST transform m13 CDATA #REQUIRED>
+        <!ATTLIST transform m20 CDATA #REQUIRED>
+        <!ATTLIST transform m21 CDATA #REQUIRED>
+        <!ATTLIST transform m22 CDATA #REQUIRED>
+        <!ATTLIST transform m23 CDATA #REQUIRED>
+        <!ATTLIST transform m30 CDATA #REQUIRED>
+        <!ATTLIST transform m31 CDATA #REQUIRED>
+        <!ATTLIST transform m32 CDATA #REQUIRED>
+        <!ATTLIST transform m33 CDATA #REQUIRED>
+        <!ATTLIST bone name CDATA #REQUIRED>
+        <!ATTLIST bone parent CDATA #REQUIRED>
+        ]>
+
+<skeleton>
+    <bones>
+        <bone name="boar Chest" parent="boar Pelvis"/>
+        <bone name="boar Head" parent="boar Neck"/>
+        <bone name="boar L Front1" parent="boar Chest"/>
+        <bone name="boar L Front2" parent="boar L Front1"/>
+        <bone name="boar L Hind1" parent="boar Pelvis"/>
+        <bone name="boar L Hind2" parent="boar L Hind1"/>
+        <bone name="boar Neck" parent="boar Chest"/>
+        <bone name="boar Pelvis" parent=""/>
+        <bone name="boar R Front1" parent="boar Chest"/>
+        <bone name="boar R Front2" parent="boar R Front1"/>
+        <bone name="boar R Hind1" parent="boar Pelvis"/>
+        <bone name="boar R Hind2" parent="boar R Hind1"/>
+        <bone name="boar Tail" parent="boar Pelvis"/>
+    </bones>
+    <init_pose>
+        <transform name="boar Chest" m00="0.999201" m01="0" m02="0.03996812" m03="0" m10="-0.0015974761"
+                   m11="0.99920094" m12="0.039936192" m13="0" m20="-0.03993618" m21="-0.03996813" m22="0.99840254"
+                   m23="0" m30="-0.099999994" m31="0" m32="0.64" m33="1"/>
+        <transform name="boar Head" m00="0.88721687" m01="-3.7252903e-09" m02="-0.4613528" m03="0" m10="-0.21284641"
+                   m11="0.88721687" m12="-0.40931988" m13="0" m20="0.40931994" m21="0.46135277" m22="0.7871537" m23="0"
+                   m30="0.6" m31="0" m32="0.62" m33="1"/>
+        <transform name="boar L Front1" m00="-0.31622776" m01="7.0780516e-08" m02="-0.948683" m03="0" m10="-0.9"
+                   m11="-0.31622782" m12="0.29999995" m13="0" m20="-0.3" m21="0.9486831" m22="0.10000019" m23="0"
+                   m30="0.30000004" m31="0.15999998" m32="0.5" m33="1"/>
+        <transform name="boar L Front2" m00="0.29408577" m01="0" m02="-0.9557787" m03="0" m10="-0.91351354"
+                   m11="0.29408586" m12="-0.28108087" m13="0" m20="0.2810812" m21="0.95577884" m22="0.08648656" m23="0"
+                   m30="0.22000003" m31="0.16" m32="0.26000002" m33="1"/>
+        <transform name="boar L Hind1" m00="0.37139073" m01="7.0780516e-08" m02="-0.92847675" m03="0" m10="-0.86206895"
+                   m11="0.37139073" m12="-0.34482762" m13="0" m20="0.3448276" m21="0.9284767" m22="0.13793108" m23="0"
+                   m30="-0.48000005" m31="0.15" m32="0.52" m33="1"/>
+        <transform name="boar L Hind2" m00="-0.40613845" m01="0" m02="-0.9138117" m03="0" m10="-0.83505154"
+                   m11="-0.40613857" m12="0.37113413" m13="0" m20="-0.37113407" m21="0.91381156" m22="0.16494843"
+                   m23="0" m30="-0.38000003" m31="0.15000002" m32="0.26999995" m33="1"/>
+        <transform name="boar Neck" m00="0.98058075" m01="0" m02="-0.19611627" m03="0" m10="-0.038461607"
+                   m11="0.9805807" m12="-0.19230779" m13="0" m20="0.19230783" m21="0.19611622" m22="0.96153843" m23="0"
+                   m30="0.4" m31="0" m32="0.66" m33="1"/>
+        <transform name="boar Pelvis" m00="0.99913305" m01="0" m02="0.041630507" m03="0" m10="-0.0017331244"
+                   m11="0.99913305" m12="0.04159442" m13="0" m20="-0.041594416" m21="-0.04163051" m22="0.9982669"
+                   m23="0" m30="-0.58" m31="0" m32="0.62" m33="1"/>
+        <transform name="boar R Front1" m00="-0.31622773" m01="5.2154064e-08" m02="-0.94868326" m03="0" m10="-0.9000001"
+                   m11="-0.31622773" m12="0.29999995" m13="0" m20="-0.3" m21="0.94868326" m22="0.100000024" m23="0"
+                   m30="0.3" m31="-0.16" m32="0.5" m33="1"/>
+        <transform name="boar R Front2" m00="0.29408598" m01="0" m02="-0.9557791" m03="0" m10="-0.9135136"
+                   m11="0.29408604" m12="-0.28108114" m13="0" m20="0.28108132" m21="0.95577896" m22="0.08648656" m23="0"
+                   m30="0.22000001" m31="-0.15999998" m32="0.26" m33="1"/>
+        <transform name="boar R Hind1" m00="0.37139073" m01="7.0780516e-08" m02="-0.92847675" m03="0" m10="-0.86206895"
+                   m11="0.37139073" m12="-0.34482762" m13="0" m20="0.3448276" m21="0.9284767" m22="0.13793108" m23="0"
+                   m30="-0.48000002" m31="-0.15000002" m32="0.52" m33="1"/>
+        <transform name="boar R Hind2" m00="-0.40613845" m01="0" m02="-0.9138117" m03="0" m10="-0.83505154"
+                   m11="-0.40613857" m12="0.37113413" m13="0" m20="-0.37113407" m21="0.91381156" m22="0.16494843"
+                   m23="0" m30="-0.38" m31="-0.15" m32="0.26999995" m33="1"/>
+        <transform name="boar Tail" m00="-0.63570696" m01="-2.9802322e-08" m02="-0.77193016" m03="0" m10="-0.5958763"
+                   m11="-0.6357073" m12="0.49072152" m13="0" m20="-0.49072155" m21="0.77193004" m22="0.40412366" m23="0"
+                   m30="-0.7" m31="0" m32="0.72" m33="1"/>
+    </init_pose>
+</skeleton>

@@ -57,7 +57,9 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -130,6 +132,9 @@ public final class RacesResources {
     // Buffed's snares (docs/design/drum-and-net.md), per race.
     private final @NonNull SpriteKey[] snare_sprites = new SpriteKey[2];
     private final @NonNull String snare_name;
+    // Buffed's wild animals (docs/design/fauna.md), by species.
+    private final @NonNull SpriteKey @NonNull [] animal_sprites;
+    private final @NonNull String @NonNull [] animal_names;
     private final @NonNull Race @NonNull [] races;
 
     public static boolean isValidRace(int race) {
@@ -1229,6 +1234,11 @@ public final class RacesResources {
                 Globals.NO_MIPMAP_CUTOFF, true, true, true, false));
         snare_sprites[RACE_VIKINGS] = queues.register(new SpriteFile("/geometry/vikings/snare.binsprite",
                 Globals.NO_MIPMAP_CUTOFF, true, true, true, false));
+        animal_sprites = Arrays.stream(Animal.Species.values()).map(species -> queues.register(new SpriteFile(
+                getAnimalSpritePath(species), Globals.NO_MIPMAP_CUTOFF, true, true, true, false))).toArray(
+                        SpriteKey[]::new);
+        animal_names = Arrays.stream(Animal.Species.values()).map(species -> i18n(species.name().toLowerCase(
+                Locale.ROOT))).toArray(String[]::new);
 
         wood_fragment_sprites[0] = queues.register(new SpriteFile("/geometry/misc/wood_2.binsprite",
                 Globals.NO_MIPMAP_CUTOFF,
@@ -1341,6 +1351,24 @@ public final class RacesResources {
 
     public @NonNull Audio getBuildingCollapseSound() {
         return building_collapse_sound;
+    }
+
+    private static @NonNull String getAnimalSpritePath(Animal.@NonNull Species species) {
+        return switch (species) {
+            case CRAB -> "/geometry/misc/crab.binsprite";
+            case MONKEY -> "/geometry/natives/monkey.binsprite";
+            case BOAR -> "/geometry/natives/boar.binsprite";
+            case WOLF -> "/geometry/vikings/wolf.binsprite";
+        };
+    }
+
+    /** A wild animal of Buffed's fauna (docs/design/fauna.md). */
+    public @NonNull SpriteKey getAnimalSprite(Animal.@NonNull Species species) {
+        return animal_sprites[species.ordinal()];
+    }
+
+    public @NonNull String getAnimalName(Animal.@NonNull Species species) {
+        return animal_names[species.ordinal()];
     }
 
     /** The snare a Chicken Catcher or Fowler lays (Buffed), for {@code race}. */

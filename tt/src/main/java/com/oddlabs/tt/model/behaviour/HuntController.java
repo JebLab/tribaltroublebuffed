@@ -1,14 +1,14 @@
 package com.oddlabs.tt.model.behaviour;
 
-import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Hittable;
 import com.oddlabs.tt.model.Unit;
 import org.jspecify.annotations.NonNull;
 
 public final class HuntController extends Controller {
-    private final @NonNull Selectable<?> target;
+    private final @NonNull Hittable target;
     private final @NonNull Unit unit;
 
-    public HuntController(@NonNull Unit unit, @NonNull Selectable<?> target) {
+    public HuntController(@NonNull Unit unit, @NonNull Hittable target) {
         super(1);
         this.unit = unit;
         this.target = target;

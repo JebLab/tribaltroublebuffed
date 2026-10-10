@@ -2,7 +2,7 @@ package com.oddlabs.tt.model.behaviour;
 
 import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.AttackScanFilter;
-import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Hittable;
 import com.oddlabs.tt.model.Ship;
 import com.oddlabs.tt.model.ShipAllocation;
 import com.oddlabs.tt.model.Unit;
@@ -40,7 +40,7 @@ public final class ShipAttackController extends Controller {
         if (shouldSleep(0f)) return;
         redecide_time = MIN_SCAN_DELAY + unit.getOwner().getWorld().getRandom().nextFloat() * (MAX_SCAN_DELAY - MIN_SCAN_DELAY);
         if (unit.getAbilities().hasAbilities(Abilities.ATTACK)) unit.scanVicinity(scan_filter);
-        Selectable s = scan_filter.removeTarget();
+        Hittable s = scan_filter.removeTarget();
         if (s != null) {
             unit.pushController(new AttackController(unit, s, allocation, ship));
         }

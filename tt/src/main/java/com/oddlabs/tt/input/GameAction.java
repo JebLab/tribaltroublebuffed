@@ -188,6 +188,9 @@ public enum GameAction {
     CHEAT_12,
     CHEAT_13,
     CHEAT_14,
+    CHEAT_15,
+    CHEAT_16,
+    CHEAT_17,
 
     // Observer mode
     SPECTATOR_NEXT_PLAYER,

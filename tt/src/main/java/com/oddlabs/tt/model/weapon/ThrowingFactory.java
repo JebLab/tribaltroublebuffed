@@ -1,7 +1,7 @@
 package com.oddlabs.tt.model.weapon;
 
 import com.oddlabs.tt.audio.Audio;
-import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Hittable;
 import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.render.SpriteKey;
 import org.jspecify.annotations.NonNull;
@@ -9,7 +9,7 @@ import org.jspecify.annotations.NonNull;
 public final class ThrowingFactory<W extends ThrowingWeapon> extends WeaponFactory {
     @FunctionalInterface
     public interface WeaponConstructor<W extends ThrowingWeapon> {
-        W create(boolean hit, @NonNull Unit src, @NonNull Selectable<?> target, @NonNull SpriteKey sprite_renderer,
+        W create(boolean hit, @NonNull Unit src, @NonNull Hittable target, @NonNull SpriteKey sprite_renderer,
                 @NonNull Audio throw_sound, Audio @NonNull [] hit_sounds);
     }
 
@@ -31,7 +31,7 @@ public final class ThrowingFactory<W extends ThrowingWeapon> extends WeaponFacto
     }
 
     @Override
-    protected void doAttack(boolean hit, @NonNull Unit src, @NonNull Selectable<?> target) {
+    protected void doAttack(boolean hit, @NonNull Unit src, @NonNull Hittable target) {
         weapon_constructor.create(hit, src, target, weapon_sprite, throw_sound, hit_sounds);
     }
 

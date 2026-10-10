@@ -6,6 +6,8 @@ import com.oddlabs.tt.event.LocalEventQueue;
 import com.oddlabs.tt.form.ProgressForm;
 import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.model.AbstractElementNode;
+import com.oddlabs.tt.model.Animal;
+import com.oddlabs.tt.model.Fauna;
 import com.oddlabs.tt.model.LandBuilding;
 import com.oddlabs.tt.model.RacesResources;
 import com.oddlabs.tt.model.Snare;
@@ -72,6 +74,8 @@ public final class World {
     private final @NonNull List<@NonNull LandBuilding> lodges = new ArrayList<>();
     private final @NonNull List<@NonNull Unit> drummers = new ArrayList<>();
     private final @NonNull List<@NonNull Snare> snares = new ArrayList<>();
+    private final @NonNull List<@NonNull Animal> animals = new ArrayList<>();
+    private final Landscape.@NonNull TerrainType terrain;
 
     public static @NonNull LandscapeResources loadCommon(@NonNull RenderQueues queues) {
         LandscapeResources landscape_resources = new LandscapeResources(queues);
@@ -111,6 +115,8 @@ public final class World {
             assert player != null;
             player.init(world_info.starting_locations()[i]);
         }
+        // Buffed's wild animals, after the island and the starts are known; other rulesets draw no numbers here.
+        Fauna.populate(world, world_info.starting_locations());
         return world;
     }
 
@@ -213,6 +219,7 @@ public final class World {
         // Standard exists, so resolve it directly here. Restore world_params.getMode() when modes ship.
         this.mode = GameMode.STANDARD;
         this.ruleset = world_params.getRuleset();
+        this.terrain = terrain;
         long time_start = System.currentTimeMillis();
 
         world = new HeightMap(this, world_info.meters_per_world(), world_info.sea_level_meters(),
@@ -326,5 +333,15 @@ public final class World {
     /** Every player's snares lying in the world, in the order they were laid (see {@code Snare}). */
     public @NonNull List<@NonNull Snare> getSnares() {
         return snares;
+    }
+
+    /** Buffed's wild animals alive in the world, in the order they were placed (see {@code Fauna}). */
+    public @NonNull List<@NonNull Animal> getAnimals() {
+        return animals;
+    }
+
+    /** Tropical (Native) or northern (Viking). */
+    public Landscape.@NonNull TerrainType getTerrain() {
+        return terrain;
     }
 }

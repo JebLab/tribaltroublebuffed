@@ -27,6 +27,8 @@ public interface ElementVisitor {
 
     void visitRubberSupply(@NonNull RubberSupply model);
 
+    void visitAnimal(@NonNull Animal model);
+
     void visitDirectedThrowingWeapon(@NonNull DirectedThrowingWeapon model);
 
     void visitRotatingThrowingWeapon(@NonNull RotatingThrowingWeapon model);

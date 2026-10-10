@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!DOCTYPE skeleton [
+        <!ELEMENT skeleton   (bones, init_pose)>
+        <!ELEMENT bones      (bone+)>
+        <!ELEMENT init_pose  (transform+)>
+        <!ELEMENT bone        EMPTY>
+        <!ELEMENT transform   EMPTY>
+        <!ATTLIST transform name CDATA #REQUIRED>
+        <!ATTLIST transform m00 CDATA #REQUIRED>
+        <!ATTLIST transform m01 CDATA #REQUIRED>
+        <!ATTLIST transform m02 CDATA #REQUIRED>
+        <!ATTLIST transform m03 CDATA #REQUIRED>
+        <!ATTLIST transform m10 CDATA #REQUIRED>
+        <!ATTLIST transform m11 CDATA #REQUIRED>
+        <!ATTLIST transform m12 CDATA #REQUIRED>
+        <!ATTLIST transform m13 CDATA #REQUIRED>
+        <!ATTLIST transform m20 CDATA #REQUIRED>
+        <!ATTLIST transform m21 CDATA #REQUIRED>
+        <!ATTLIST transform m22 CDATA #REQUIRED>
+        <!ATTLIST transform m23 CDATA #REQUIRED>
+        <!ATTLIST transform m30 CDATA #REQUIRED>
+        <!ATTLIST transform m31 CDATA #REQUIRED>
+        <!ATTLIST transform m32 CDATA #REQUIRED>
+        <!ATTLIST transform m33 CDATA #REQUIRED>
+        <!ATTLIST bone name CDATA #REQUIRED>
+        <!ATTLIST bone parent CDATA #REQUIRED>
+        ]>
+
+<skeleton>
+    <bones>
+        <bone name="crab Body" parent=""/>
+        <bone name="crab L Arm" parent="crab Body"/>
+        <bone name="crab L Claw" parent="crab L Arm"/>
+        <bone name="crab L Finger" parent="crab L Claw"/>
+        <bone name="crab L Leg1a" parent="crab Body"/>
+        <bone name="crab L Leg1b" parent="crab L Leg1a"/>
+        <bone name="crab L Leg2a" parent="crab Body"/>
+        <bone name="crab L Leg2b" parent="crab L Leg2a"/>
+        <bone name="crab L Leg3a" parent="crab Body"/>
+        <bone name="crab L Leg3b" parent="crab L Leg3a"/>
+        <bone name="crab R Arm" parent="crab Body"/>
+        <bone name="crab R Claw" parent="crab R Arm"/>
+        <bone name="crab R Finger" parent="crab R Claw"/>
+        <bone name="crab R Leg1a" parent="crab Body"/>
+        <bone name="crab R Leg1b" parent="crab R Leg1a"/>
+        <bone name="crab R Leg2a" parent="crab Body"/>
+        <bone name="crab R Leg2b" parent="crab R Leg2a"/>
+        <bone name="crab R Leg3a" parent="crab Body"/>
+        <bone name="crab R Leg3b" parent="crab R Leg3a"/>
+    </bones>
+    <init_pose>
+        <transform name="crab Body" m00="0" m01="-1" m02="0" m03="0" m10="1" m11="0" m12="0" m13="0" m20="0" m21="0"
+                   m22="1" m23="0" m30="0" m31="0" m32="0.21" m33="1"/>
+        <transform name="crab L Arm" m00="0.46725675" m01="-0.88259596" m02="0.05191745" m03="0" m10="0.8596375"
+                   m11="0.46725675" m12="0.20662655" m13="0" m20="-0.2066265" m21="-0.051917467" m22="0.9770415" m23="0"
+                   m30="0.13" m31="-0.15" m32="0.19" m33="1"/>
+        <transform name="crab L Claw" m00="0.020756848" m01="-0.99633104" m02="-0.08302756" m03="0" m10="-0.88256866"
+                   m11="0.020756885" m12="-0.46972513" m13="0" m20="0.46972513" m21="0.08302757" m22="-0.8788998"
+                   m23="0" m30="0.22" m31="-0.32" m32="0.2" m33="1"/>
+        <transform name="crab L Finger" m00="-0.059814885" m01="-0.98694515" m02="-0.14953715" m03="0" m10="-0.7259376"
+                   m11="-0.05981511" m12="0.6851546" m13="0" m20="-0.68515456" m21="0.14953703" m22="-0.7128827" m23="0"
+                   m30="0.23499998" m31="-0.45" m32="0.235" m33="1"/>
+        <transform name="crab L Leg1a" m00="0.85592085" m01="-0.21398029" m02="0.47075653" m03="0" m10="-0.06796146"
+                   m11="0.8559209" m12="0.51262116" m13="0" m20="-0.5126213" m21="-0.47075656" m22="0.7180583" m23="0"
+                   m30="0.22" m31="-0.1" m32="0.19" m33="1"/>
+        <transform name="crab L Leg1b" m00="0.39303812" m01="-0.1511684" m02="-0.90701103" m03="0" m10="-0.8180098"
+                   m11="0.39303833" m12="-0.41997716" m13="0" m20="0.41997737" m21="0.90701103" m22="0.03082174" m23="0"
+                   m30="0.41999996" m31="-0.15" m32="0.3" m33="1"/>
+        <transform name="crab L Leg2a" m00="0.87537616" m01="0.043768853" m02="0.481457" m03="0" m10="-0.26584947"
+                   m11="0.87537616" m12="0.4037829" m13="0" m20="-0.4037829" m21="-0.481457" m22="0.77791935" m23="0"
+                   m30="0.22" m31="0.019999996" m32="0.19" m33="1"/>
+        <transform name="crab L Leg2b" m00="0.39742166" m01="0.030570894" m02="-0.9171268" m03="0" m10="-0.84674126"
+                   m11="0.3974217" m12="-0.35367388" m13="0" m20="0.353674" m21="0.91712666" m22="0.18382958" m23="0"
+                   m30="0.42" m31="0.030000005" m32="0.3" m33="1"/>
+        <transform name="crab L Leg3a" m00="0.8474271" m01="0.2542282" m02="0.46608502" m03="0" m10="-0.42743045"
+                   m11="0.8474271" m12="0.3149133" m13="0" m20="-0.3149132" m21="-0.46608505" m22="0.8267976" m23="0"
+                   m30="0.22" m31="0.13" m32="0.19" m33="1"/>
+        <transform name="crab L Leg3b" m00="0.3887965" m01="0.20935196" m02="-0.8972227" m03="0" m10="-0.87500507"
+                   m11="0.3887967" m12="-0.2884497" m13="0" m20="0.28844973" m21="0.89722276" m22="0.334347" m23="0"
+                   m30="0.42" m31="0.19000001" m32="0.3" m33="1"/>
+        <transform name="crab R Arm" m00="-0.46725675" m01="-0.88259596" m02="0.05191745" m03="0" m10="0.8596375"
+                   m11="-0.46725675" m12="-0.20662655" m13="0" m20="0.2066265" m21="-0.051917467" m22="0.9770415"
+                   m23="0" m30="-0.13" m31="-0.15" m32="0.19" m33="1"/>
+        <transform name="crab R Claw" m00="-0.020756848" m01="-0.99633104" m02="-0.08302756" m03="0" m10="-0.88256866"
+                   m11="-0.020756885" m12="0.46972513" m13="0" m20="-0.46972513" m21="0.08302757" m22="-0.8788998"
+                   m23="0" m30="-0.22" m31="-0.32" m32="0.2" m33="1"/>
+        <transform name="crab R Finger" m00="0.059814885" m01="-0.98694515" m02="-0.14953715" m03="0" m10="-0.7259376"
+                   m11="0.05981511" m12="-0.6851546" m13="0" m20="0.68515456" m21="0.14953703" m22="-0.7128827" m23="0"
+                   m30="-0.23499998" m31="-0.45" m32="0.235" m33="1"/>
+        <transform name="crab R Leg1a" m00="-0.85592085" m01="-0.21398029" m02="0.47075653" m03="0" m10="-0.06796146"
+                   m11="-0.8559209" m12="-0.51262116" m13="0" m20="0.5126213" m21="-0.47075656" m22="0.7180583" m23="0"
+                   m30="-0.22" m31="-0.1" m32="0.19" m33="1"/>
+        <transform name="crab R Leg1b" m00="-0.39303812" m01="-0.1511684" m02="-0.90701103" m03="0" m10="-0.8180098"
+                   m11="-0.39303833" m12="0.41997716" m13="0" m20="-0.41997737" m21="0.90701103" m22="0.03082174"
+                   m23="0" m30="-0.41999996" m31="-0.15" m32="0.3" m33="1"/>
+        <transform name="crab R Leg2a" m00="-0.87537616" m01="0.043768853" m02="0.481457" m03="0" m10="-0.26584947"
+                   m11="-0.87537616" m12="-0.4037829" m13="0" m20="0.4037829" m21="-0.481457" m22="0.77791935" m23="0"
+                   m30="-0.22" m31="0.019999996" m32="0.19" m33="1"/>
+        <transform name="crab R Leg2b" m00="-0.39742166" m01="0.030570894" m02="-0.9171268" m03="0" m10="-0.84674126"
+                   m11="-0.3974217" m12="0.35367388" m13="0" m20="-0.353674" m21="0.91712666" m22="0.18382958" m23="0"
+                   m30="-0.42" m31="0.030000005" m32="0.3" m33="1"/>
+        <transform name="crab R Leg3a" m00="-0.8474271" m01="0.2542282" m02="0.46608502" m03="0" m10="-0.42743045"
+                   m11="-0.8474271" m12="-0.3149133" m13="0" m20="0.3149132" m21="-0.46608505" m22="0.8267976" m23="0"
+                   m30="-0.22" m31="0.13" m32="0.19" m33="1"/>
+        <transform name="crab R Leg3b" m00="-0.3887965" m01="0.20935196" m02="-0.8972227" m03="0" m10="-0.87500507"
+                   m11="-0.3887967" m12="0.2884497" m13="0" m20="-0.28844973" m21="0.89722276" m22="0.334347" m23="0"
+                   m30="-0.42" m31="0.19000001" m32="0.3" m33="1"/>
+    </init_pose>
+</skeleton>

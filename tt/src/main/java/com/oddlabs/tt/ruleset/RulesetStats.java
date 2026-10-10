@@ -34,11 +34,12 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
      * @param lodge             peons can build the Spirit Lodge / Mead Hall, which trains the Champion
      * @param drum              the Armory makes Drums and Horns (the Drummer / Hornblower)
      * @param net               the Armory makes Nets (the Chicken Catcher / Fowler), which lay snares
+     * @param fauna             wild animals live on the island (crabs, monkeys, boars or wolves; docs/design/fauna.md)
      */
     public record Features(boolean ships, boolean enormous_islands, boolean archipelago, int max_players,
                            boolean adjustable_limits, boolean chicken_coop, boolean totem, boolean shield,
                            boolean torch, boolean market, boolean palisade, boolean great_tower, boolean lodge,
-                           boolean drum, boolean net) {
+                           boolean drum, boolean net, boolean fauna) {
     }
 
     /**
@@ -57,7 +58,8 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
                             @NonNull PalisadeStats palisade, @NonNull BuildingStats gate,
                             @NonNull UnitStats champion, @NonNull GreatTowerStats great_tower,
                             @NonNull LodgeStats lodge, @NonNull UnitStats drum_warrior,
-                            @NonNull UnitStats net_warrior, @NonNull DrumStats drum, @NonNull NetStats net) {
+                            @NonNull UnitStats net_warrior, @NonNull DrumStats drum, @NonNull NetStats net,
+                            @NonNull FaunaStats fauna) {
     }
 
     /**
@@ -170,6 +172,66 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
      * @param stun_seconds how long a snare stuns
      */
     public record NetStats(int snares, float stun_seconds) {
+    }
+
+    /**
+     * Buffed's wild animals (docs/design/fauna.md). They belong to the terrain, not to a race: a world uses the numbers
+     * of the race whose terrain it has (natives: tropical, vikings: northern), and both races hold the same.
+     *
+     * @param start_clearance meters around every player's start that no animal is placed in
+     * @param defense_chance  chance that a hit aimed at an animal misses (dodge); every animal has one hit point
+     * @param crab            beach crabs, ambience: no one attacks them
+     * @param monkey          monkeys at the forest edges (tropical islands only), which steal a carrier's load
+     * @param predator        boars (tropical) and wolves (northern) in deep forest, which attack a lone peon
+     */
+    public record FaunaStats(float start_clearance, float defense_chance, @NonNull CrabStats crab,
+                             @NonNull MonkeyStats monkey, @NonNull PredatorStats predator) {
+    }
+
+    /**
+     * @param per_100m_shore crabs per 100 meters of shore
+     * @param max            crabs on the island at most
+     * @param speed          meters per second
+     * @param flee_radius    a crab scuttles away from any unit this close (meters)
+     */
+    public record CrabStats(float per_100m_shore, int max, float speed, float flee_radius) {
+    }
+
+    /**
+     * @param count        monkeys by island size
+     * @param speed        meters per second when it runs for a load and back
+     * @param sight        a carrier passing this close (meters) is robbed
+     * @param leash        it gives up when the carrier is this far from its tree (meters)
+     * @param rest_seconds it waits this long after a theft
+     */
+    public record MonkeyStats(@NonNull CountBySize count, float speed, float sight, float leash, float rest_seconds) {
+    }
+
+    /**
+     * @param count          boars or wolves by island size
+     * @param speed          meters per second when it charges and goes back
+     * @param sight          a lone peon this close (meters) is attacked
+     * @param company_radius a peon with another unit of its team this close (meters) is not alone
+     * @param leash          it gives up when the peon is this far from its patch (meters)
+     * @param hit_chance     chance that its blow hits, before the peon's defense chance
+     * @param rest_seconds   it rests this long after a strike, whatever the outcome
+     */
+    public record PredatorStats(@NonNull CountBySize count, float speed, float sight, float company_radius,
+                                float leash, float hit_chance, float rest_seconds) {
+    }
+
+    /** A number for each island size: Small (256 m), Medium (512 m), Large (1024 m), Enormous (2048 m). */
+    public record CountBySize(int small, int medium, int large, int enormous) {
+        /** The count for a world this many meters across (an Archipelago counts as Enormous). */
+        public int forMetersPerWorld(int meters_per_world) {
+            if (meters_per_world <= 256)
+                return small;
+            if (meters_per_world <= 512)
+                return medium;
+            if (meters_per_world <= 1024)
+                return large;
+            return enormous;
+        }
     }
 
     /** The chieftains' spells, by their in-game names. */

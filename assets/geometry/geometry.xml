@@ -586,6 +586,16 @@
 				<texture name="viking_ship" team="viking_ship_team"/>
 			</model>
 		</sprite>
+        <sprite name="wolf">
+            <skeleton>vikings/wolf/wolf_skeleton.xml</skeleton>
+            <model r="90" g="60" b="30">
+                vikings/wolf/wolf_mesh.xml
+                <texture name="wolf"/>
+            </model>
+            <animation name="idle" wpc="1" type="loop">vikings/wolf/wolf_idle.xml</animation>
+            <animation name="run" wpc="1.875" type="loop">vikings/wolf/wolf_run.xml</animation>
+            <animation name="attack" wpc="1" type="plain">vikings/wolf/wolf_attack.xml</animation>
+        </sprite>
     </group>
     <group name="natives">
         <sprite name="chieftain">
@@ -1149,6 +1159,26 @@
 				<texture name="native_ship" team="native_ship_team"/>
 			</model>
 		</sprite>
+        <sprite name="monkey">
+            <skeleton>natives/monkey/monkey_skeleton.xml</skeleton>
+            <model r="90" g="60" b="30">
+                natives/monkey/monkey_mesh.xml
+                <texture name="monkey"/>
+            </model>
+            <animation name="idle" wpc="1" type="loop">natives/monkey/monkey_idle.xml</animation>
+            <animation name="run" wpc="1.5" type="loop">natives/monkey/monkey_run.xml</animation>
+            <animation name="attack" wpc="1" type="plain">natives/monkey/monkey_attack.xml</animation>
+        </sprite>
+        <sprite name="boar">
+            <skeleton>natives/boar/boar_skeleton.xml</skeleton>
+            <model r="90" g="60" b="30">
+                natives/boar/boar_mesh.xml
+                <texture name="boar"/>
+            </model>
+            <animation name="idle" wpc="1" type="loop">natives/boar/boar_idle.xml</animation>
+            <animation name="run" wpc="1.35" type="loop">natives/boar/boar_run.xml</animation>
+            <animation name="attack" wpc="1" type="plain">natives/boar/boar_attack.xml</animation>
+        </sprite>
     </group>
     <group name="misc">
         <sprite name="jungle_tree_crown">
@@ -1360,6 +1390,16 @@
             <animation name="die" wpc="1" type="plain">misc/chicken/chicken_die.xml</animation>
             <animation name="run" wpc="4" type="loop">misc/chicken/chicken_run.xml</animation>
             <animation name="fly" wpc="8" type="loop">misc/chicken/chicken_fly.xml</animation>
+        </sprite>
+        <sprite name="crab">
+            <skeleton>misc/crab/crab_skeleton.xml</skeleton>
+            <model r="90" g="60" b="30">
+                misc/crab/crab_mesh.xml
+                <texture name="crab"/>
+            </model>
+            <animation name="idle" wpc="1" type="loop">misc/crab/crab_idle.xml</animation>
+            <animation name="run" wpc="0.56" type="loop">misc/crab/crab_run.xml</animation>
+            <animation name="attack" wpc="1" type="plain">misc/crab/crab_attack.xml</animation>
         </sprite>
     </group>
 </geometry>

@@ -2,7 +2,7 @@ package com.oddlabs.tt.model.weapon;
 
 import com.oddlabs.tt.audio.Audio;
 import com.oddlabs.tt.model.Building;
-import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Hittable;
 import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.ruleset.RulesetStats.TorchStats;
 import org.jspecify.annotations.NonNull;
@@ -32,7 +32,7 @@ public final class GearFactory extends WeaponFactory {
     }
 
     @Override
-    protected void doAttack(boolean hit, @NonNull Unit src, @NonNull Selectable<?> target) {
+    protected void doAttack(boolean hit, @NonNull Unit src, @NonNull Hittable target) {
         if (torch != null && target instanceof Building building) {
             InstantHitFactory.strike(src, target, torch.building_damage(), sounds);
             if (!building.isDead())

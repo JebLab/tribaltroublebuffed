@@ -1,6 +1,6 @@
 package com.oddlabs.tt.model.behaviour;
 
-import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.Hittable;
 import com.oddlabs.tt.model.Ship;
 import com.oddlabs.tt.model.ShipAllocation;
 import com.oddlabs.tt.model.Unit;
@@ -9,12 +9,12 @@ import com.oddlabs.tt.pathfinder.UnitGrid;
 
 public final class AttackController extends Controller {
 
-    private final Selectable<?> target;
+    private final Hittable target;
     private final Unit unit;
     private final Ship ship;
     private final ShipAllocation allocation;
 
-    public AttackController(Unit unit, Selectable<?> target) {
+    public AttackController(Unit unit, Hittable target) {
         super(0);
         this.unit = unit;
         this.target = target;
@@ -22,7 +22,7 @@ public final class AttackController extends Controller {
         this.allocation = null;
     }
 
-    public AttackController(Unit unit, Selectable target, ShipAllocation allocation, Ship ship) {
+    public AttackController(Unit unit, Hittable target, ShipAllocation allocation, Ship ship) {
         super(0);
         this.unit = unit;
         this.target = target;

@@ -3,6 +3,7 @@ package com.oddlabs.tt.render;
 import com.oddlabs.tt.gui.GUIIcons;
 import com.oddlabs.tt.gui.ToolTipBox;
 import com.oddlabs.tt.model.Abilities;
+import com.oddlabs.tt.model.Animal;
 import com.oddlabs.tt.model.Building;
 import com.oddlabs.tt.model.ModelToolTip;
 import com.oddlabs.tt.model.SceneryModel;
@@ -60,6 +61,7 @@ final class ToolTipAdapter implements ToolTip {
             case Building building -> visitBuilding(tool_tip, building);
             case Supply supply -> visitSupply(tool_tip, supply);
             case SceneryModel scenery -> visitSceneryModel(tool_tip, scenery);
+            case Animal animal -> tool_tip.append(animal.getName());
             default -> {
             }
         }

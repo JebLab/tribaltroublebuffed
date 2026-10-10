@@ -1,6 +1,6 @@
 # Neutral fauna
 
-Buffed's wild animals (M9, PLAN.md §4.4 "Neutral fauna"): ambient, cheap and on-brand, with two of them a small hazard of the map. Written in M9's first session as the design for its second (`docs/prompts/m09-part2-fauna.md`), which builds them; numbers there may still move, and the session logs what it changes. Classic and Resurrected do not have them (a `features.fauna` flag, false there).
+Buffed's wild animals (M9, PLAN.md §4.4 "Neutral fauna"): ambient, cheap and on-brand, with two of them a small hazard of the map. Written in M9's first session as the design for its second (`docs/prompts/m09-part2-fauna.md`), which built them; "As built" at the end lists what building them changed. Classic and Resurrected do not have them (a `features.fauna` flag, false there).
 
 | Animal | Where | What it does | Counter |
 |---|---|---|---|
@@ -20,14 +20,22 @@ Buffed's wild animals (M9, PLAN.md §4.4 "Neutral fauna"): ambient, cheap and on
 
 ## The AI
 
-The AI needs no new orders: its warriors attack animals in reach like any target (the lowest priority), and its gatherers keep working. Normal and Hard AIs send one warrior with each group of woodcutters when the island has boars or wolves (optional, if it stops their peons being eaten; measure with the census: peons lost to animals per AI).
+The AI's warriors attack animals in reach like any target (the lowest priority), and its gatherers keep working. Escorting woodcutters was the first idea; as built, Normal and Hard hunt down a boar or wolf that has killed one of their peons (see "As built").
 
 ## Art (placeholders)
 
-Three new skeletons with three animations each (idle, run, attack; a hit animal plays no death animation: it falls over and fades like a killed chicken), about 300 triangles: `misc/crab`, `natives/monkey`, `natives/boar`, `vikings/wolf`, with textures in the style of the chicken's. The animals' animation positions are their own (an animal class picks them itself, unlike `Unit.Animation`). Final art needs an artist (MILESTONES.md).
+Four new skeletons with three animations each (idle, run, attack; a hit animal plays no death animation: it falls over and fades like a killed chicken), about 300 triangles: `misc/crab`, `natives/monkey`, `natives/boar`, `vikings/wolf`, with textures in the style of the chicken's. The animals' animation positions are their own (an animal class picks them itself, unlike `Unit.Animation`). Final art needs an artist (MILESTONES.md).
 
-## Open for the second session
+## As built (M9, part 2)
 
-- Whether monkeys drop the stolen load in the forest (where anyone could pick it up again) or it is simply gone (simpler; the plan says "steal").
-- Whether crabs can be caught for food (they are not in the plan; leave them as ambience unless it is free).
-- Sounds: the chickens' are reused for now; new clips need a source (C6).
+What building it settled or changed (R-51 to R-56 in [DECISIONS.md](../DECISIONS.md)):
+
+- **Code.** `model/Animal` (grid, path tracker, one hit point, death) with `Crab`, `Monkey` and `Predator` (boar and wolf); `model/Fauna` places them; `World.getAnimals()` lists the living ones. Weapons aim at a `Hittable` (a player's `Selectable` or an `Animal`) instead of a `Selectable`; `AttackScanFilter` takes animals only when built to hunt them (warriors and tower throwers; not peons, chieftains or ships) and gives them `Priority.ANIMAL`, below everything of a player. `Unit.hitByAnimal` kills without crediting anyone; `Unit.loseLoad` empties a carrier and sends it back to work.
+- **Where.** The island's "contour" is only its docking spots, so the shore is every free land cell next to water. Trees never stand side by side in this engine (a free cell has at most two trees around it), so depth is the number of trees within 4 cells (a square 18 m across): deep forest has at least 6 (fewer, down to 3, while there are under 10 such cells per boar or wolf), a forest edge is a cell next to a tree with at most 4. Northern coasts are mostly cliff: the Medium test island has 71 walkable cells by the water and gets 3 crabs, the tropical one 20.
+- **How many** is per map (the island size setting; an Archipelago counts as Enormous), not per island. Animals of a kind keep apart: crabs 4 cells, monkeys 8, boars and wolves 12, any two animals 2.
+- **Moving.** Crabs wander within 3 cells of home at half their 3 m/s and run from units within 3 m; boars and wolves roam within 2 cells at 40 % of their 6 m/s. An animal decides twice a second, on a cell. Its attack takes 0.6 s and lands half way, on a peon up to two cells away (a lunge).
+- **Monkeys** rob a unit walking by with a load (peons and chicken catchers), and give up when it gets 12 m from their home, like boars and wolves. **The load is simply gone** (the plan says "steal"; dropping it would need a new kind of supply on the ground).
+- **Crabs cannot be caught**: catching would need supply code for them; they stay ambience.
+- **Kills.** An animal's kill counts for nobody; a dead animal counts in no player's statistics either (the census keeps both, and loads stolen). Players can right-click an animal with warriors; hovering shows its name.
+- **Death.** It falls onto its side in 0.4 s, lies there 1.5 s and sinks 1 m over 3 s (no death animation). **Sounds:** the chicken's death clip for every animal, nothing else; new clips need a source (C6).
+- **The AI.** Normal and Hard send 2 / 3 idle throwers after the boar or wolf nearest to where one of their peons was killed (within 20 cells). Without it a Hard AI lost 13 peons to wolves in the six-tribe test match; with it, 4.

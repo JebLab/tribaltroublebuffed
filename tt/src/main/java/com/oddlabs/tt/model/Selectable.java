@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class Selectable<T extends Template> extends Model implements Target, Animated, ModelToolTip {
+public abstract class Selectable<T extends Template> extends Model implements Hittable, Animated, ModelToolTip {
     private final @NonNull Player owner;
     private @Nullable Behaviour current_behaviour;
     private final Abilities abilities = new Abilities(Abilities.NONE);
@@ -175,6 +175,11 @@ public abstract class Selectable<T extends Template> extends Model implements Ta
         should_decide = false;
         current_behaviour = null;
         getCurrentController().decide();
+    }
+
+    /** Has the controller decide again as soon as the current behaviour allows, as a new order would. */
+    protected final void redecide() {
+        decide();
     }
 
     protected final void forceDecide() {

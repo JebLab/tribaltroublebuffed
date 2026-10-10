@@ -26,6 +26,9 @@ final class CensusTaker {
     private final int[] great_tower_throwers;
     private final int[] snares_laid;
     private final int[] snares_sprung;
+    private final int[] units_lost_to_animals;
+    private final int[] loads_stolen;
+    private final int[] animals_killed;
 
     CensusTaker(int num_players) {
         for (int i = 0; i < num_players; i++) {
@@ -38,6 +41,9 @@ final class CensusTaker {
         great_tower_throwers = new int[num_players];
         snares_laid = new int[num_players];
         snares_sprung = new int[num_players];
+        units_lost_to_animals = new int[num_players];
+        loads_stolen = new int[num_players];
+        animals_killed = new int[num_players];
     }
 
     void update(@NonNull Player @NonNull [] players) {
@@ -62,6 +68,9 @@ final class CensusTaker {
             trades_made[i] = players[i].getTradesMade();
             snares_laid[i] = players[i].getSnaresLaid();
             snares_sprung[i] = players[i].getSnaresSprung();
+            units_lost_to_animals[i] = players[i].getUnitsLostToAnimals();
+            loads_stolen[i] = players[i].getLoadsStolen();
+            animals_killed[i] = players[i].getAnimalsKilled();
         }
     }
 
@@ -71,7 +80,7 @@ final class CensusTaker {
         for (int i = 0; i < chicken_coop_bred.length; i++)
             census.add(new HeadlessMatchResult.Census(completed_buildings.get(i), chicken_coop_bred[i],
                     unit_types.get(i), fires_lit[i], trades_made[i], great_tower_throwers[i], snares_laid[i],
-                    snares_sprung[i]));
+                    snares_sprung[i], units_lost_to_animals[i], loads_stolen[i], animals_killed[i]));
         return census;
     }
 }

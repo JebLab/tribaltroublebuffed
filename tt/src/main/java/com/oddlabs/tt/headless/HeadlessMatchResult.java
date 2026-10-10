@@ -40,10 +40,14 @@ public record HeadlessMatchResult(int winningTeam, int finalTick, int finalCheck
      * @param greatTowerThrowers the most throwers it had in one Great Tower at once
      * @param snaresLaid         snares its chicken catchers laid
      * @param snaresSprung       enemies its snares stunned
+     * @param unitsLostToAnimals its units that boars or wolves killed
+     * @param loadsStolen        loads that monkeys took from its units
+     * @param animalsKilled      wild animals its units killed
      */
     public record Census(@NonNull Set<@NonNull Integer> completedBuildings, boolean chickenCoopBred,
                          @NonNull Set<@NonNull Integer> unitTypes, int firesLit, int tradesMade,
-                         int greatTowerThrowers, int snaresLaid, int snaresSprung) {
+                         int greatTowerThrowers, int snaresLaid, int snaresSprung, int unitsLostToAnimals,
+                         int loadsStolen, int animalsKilled) {
         public Census {
             completedBuildings = Collections.unmodifiableSortedSet(new TreeSet<>(completedBuildings));
             unitTypes = Collections.unmodifiableSortedSet(new TreeSet<>(unitTypes));
