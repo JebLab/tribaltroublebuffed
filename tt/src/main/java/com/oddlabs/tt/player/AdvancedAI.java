@@ -4,7 +4,9 @@ import com.oddlabs.tt.landscape.LandscapeTarget;
 import com.oddlabs.tt.model.Abilities;
 import com.oddlabs.tt.model.Action;
 import com.oddlabs.tt.model.Building;
+import com.oddlabs.tt.model.ChickenCoop;
 import com.oddlabs.tt.model.DeployType;
+import com.oddlabs.tt.model.LandBuilding;
 import com.oddlabs.tt.model.Race;
 import com.oddlabs.tt.model.Selectable;
 import com.oddlabs.tt.model.Ship;
@@ -54,6 +56,17 @@ public final class AdvancedAI extends AI {
 
     private static final int[] UNITS_PER_TOWER1 = new int[]{1000, 1000, 90};
     private static final int[] UNITS_PER_TOWER2 = new int[]{1000, 1000, 120};
+
+    // Buffed's buildings, built once the Quarters and Armory stand: a Chicken Coop above this many units, and the
+    // n-th Totem (by the Armory, then the Quarters) above n times this many.
+    private static final int[] MAX_CHICKEN_COOPS = new int[]{0, 1, 1};
+    private static final int[] UNITS_FOR_CHICKEN_COOP = new int[]{1000, 30, 25};
+    private static final int[] MAX_TOTEMS = new int[]{0, 1, 2};
+    private static final int[] UNITS_PER_TOTEM = new int[]{1000, 40, 30};
+    // Extra chicken gatherers while a coop breeds: its chickens roam near the base.
+    private static final int[] CHICKEN_COOP_GATHERERS = new int[]{0, 2, 2};
+    private static final int CHICKEN_COOP_BUILDERS = 6;
+    private static final int TOTEM_BUILDERS = 3;
 
     private static final int SHIP_PEONS = 26;
     private static final int SHIP_WARRIORS = 50;
@@ -113,6 +126,8 @@ public final class AdvancedAI extends AI {
                 nodePickInitIsland();
             }
         }
+
+        nodeBuildBuffedBuildings();
 
         reclassify();
         nodeAttackWithWarriorsAndChieftain(NUM_WARRIORS[difficulty],
@@ -291,6 +306,79 @@ public final class AdvancedAI extends AI {
         }
     }
 
+    /**
+     * Buffed's buildings (a no-op under rulesets without them, so their AI plays exactly as before): a Chicken Coop by
+     * the Quarters, stocked with chickens by peons, and Totems by the Armory and the Quarters.
+     */
+    private void nodeBuildBuffedBuildings() {
+        boolean chicken_coop = getOwner().canBuild(Race.BUILDING_CHICKEN_COOP);
+        boolean totem = getOwner().canBuild(Race.BUILDING_TOTEM);
+        if (!chicken_coop && !totem)
+            return;
+        reclassify();
+        if (!baseBuildingsDone())
+            return;
+        nodeStockChickenCoops();
+        int units = getOwner().getUnitCountContainer().getNumSupplies();
+        if (chicken_coop && !chickenCoopUnderConstruction() && count(getChickenCoops()) < MAX_CHICKEN_COOPS[difficulty]
+                && units > UNITS_FOR_CHICKEN_COOP[difficulty]) {
+            Selectable<?>[] builders = firstN(getPeons(CHICKEN_COOP_BUILDERS), CHICKEN_COOP_BUILDERS);
+            Building quarters = (Building) getQuarters()[0];
+            setChickenCoopUnderConstruction(buildBuilding(Race.BUILDING_CHICKEN_COOP, builders, quarters.getGridX(),
+                    quarters.getGridY()));
+            reclassify();
+        }
+        int totems = count(getTotems());
+        if (totem && !totemUnderConstruction() && totems < MAX_TOTEMS[difficulty]
+                && units > UNITS_PER_TOTEM[difficulty] * (totems + 1)) {
+            Selectable<?>[] builders = firstN(getPeons(TOTEM_BUILDERS), TOTEM_BUILDERS);
+            Building origin = totems % 2 == 0 ? (Building) getArmory()[0] : (Building) getQuarters()[0];
+            setTotemUnderConstruction(buildBuilding(Race.BUILDING_TOTEM, builders, origin.getGridX(),
+                    origin.getGridY()));
+            reclassify();
+        }
+    }
+
+    /** Sends peons to a finished coop that still lacks its first chickens: they catch them and bring them in. */
+    private void nodeStockChickenCoops() {
+        if (getChickenCoops() == null)
+            return;
+        for (Selectable<?> s : getChickenCoops()) {
+            ChickenCoop coop = ((LandBuilding) s).getChickenCoop();
+            if (coop == null || !coop.needsStock())
+                continue;
+            int missing = coop.getStock().getMaxSupplyCount() - coop.getStock().getNumSupplies() - countBuilders(
+                    (Building) s);
+            if (missing > 0) {
+                Selectable<?>[] peons = firstN(getPeons(missing), missing);
+                if (peons.length > 0)
+                    getOwner().setTarget(peons, s, Action.DEFAULT, false);
+            }
+        }
+    }
+
+    private boolean hasBreedingChickenCoop() {
+        if (getChickenCoops() != null) {
+            for (Selectable<?> s : getChickenCoops()) {
+                ChickenCoop coop = ((LandBuilding) s).getChickenCoop();
+                if (coop != null && !coop.needsStock())
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private int getMaxRubberGatherers() {
+        int max = MAX_UNITS_GATHERING_RUBBER[difficulty];
+        if (hasBreedingChickenCoop())
+            max += CHICKEN_COOP_GATHERERS[difficulty];
+        return max;
+    }
+
+    private static int count(@NonNull Selectable<?> @Nullable [] list) {
+        return list != null ? list.length : 0;
+    }
+
     private void nodeAssignIdlePeons() {
         if (getIdlePeons() != null) {
             if (quartersUnderConstruction() && getConstructionSites() != null) {
@@ -301,9 +389,12 @@ public final class AdvancedAI extends AI {
                 getOwner().setTarget(getIdlePeons(), getConstructionSites()[0], Action.DEFAULT, false);
             } else if (shipUnderConstruction() && getConstructionSites() != null) {
                 getOwner().setTarget(getIdlePeons(), getConstructionSites()[0], Action.DEFAULT, false);
-            } else if (getQuarters() != null && !getQuarters()[0].isDead()) {
-                getOwner().setTarget(getIdlePeons(), getQuarters()[0], Action.DEFAULT, false);
-            }
+            } else if ((chickenCoopUnderConstruction() || totemUnderConstruction())
+                    && getConstructionSites() != null) {
+                        getOwner().setTarget(getIdlePeons(), getConstructionSites()[0], Action.DEFAULT, false);
+                    } else if (getQuarters() != null && !getQuarters()[0].isDead()) {
+                        getOwner().setTarget(getIdlePeons(), getQuarters()[0], Action.DEFAULT, false);
+                    }
         }
     }
 
@@ -394,6 +485,7 @@ public final class AdvancedAI extends AI {
         int rock = 0;
         int iron = 0;
         int rubber = 0;
+        int max_rubber = getMaxRubberGatherers();
 
         if (getGatherTreePeons() != null)
             tree = getGatherTreePeons().length;
@@ -410,7 +502,7 @@ public final class AdvancedAI extends AI {
             rock = Integer.MAX_VALUE;
         if (iron >= MAX_UNITS_GATHERING_IRON[difficulty])
             iron = Integer.MAX_VALUE;
-        if (rubber >= MAX_UNITS_GATHERING_RUBBER[difficulty])
+        if (rubber >= max_rubber)
             rubber = Integer.MAX_VALUE;
 
         boolean deployed;
@@ -431,7 +523,7 @@ public final class AdvancedAI extends AI {
                                 getOwner().deployUnits(armory, DeployType.PEON_HARVEST_IRON, 1);
                                 deployed = true;
                                 iron++;
-                            } else if (num_units > 0 && rubber < MAX_UNITS_GATHERING_RUBBER[difficulty]
+                            } else if (num_units > 0 && rubber < max_rubber
                                     && rubber <= tree && rubber <= rock && rubber <= iron) {
                                         getOwner().deployUnits(armory, DeployType.PEON_HARVEST_RUBBER, 1);
                                         deployed = true;

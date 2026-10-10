@@ -35,4 +35,9 @@ public final class RubberSupplyManager extends SupplyManager {
     public void emptyGroup() {
         current_groups--;
     }
+
+    /** Wild flocks on the island now; a chicken coop's flock is not one of them. */
+    public int getNumGroups() {
+        return current_groups;
+    }
 }

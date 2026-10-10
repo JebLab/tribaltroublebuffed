@@ -6,6 +6,7 @@ import com.oddlabs.tt.event.LocalEventQueue;
 import com.oddlabs.tt.form.ProgressForm;
 import com.oddlabs.tt.global.Settings;
 import com.oddlabs.tt.model.AbstractElementNode;
+import com.oddlabs.tt.model.LandBuilding;
 import com.oddlabs.tt.model.RacesResources;
 import com.oddlabs.tt.model.Supply;
 import com.oddlabs.tt.model.SupplyManager;
@@ -22,6 +23,7 @@ import com.oddlabs.tt.ruleset.Ruleset;
 import com.oddlabs.tt.ruleset.RulesetStats;
 import org.joml.Vector4fc;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jspecify.annotations.NonNull;
@@ -64,6 +66,7 @@ public final class World {
     private int map_size;
     private final @NonNull GameMode mode;
     private final @NonNull Ruleset ruleset;
+    private final @NonNull List<@NonNull LandBuilding> totems = new ArrayList<>();
 
     public static @NonNull LandscapeResources loadCommon(@NonNull RenderQueues queues) {
         LandscapeResources landscape_resources = new LandscapeResources(queues);
@@ -298,5 +301,10 @@ public final class World {
 
     public @NonNull Random getRandom() {
         return random;
+    }
+
+    /** The finished totems of every player, in the order they were finished (see {@code TotemAura}). */
+    public @NonNull List<@NonNull LandBuilding> getTotems() {
+        return totems;
     }
 }

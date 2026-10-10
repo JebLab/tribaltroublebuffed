@@ -26,7 +26,7 @@ public final class PlaceBuildingController extends Controller {
         if (building.isDead()) {
             unit.popController();
         } else if (building.isPlaced()) {
-            if (building.isDamaged())
+            if (building.hasWork())
                 unit.swapController(new RepairController(unit, building));
             else
                 unit.popController();

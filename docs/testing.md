@@ -11,6 +11,7 @@
 | `headless/FullGameSimulationTest` | AI-only matches play to a victory without an exception: a 1v1 and a six-tribe free-for-all under each ruleset, and a 6v6 on an Enormous island under Resurrected. |
 | `headless/DeterminismTest` | The same seeded match gives the same checksums twice in one JVM, and in two fresh JVMs, the second with every identity hash code equal (`-XX:hashCode=2`). With the PR #1 fix reverted this test fails. |
 | `headless/GoldenTraceTest` | Each headless match matches the checksum trace recorded in `tt/src/test/resources/com/oddlabs/tt/headless/golden-traces.txt`. |
+| `headless/BuffedBuildingsTest` | Buffed's Chicken Coop and Totem (M5): only Buffed offers them; peons build the coop and stock it with chickens they catch, and finish the totem with a rock they fetch; the coop breeds one chicken per 90 s up to six, outside the wild-flock limit; totems add 0.05 hit chance to friendly units within 10 m, two at most; Normal and Hard AIs build and use both (from the matches' census), Easy ones and every AI under Classic and Resurrected never do. |
 
 The headless tests take about a minute: a match plays 15 to 60 minutes of game time in seconds.
 
@@ -24,7 +25,7 @@ Play one match from the command line (PowerShell; in Git Bash the quoted `--args
 .\gradlew.bat tt:headlessMatch --args="--ruleset buffed --size 1 --seed 11 --player 0:0:3 --player 1:1:3"
 ```
 
-Options: `--ruleset classic|resurrected|buffed`, `--terrain NATIVE|VIKING`, `--size 0..3` (small to enormous), `--seed`, `--hills`/`--vegetation`/`--supplies` (0 to 1), `--max-ticks`, and one `--player team:race:difficulty` per tribe (race 0 natives, 1 vikings; difficulty 1 easy, 2 normal, 3 hard). `--quiet` drops the five-minute progress lines, and `-PheadlessJvmArgs="..."` passes JVM options. It prints the checksum trace and a `result` line with the winning team, the final tick and checksum.
+Options: `--ruleset classic|resurrected|buffed`, `--terrain NATIVE|VIKING`, `--size 0..3` (small to enormous), `--seed`, `--hills`/`--vegetation`/`--supplies` (0 to 1), `--max-ticks`, and one `--player team:race:difficulty` per tribe (race 0 natives, 1 vikings; difficulty 1 easy, 2 normal, 3 hard). `--quiet` drops the five-minute progress lines, and `-PheadlessJvmArgs="..."` passes JVM options. It prints the checksum trace, a `result` line with the winning team, the final tick and checksum, and a `census` line per player: the buildings it finished during the match (`Race.BUILDING_*` ids, sampled every ten seconds) and whether its Chicken Coop bred. The census only reads the world, so it never changes a match.
 
 The checksum is the one multiplayer peers compare: the tick, the world's running checksum and every animation's contribution (`HeadlessMatchRunner.checksum`). It is sampled every 500 ticks (ten seconds of game time), exactly where a game computes it, because computing it flushes the animation managers' removal lists and can reorder animations.
 
@@ -42,7 +43,7 @@ After an intended simulation change, bump `SIM_VERSION` and regenerate the file:
 gradlew tt:test --tests com.oddlabs.tt.headless.GoldenTraceTest -PupdateGoldenTraces
 ```
 
-Then read the diff: only the matches of the ruleset you changed should move. Today all three rulesets give the same traces, because Classic and Buffed do not yet differ from Resurrected in any number the AI matches touch.
+Then read the diff: only the matches of the ruleset you changed should move. Classic and Resurrected still give the same traces, because Classic differs from Resurrected only in world options the matches do not use; Buffed's have differed since M5, whose AIs build the Chicken Coop and Totem.
 
 ## Replaying a game
 

@@ -59,8 +59,11 @@ public final class RacesResources {
     public static final int ARMORY_SIZE = 5;
     public static final int TOWER_SIZE = 3;
     public static final int SHIP_SIZE = 12;
+    // A building of size n covers (2n - 3) x (2n - 3) grid cells of 2 m: the coop 3 x 3 like the tower, the totem one.
+    public static final int CHICKEN_COOP_SIZE = 3;
+    public static final int TOTEM_SIZE = 2;
     public static final int MAX_BUILDING_SIZE = IntStream.of(QUARTERS_SIZE, ARMORY_SIZE,
-            TOWER_SIZE).max().orElseThrow();
+            TOWER_SIZE, CHICKEN_COOP_SIZE, TOTEM_SIZE).max().orElseThrow();
 
     public static final int RACE_NATIVES = 0;
     public static final int RACE_VIKINGS = 1;
@@ -193,6 +196,52 @@ public final class RacesResources {
                 chimney_x,
                 chimney_y,
                 chimney_z,
+                is_vikings,
+                name);
+    }
+
+    private static @NonNull BuildingTemplate createChickenCoopTemplate(@NonNull RenderQueues queues,
+            @NonNull String race, int max_hit_points, boolean is_vikings, @NonNull String name) {
+        String path = "/geometry/" + race + "/chicken_coop";
+        return createBuildingTemplate(
+                queues,
+                Race.BUILDING_CHICKEN_COOP,
+                BuildingTemplate.TYPE_BUILDING,
+                path + ".binsprite",
+                2.5f, 4.5f,
+                path + "_halfbuilt.binsprite",
+                2.5f, 3.5f,
+                path + "_start.binsprite",
+                2.5f, 1f,
+                8f, .009f, CHICKEN_COOP_SIZE, 3f, 5f, 20, max_hit_points,
+                new EmptyUnitContainerFactory(),
+                new Abilities(Abilities.BREED),
+                new float[]{0f, 1f, 2f}, 0f, 4f,
+                0f, 0f, 0f,
+                0f, 0f, 0f,
+                is_vikings,
+                name);
+    }
+
+    private static @NonNull BuildingTemplate createTotemTemplate(@NonNull RenderQueues queues, @NonNull String race,
+            int max_hit_points, boolean is_vikings, @NonNull String name) {
+        String path = "/geometry/" + race + "/totem";
+        return createBuildingTemplate(
+                queues,
+                Race.BUILDING_TOTEM,
+                BuildingTemplate.TYPE_BUILDING,
+                path + ".binsprite",
+                .85f, 5f,
+                path + "_halfbuilt.binsprite",
+                .85f, 4.5f,
+                path + "_start.binsprite",
+                1f, 1f,
+                3f, .04f, TOTEM_SIZE, 1f, 5f, 10, max_hit_points,
+                new EmptyUnitContainerFactory(),
+                new Abilities(Abilities.AURA),
+                new float[]{0f, 1f, 2.5f}, 0f, 2f,
+                0f, 0f, 0f,
+                0f, 0f, 0f,
                 is_vikings,
                 name);
     }
@@ -559,6 +608,16 @@ public final class RacesResources {
                 Utils.getBundleString(bundle, "ship"));
         ProgressForm.progress(1f / num_progress);
 
+        // Buffed's buildings. Placeholder models: the race's Quarters and Tower, scaled down and recoloured.
+        BuildingTemplate native_chicken_coop_template = createChickenCoopTemplate(queues, "natives",
+                natives.chicken_coop().hit_points(), false, i18n("chicken_coop_natives"));
+        BuildingTemplate viking_chicken_coop_template = createChickenCoopTemplate(queues, "vikings",
+                vikings.chicken_coop().hit_points(), true, i18n("chicken_coop_vikings"));
+        BuildingTemplate native_totem_template = createTotemTemplate(queues, "natives", natives.totem().hit_points(),
+                false, i18n("totem_natives"));
+        BuildingTemplate viking_totem_template = createTotemTemplate(queues, "vikings", vikings.totem().hit_points(),
+                true, i18n("totem_vikings"));
+
         final float shadow_diameter_warrior = 1.9f;
         final float shadow_diameter_peon = 1.6f;
         final float shadow_diameter_chieftain = 2.2f;
@@ -854,6 +913,8 @@ public final class RacesResources {
                 native_armory_template,
                 native_tower_template,
                 native_ship_template,
+                native_chicken_coop_template,
+                native_totem_template,
                 native_warrior_rock_template,
                 native_warrior_iron_template,
                 native_warrior_rubber_template,
@@ -872,6 +933,8 @@ public final class RacesResources {
                 viking_armory_template,
                 viking_tower_template,
                 viking_ship_template,
+                viking_chicken_coop_template,
+                viking_totem_template,
                 viking_warrior_rock_template,
                 viking_warrior_iron_template,
                 viking_warrior_rubber_template,

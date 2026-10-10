@@ -19,7 +19,8 @@ public final class NullController extends Controller {
         Abilities abilities = selectable.getAbilities();
         return List.of(super.getKey(), abilities.hasAbilities(Abilities.BUILD_ARMIES),
                 abilities.hasAbilities(Abilities.REPRODUCE), abilities.hasAbilities(Abilities.ATTACK),
-                abilities.hasAbilities(Abilities.SAIL));
+                abilities.hasAbilities(Abilities.SAIL), abilities.hasAbilities(Abilities.BREED),
+                abilities.hasAbilities(Abilities.AURA));
     }
 
     @Override

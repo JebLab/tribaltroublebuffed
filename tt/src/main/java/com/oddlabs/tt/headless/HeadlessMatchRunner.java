@@ -79,16 +79,19 @@ public final class HeadlessMatchRunner {
      */
     public @NonNull HeadlessMatchResult run(@NonNull HeadlessMatchConfig config, @NonNull IntPredicate stop_after) {
         setUp();
-        World world = newWorld(config);
+        World world = newWorld(config, true);
         Player[] players = world.getPlayers();
         List<HeadlessMatchResult.Sample> trace = new ArrayList<>();
+        CensusTaker census = new CensusTaker(players.length);
         // Before the first tick nothing runs between this flush and the one the tick starts with.
         trace.add(new HeadlessMatchResult.Sample(world.getTick(), checksum(world)));
         while (true) {
             world.tick(AnimationManager.ANIMATION_SECONDS_PER_TICK);
             int tick = world.getTick();
-            if (tick % SAMPLE_INTERVAL == 0)
+            if (tick % SAMPLE_INTERVAL == 0) {
                 trace.add(new HeadlessMatchResult.Sample(tick, checksum(world)));
+                census.update(players);
+            }
             if (verbose && tick % PROGRESS_INTERVAL == 0)
                 IO.println(progress(tick, players));
 
@@ -111,7 +114,8 @@ public final class HeadlessMatchRunner {
                 if (verbose)
                     IO.println(progress(tick,
                             players) + (winner >= 0 ? " -> team " + winner + " wins" : " -> undecided"));
-                return new HeadlessMatchResult(winner, tick, checksum, survivors, trace);
+                census.update(players);
+                return new HeadlessMatchResult(winner, tick, checksum, survivors, trace, census.result());
             }
         }
     }
@@ -129,7 +133,12 @@ public final class HeadlessMatchRunner {
         return sum.getValue();
     }
 
-    private static @NonNull World newWorld(@NonNull HeadlessMatchConfig config) {
+    /**
+     * Builds the match's world the way a Single-player skirmish does.
+     *
+     * @param ai give every slot an AI with the skirmish starting units; without, the island starts empty
+     */
+    static @NonNull World newWorld(@NonNull HeadlessMatchConfig config, boolean ai) {
         RenderQueues queues = new RenderQueues();
         LandscapeResources landscape_resources = World.loadCommon(queues);
         RacesResources races_resources = World.loadInGame(queues, config.ruleset().getStats());
@@ -158,7 +167,7 @@ public final class HeadlessMatchRunner {
                 new NotificationListener() {
                 }, world_params, world_info, generator.getTerrainType(), player_infos, generator.getFogInfo());
         Player[] players = world.getPlayers();
-        for (int i = 0; i < players.length; i++) {
+        for (int i = 0; ai && i < players.length; i++) {
             // A skirmish AI starts with peons only (see Client's unit infos).
             UnitInfo unit_info = new UnitInfo(false, false, 0, false, world_params.getInitialUnitCount(), 0, 0, 0);
             players[i].setAI(new AdvancedAI(players[i], unit_info, toAIDifficulty(player_configs.get(i).difficulty())));

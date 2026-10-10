@@ -2,7 +2,7 @@
 
 Models for Tribal Trouble are made in Blender and exported with the add-on in [tools/blender/io_scene_tribaltrouble.py](../tools/blender/io_scene_tribaltrouble.py) to the geometry XML in `assets/geometry`, which the build converts to the binary sprites the game loads. The add-on also imports the original models, so an existing unit can be opened, studied, changed or used as the starting point of a new one. What else a new unit or building needs (icons, sounds, strings, AI, rules) is in [new-content-checklist.md](new-content-checklist.md).
 
-Proven in M4 on the Native warrior: imported and exported again, every file came back byte for byte; exported with every number computed by Blender, it matched the original within float precision and animated in game (idle, run, die).
+Proven in M4 on the Native warrior: imported and exported again, every file came back byte for byte; exported with every number computed by Blender, it matched the original within float precision and animated in game (idle, run, die). M5 made the placeholder Chicken Coops and Totems with it: each race's Quarters and Tower stages imported, scaled down (0.43 to 0.45 and 0.35 to 0.4), exported under new names and given tinted copies of their textures (at 1024², half the originals' size; the team-colour masks are reused, since the UVs did not change). Not every model round-trips byte for byte: the high-detail building meshes come back with normals off by up to 8.5e-3 (about half a degree), because Blender averages nearly identical custom normals at a vertex; low-detail meshes and the warrior come back identical.
 
 ## Set up
 

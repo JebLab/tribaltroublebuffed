@@ -38,5 +38,10 @@ public final class HeadlessMain {
         IO.println(
                 "result winner=" + result.winningTeam() + " tick=" + result.finalTick() + " checksum=" + Integer.toHexString(
                         result.finalChecksum()) + " survivors=" + result.survivors());
+        for (int i = 0; i < result.census().size(); i++) {
+            HeadlessMatchResult.Census census = result.census().get(i);
+            IO.println(
+                    "census player=" + i + " buildings=" + census.completedBuildings() + " coop_bred=" + census.chickenCoopBred());
+        }
     }
 }

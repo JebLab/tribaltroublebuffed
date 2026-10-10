@@ -9,7 +9,9 @@ when Josh allows it (docs/SESSION_RULES.md section 8). Standard library only; ru
   python tools/scripts/drive_game.py click <x> <y>       left click
   python tools/scripts/drive_game.py rclick <x> <y>      right click (orders selected units)
   python tools/scripts/drive_game.py move <x> <y>        move the cursor (e.g. off a button before a screenshot)
-  python tools/scripts/drive_game.py key <key>           tap a key: esc, enter, space, tab, f1..f12, a..z, 0..9
+  python tools/scripts/drive_game.py drag <x1> <y1> <x2> <y2>  drag with the left button (box-selects units)
+  python tools/scripts/drive_game.py key <key>           tap a key: esc, enter, space, tab, f1..f12, a..z, 0..9,
+                                                         add / subtract (numpad + and -: game speed)
   python tools/scripts/drive_game.py type <letters>      tap each of a..z, 0..9, / in turn (chat commands)
   python tools/scripts/drive_game.py wait <seconds>      sleep (between steps that load)
 
@@ -33,6 +35,8 @@ KEYS.update({f"f{n}": 0x6F + n for n in range(1, 13)})
 KEYS.update({chr(c): c - 32 for c in range(ord("a"), ord("z") + 1)})
 KEYS.update({str(d): 0x30 + d for d in range(10)})
 KEYS["/"] = 0xBF  # VK_OEM_2: the slash key on a US layout, for chat commands such as /iamacheater
+KEYS["add"] = 0x6B  # VK_ADD: numpad +, game speed up
+KEYS["subtract"] = 0x6D  # VK_SUBTRACT: numpad -, game speed down
 
 user32 = ctypes.WinDLL("user32", use_last_error=True)
 gdi32 = ctypes.WinDLL("gdi32", use_last_error=True)
@@ -118,6 +122,21 @@ def click(hwnd, x, y, right=False):
     return {"ok": True, "rclick" if right else "click": [x, y]}
 
 
+def drag(hwnd, x1, y1, x2, y2):
+    left, top, _, _ = client_box(hwnd)
+    focus(hwnd)
+    user32.SetCursorPos(left + x1, top + y1)
+    time.sleep(0.12)
+    user32.mouse_event(0x0002, 0, 0, 0, 0)  # left button down
+    for step in range(1, 11):
+        time.sleep(0.03)
+        user32.SetCursorPos(left + x1 + (x2 - x1) * step // 10, top + y1 + (y2 - y1) * step // 10)
+    time.sleep(0.1)
+    user32.mouse_event(0x0004, 0, 0, 0, 0)  # left button up
+    time.sleep(0.4)
+    return {"ok": True, "drag": [x1, y1, x2, y2]}
+
+
 def move(hwnd, x, y):
     left, top, _, _ = client_box(hwnd)
     user32.SetCursorPos(left + x, top + y)
@@ -148,6 +167,9 @@ def main(argv):
         if command in ("click", "rclick", "move"):
             steps.append((command, int(argv[i + 1]), int(argv[i + 2])))
             i += 3
+        elif command == "drag":
+            steps.append((command, *(int(v) for v in argv[i + 1:i + 5])))
+            i += 5
         elif command == "zoom":
             steps.append((command, argv[i + 1], tuple(int(v) for v in argv[i + 2:i + 6])))
             i += 6
@@ -162,6 +184,8 @@ def main(argv):
         elif step[0] == "type":
             results = [key(hwnd, letter) for letter in step[1]]
             result = {"ok": all(r["ok"] for r in results), "type": step[1]}
+        elif step[0] == "drag":
+            result = drag(hwnd, *step[1:])
         elif step[0] == "move":
             result = move(hwnd, step[1], step[2])
         elif step[0] == "key":

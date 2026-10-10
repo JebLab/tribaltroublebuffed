@@ -2,7 +2,10 @@ package com.oddlabs.tt.headless;
 
 import org.jspecify.annotations.NonNull;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * How a headless match ended.
@@ -12,9 +15,11 @@ import java.util.List;
  * @param finalChecksum {@link HeadlessMatchRunner#checksum} at that tick
  * @param survivors     indices of the players still alive at the end
  * @param trace         the checksum at every sampled tick, in order
+ * @param census        per player, what it had built at any sampled tick
  */
 public record HeadlessMatchResult(int winningTeam, int finalTick, int finalChecksum,
-                                  @NonNull List<@NonNull Integer> survivors, @NonNull List<@NonNull Sample> trace) {
+                                  @NonNull List<@NonNull Integer> survivors, @NonNull List<@NonNull Sample> trace,
+                                  @NonNull List<@NonNull Census> census) {
 
     /** The world checksum at one tick. */
     public record Sample(int tick, int checksum) {
@@ -24,9 +29,22 @@ public record HeadlessMatchResult(int winningTeam, int finalTick, int finalCheck
         }
     }
 
+    /**
+     * What one player had at the sampled ticks.
+     *
+     * @param completedBuildings template ids ({@code Race.BUILDING_*}) of the finished buildings it had
+     * @param chickenCoopBred    whether one of its Chicken Coops had let out a chicken
+     */
+    public record Census(@NonNull Set<@NonNull Integer> completedBuildings, boolean chickenCoopBred) {
+        public Census {
+            completedBuildings = Collections.unmodifiableSortedSet(new TreeSet<>(completedBuildings));
+        }
+    }
+
     public HeadlessMatchResult {
         survivors = List.copyOf(survivors);
         trace = List.copyOf(trace);
+        census = List.copyOf(census);
     }
 
     public boolean victory() {

@@ -8,6 +8,7 @@ import com.oddlabs.tt.landscape.World;
 import com.oddlabs.tt.model.behaviour.AttackController;
 import com.oddlabs.tt.model.behaviour.GatherController;
 import com.oddlabs.tt.model.behaviour.NullController;
+import com.oddlabs.tt.model.behaviour.RepairBehaviour;
 import com.oddlabs.tt.model.behaviour.StunController;
 import com.oddlabs.tt.model.behaviour.TransferUnitController;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
@@ -24,6 +25,7 @@ import com.oddlabs.tt.pathfinder.Occupant;
 import com.oddlabs.tt.pathfinder.UnitGrid;
 import com.oddlabs.tt.player.Player;
 import com.oddlabs.tt.render.SpriteKey;
+import com.oddlabs.tt.ruleset.RulesetStats.RaceStats;
 import com.oddlabs.tt.util.Target;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -65,6 +67,8 @@ public final class LandBuilding extends Building {
 
     private @Nullable ChieftainContainer chieftain_container = null;
     private @Nullable WeaponsProducer weapons_producer = null;
+    private @Nullable ChickenCoop chicken_coop = null;
+    private int rocks_delivered = 0;
     private float remove_delay = 0;
     private int hit_points = 1;
     private int build_points = 0;
@@ -151,6 +155,9 @@ public final class LandBuilding extends Building {
                 unit_container.animate(t);
             if (weapons_producer != null) {
                 weapons_producer.animate(t);
+            }
+            if (chicken_coop != null) {
+                chicken_coop.animate(t);
             }
 
             int num_deploying = 0;
@@ -469,8 +476,66 @@ public final class LandBuilding extends Building {
                 } else if (getAbilities().hasAbilities(Abilities.REPRODUCE)) {
                     chieftain_container = new ChieftainContainer(this);
                     deploy_containers.put(DeployType.PEON, new DeployContainer(this, .5f, DeployType.PEON, null));
+                } else if (getAbilities().hasAbilities(Abilities.BREED)) {
+                    chicken_coop = new ChickenCoop(this, getRaceStats().chicken_coop());
+                    supply_containers.put(RubberSupply.class, chicken_coop.getStock());
+                } else if (getAbilities().hasAbilities(Abilities.AURA)) {
+                    getOwner().getWorld().getTotems().add(this);
                 }
             }
+        }
+    }
+
+    private @NonNull RaceStats getRaceStats() {
+        return getOwner().getWorld().getRuleset().getStats().race(getTemplate().isVikings());
+    }
+
+    /** Rocks the Totem still needs: each one is the last 5 of its build points, after the wood. */
+    private int getRocksMissing() {
+        if (getTemplate().getTemplateID() != Race.BUILDING_TOTEM || isComplete())
+            return 0;
+        return getRaceStats().totem().rock() - rocks_delivered;
+    }
+
+    private boolean isWaitingForRock() {
+        int rocks_missing = getRocksMissing();
+        return rocks_missing > 0
+                && build_points >= getTemplate().getMaxHitPoints() - rocks_missing * RepairBehaviour.REPAIRS_PER_SUPPLY;
+    }
+
+    /** The finished Chicken Coop's breeding, or null for any other building or an unfinished coop. */
+    public @Nullable ChickenCoop getChickenCoop() {
+        return chicken_coop;
+    }
+
+    @Override
+    public @NonNull Class<? extends Supply> getWorkMaterial() {
+        if (isWaitingForRock())
+            return RockSupply.class;
+        if (!isDamaged() && chicken_coop != null && chicken_coop.needsStock())
+            return RubberSupply.class;
+        return TreeSupply.class;
+    }
+
+    @Override
+    public boolean needsMaterial(@NonNull Class<? extends Supply> material) {
+        if (material == TreeSupply.class)
+            return isDamaged() && !isWaitingForRock();
+        if (material == RockSupply.class)
+            return isWaitingForRock();
+        if (material == RubberSupply.class)
+            return chicken_coop != null && chicken_coop.needsStock();
+        return false;
+    }
+
+    @Override
+    public void deliverMaterial(@NonNull Class<? extends Supply> material) {
+        assert !isDead() && needsMaterial(material) && material != TreeSupply.class : material;
+        if (material == RockSupply.class) {
+            rocks_delivered++;
+            repair(RepairBehaviour.REPAIRS_PER_SUPPLY);
+        } else if (material == RubberSupply.class) {
+            chicken_coop.addStock();
         }
     }
 
@@ -609,6 +674,7 @@ public final class LandBuilding extends Building {
         }
         free();
         undoLandscape();
+        getOwner().getWorld().getTotems().remove(this);
         int result = getOwner().getBuildingCountContainer().increaseSupply(-1);
         assert result == -1;
         super.removeDying();

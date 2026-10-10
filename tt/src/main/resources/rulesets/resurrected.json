@@ -1,6 +1,6 @@
 {
-  "description": "Tribal Trouble: Resurrected's numbers at the time of the fork (October 2026). The complete base the other rulesets extend; campaign, tutorials and multiplayer play under it. Field reference: docs/rulesets.md.",
-  "features": { "ships": true, "enormous_islands": true, "archipelago": true, "max_players": 12, "adjustable_limits": true },
+  "description": "Tribal Trouble: Resurrected's numbers at the time of the fork (October 2026). The complete base the other rulesets extend; campaign, tutorials and multiplayer play under it. The chicken_coop and totem numbers belong to buildings Resurrected does not have: they are here because the base must be complete, and their features flags keep them out of the game. Field reference: docs/rulesets.md.",
+  "features": { "ships": true, "enormous_islands": true, "archipelago": true, "max_players": 12, "adjustable_limits": true, "chicken_coop": false, "totem": false },
   "natives": {
     "peon": { "hit_points": 1, "speed": 5.0, "defense_chance": 0.0, "hit_chance": 0.2 },
     "rock_warrior": { "hit_points": 1, "speed": 4.0, "defense_chance": 0.5, "hit_chance": 0.5 },
@@ -10,7 +10,9 @@
     "quarters": { "hit_points": 200 },
     "armory": { "hit_points": 200 },
     "tower": { "hit_points": 100 },
-    "ship": { "hit_points": 250 }
+    "ship": { "hit_points": 250 },
+    "chicken_coop": { "hit_points": 100, "stock": 2, "spawn_seconds": 90.0, "max_chickens": 6 },
+    "totem": { "hit_points": 30, "rock": 1, "hit_bonus": 0.05, "radius": 10.0, "max_stacking": 2 }
   },
   "vikings": {
     "peon": { "hit_points": 1, "speed": 5.0, "defense_chance": 0.0, "hit_chance": 0.2 },
@@ -21,7 +23,9 @@
     "quarters": { "hit_points": 200 },
     "armory": { "hit_points": 200 },
     "tower": { "hit_points": 100 },
-    "ship": { "hit_points": 250 }
+    "ship": { "hit_points": 250 },
+    "chicken_coop": { "hit_points": 100, "stock": 2, "spawn_seconds": 90.0, "max_chickens": 6 },
+    "totem": { "hit_points": 30, "rock": 1, "hit_bonus": 0.05, "radius": 10.0, "max_stacking": 2 }
   },
   "spells": {
     "stinking_stew": { "radius": 26.0, "hit_chance": 0.5, "interval": 2.0, "seconds": 20.0, "damage": 10 },

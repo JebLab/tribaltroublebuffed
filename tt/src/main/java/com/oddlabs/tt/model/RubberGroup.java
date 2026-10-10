@@ -10,6 +10,10 @@ import org.jspecify.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A flock of chickens. Wild flocks land in the trees and count towards the island's limit in
+ * {@link RubberSupplyManager}; a chicken coop's flock does not.
+ */
 public final class RubberGroup {
     private static final int MIN_CHICKENS_PER_GROUP = 3;
     private static final int MAX_CHICKENS_PER_GROUP = 7;
@@ -17,10 +21,13 @@ public final class RubberGroup {
     private static final float SPAWN_TIME = 2f;
 
     private final @NonNull World world;
+    private final boolean wild;
     private final List<Supply> supplies = new ArrayList<>();
 
+    /** A wild flock of three to seven chickens, landing at a random tree. */
     public RubberGroup(@NonNull World world) {
         this.world = world;
+        this.wild = true;
         int[] group_position = getGroupPosition();
         if (group_position != null) {
             int num_supplies = MIN_CHICKENS_PER_GROUP + world.getRandom().nextInt(
@@ -30,17 +37,38 @@ public final class RubberGroup {
             float spawn_x = UnitGrid.coordinateFromGrid(group_position[0]);
             float spawn_y = UnitGrid.coordinateFromGrid(group_position[1]);
             for (int i = 0; i < num_supplies; i++) {
-                int grid_x = supply_positions[i].getGridX();
-                int grid_y = supply_positions[i].getGridY();
-                float x = UnitGrid.coordinateFromGrid(grid_x);
-                float y = UnitGrid.coordinateFromGrid(grid_y);
-                RubberSupply supply = new RubberSupply(world, world.getLandscapeResources().getChicken(), 2f, grid_x,
-                        grid_y, x, y, 0f, this, spawn_x, spawn_y);
-                supplies.add(supply);
-                new SupplySpawnAnimation(supply, SPAWN_TIME);
+                spawn(supply_positions[i], spawn_x, spawn_y);
             }
             ((RubberSupplyManager) world.getSupplyManager(RubberSupply.class)).newGroup();
         }
+    }
+
+    private RubberGroup(@NonNull World world, boolean wild) {
+        this.world = world;
+        this.wild = wild;
+    }
+
+    /** An empty flock for a chicken coop, which adds its chickens one at a time with {@link #spawn}. */
+    public static @NonNull RubberGroup newCoopFlock(@NonNull World world) {
+        return new RubberGroup(world, false);
+    }
+
+    /** A new chicken that flies from {@code spawn_x, spawn_y} to {@code target}, then roams near it. */
+    public @NonNull RubberSupply spawn(@NonNull Target target, float spawn_x, float spawn_y) {
+        int grid_x = target.getGridX();
+        int grid_y = target.getGridY();
+        float x = UnitGrid.coordinateFromGrid(grid_x);
+        float y = UnitGrid.coordinateFromGrid(grid_y);
+        RubberSupply supply = new RubberSupply(world, world.getLandscapeResources().getChicken(), 2f, grid_x, grid_y, x,
+                y, 0f, this, spawn_x, spawn_y);
+        supplies.add(supply);
+        new SupplySpawnAnimation(supply, SPAWN_TIME);
+        return supply;
+    }
+
+    /** Chickens of this flock still alive. */
+    public int size() {
+        return supplies.size();
     }
 
     private int[] getGroupPosition() {
@@ -60,7 +88,7 @@ public final class RubberGroup {
     public void remove(RubberSupply supply) {
         boolean in_list = supplies.remove(supply);
         assert in_list;
-        if (supplies.isEmpty())
+        if (wild && supplies.isEmpty())
             ((RubberSupplyManager) world.getSupplyManager(RubberSupply.class)).emptyGroup();
     }
 }

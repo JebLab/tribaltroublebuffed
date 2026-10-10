@@ -620,7 +620,7 @@ public class Unit extends Selectable<UnitTemplate> implements Occupant, Movable 
                 (action_repair || !building.getAbilities().hasAbilities(Abilities.SUPPLY_CONTAINER)
                         || !building.isComplete()) &&
                 // getOwner() == building.getOwner() && building.isPlaced() && building.isDamaged();
-                !getOwner().isEnemy(building.getOwner()) && building.isPlaced() && building.isDamaged();
+                !getOwner().isEnemy(building.getOwner()) && building.isPlaced() && building.hasWork();
     }
 
     public boolean canEnter(@NonNull Target target) {

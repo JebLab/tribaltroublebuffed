@@ -115,7 +115,9 @@ public class GUIIcons {
                 magic1_desc,
                 Icons.getNamedIconQuads(n, head + "_magic2_icon", texture),
                 magic2_desc,
-                Icons.getNamedIconQuads(n, head + "_ship_icon", texture));
+                Icons.getNamedIconQuads(n, head + "_ship_icon", texture),
+                Icons.getNamedIconQuads(n, head + "_chicken_coop_icon", texture),
+                Icons.getNamedIconQuads(n, head + "_totem_icon", texture));
     }
 
     private static @NonNull IconQuad @NonNull [] generateWatchIcons() {

@@ -68,6 +68,29 @@ public abstract class Building extends Selectable<BuildingTemplate> implements O
 
     public abstract void repair(int amount);
 
+    /**
+     * What a peon sent to work on this building should fetch: wood, unless the building needs something else first
+     * (the Totem's finishing rock, the Chicken Coop's stock of chickens).
+     */
+    public @NonNull Class<? extends Supply> getWorkMaterial() {
+        return TreeSupply.class;
+    }
+
+    /** Whether one load of {@code material} would be used here now. Wood repairs (and builds) damaged buildings. */
+    public boolean needsMaterial(@NonNull Class<? extends Supply> material) {
+        return material == TreeSupply.class && isDamaged();
+    }
+
+    /** Whether peons have work here: for most buildings, whether it is damaged. */
+    public final boolean hasWork() {
+        return needsMaterial(getWorkMaterial());
+    }
+
+    /** Hands over one load of a material other than wood, which {@link #needsMaterial} asked for. */
+    public void deliverMaterial(@NonNull Class<? extends Supply> material) {
+        throw new IllegalStateException(this + " takes no " + material.getSimpleName());
+    }
+
     public abstract boolean isPlacingLegal();
 
     public abstract boolean isPlaced();

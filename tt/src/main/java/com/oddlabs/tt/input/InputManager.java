@@ -124,6 +124,8 @@ public final class InputManager {
         def(GameAction.UNIT_BUILD_ARMORY, Key.R);
         def(GameAction.UNIT_BUILD_TOWER, Key.T);
         def(GameAction.UNIT_BUILD_SHIP, Key.S);
+        def(GameAction.UNIT_BUILD_CHICKEN_COOP, Key.K);
+        def(GameAction.UNIT_BUILD_TOTEM, Key.Y);
         def(GameAction.UNIT_EXIT_TOWER, Key.X);
         def(GameAction.UNIT_BEACON, Key.B, Modifier.CONTROL);
         def(GameAction.UNIT_NEXT_IDLE, Key.N);

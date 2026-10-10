@@ -254,6 +254,66 @@
                 <texture name="viking_building_lookout" team="viking_building_lookout_team"/>
             </model>
         </sprite>
+        <sprite name="chicken_coop">
+            <model r="90" g="60" b="30">
+                vikings/chicken_coop/viking_henhouse_built_hi.xml
+                <texture name="viking_henhouse_hi" team="viking_buildings_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/chicken_coop/viking_henhouse_built_lo.xml
+                <texture name="viking_henhouse_lo" team="viking_buildings_lo_team"/>
+            </model>
+        </sprite>
+        <sprite name="chicken_coop_halfbuilt">
+            <model r="90" g="60" b="30">
+                vikings/chicken_coop/viking_henhouse_build_hi.xml
+                <texture name="viking_henhouse_hi" team="viking_buildings_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/chicken_coop/viking_henhouse_build_lo.xml
+                <texture name="viking_henhouse_lo2" team="viking_buildings_lo2_team"/>
+            </model>
+        </sprite>
+        <sprite name="chicken_coop_start">
+            <model r="90" g="60" b="30">
+                vikings/chicken_coop/viking_henhouse_start_hi.xml
+                <texture name="viking_henhouse_hi" team="viking_buildings_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/chicken_coop/viking_henhouse_start_lo.xml
+                <texture name="viking_henhouse_hi" team="viking_buildings_hi_team"/>
+            </model>
+        </sprite>
+        <sprite name="totem">
+            <model r="90" g="60" b="30">
+                vikings/totem/viking_runestone_built_hi.xml
+                <texture name="viking_runestone" team="viking_building_lookout_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/totem/viking_runestone_built_lo.xml
+                <texture name="viking_runestone" team="viking_building_lookout_team"/>
+            </model>
+        </sprite>
+        <sprite name="totem_halfbuilt">
+            <model r="90" g="60" b="30">
+                vikings/totem/viking_runestone_build_hi.xml
+                <texture name="viking_runestone" team="viking_building_lookout_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/totem/viking_runestone_build_lo.xml
+                <texture name="viking_runestone" team="viking_building_lookout_team"/>
+            </model>
+        </sprite>
+        <sprite name="totem_start">
+            <model r="90" g="60" b="30">
+                vikings/totem/viking_runestone_start_hi.xml
+                <texture name="viking_runestone" team="viking_building_lookout_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                vikings/totem/viking_runestone_start_lo.xml
+                <texture name="viking_runestone" team="viking_building_lookout_team"/>
+            </model>
+        </sprite>
         <sprite name="rally_point">
             <model r="90" g="60" b="30">
                 vikings/misc/vikings_rally_point.xml
@@ -511,6 +571,66 @@
             <model r="90" g="60" b="30">
                 natives/tower/native_tower_start_lo.xml
                 <texture name="native_tower" team="native_tower_team"/>
+            </model>
+        </sprite>
+        <sprite name="chicken_coop">
+            <model r="90" g="60" b="30">
+                natives/chicken_coop/native_coop_built_hi.xml
+                <texture name="native_coop_hi" team="native_building_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/chicken_coop/native_coop_built_lo.xml
+                <texture name="native_coop_lo" team="native_building_lo_team"/>
+            </model>
+        </sprite>
+        <sprite name="chicken_coop_halfbuilt">
+            <model r="90" g="60" b="30">
+                natives/chicken_coop/native_coop_build_hi.xml
+                <texture name="native_coop_hi" team="native_building_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/chicken_coop/native_coop_build_lo.xml
+                <texture name="native_coop_lo" team="native_building_lo_team"/>
+            </model>
+        </sprite>
+        <sprite name="chicken_coop_start">
+            <model r="90" g="60" b="30">
+                natives/chicken_coop/native_coop_start_hi.xml
+                <texture name="native_coop_hi" team="native_building_hi_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/chicken_coop/native_coop_start_lo.xml
+                <texture name="native_coop_hi" team="native_building_hi_team"/>
+            </model>
+        </sprite>
+        <sprite name="totem">
+            <model r="90" g="60" b="30">
+                natives/totem/native_totem_built_hi.xml
+                <texture name="native_totem" team="native_tower_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/totem/native_totem_built_lo.xml
+                <texture name="native_totem" team="native_tower_team"/>
+            </model>
+        </sprite>
+        <sprite name="totem_halfbuilt">
+            <model r="90" g="60" b="30">
+                natives/totem/native_totem_build_hi.xml
+                <texture name="native_totem" team="native_tower_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/totem/native_totem_build_lo.xml
+                <texture name="native_totem" team="native_tower_team"/>
+            </model>
+        </sprite>
+        <sprite name="totem_start">
+            <model r="90" g="60" b="30">
+                natives/totem/native_totem_start_hi.xml
+                <texture name="native_totem" team="native_tower_team"/>
+            </model>
+            <model r="90" g="60" b="30">
+                natives/totem/native_totem_start_lo.xml
+                <texture name="native_totem" team="native_tower_team"/>
             </model>
         </sprite>
         <sprite name="rally_point">

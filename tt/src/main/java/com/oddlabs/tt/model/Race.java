@@ -12,7 +12,10 @@ public final class Race {
     public static final int BUILDING_ARMORY = 1;
     public static final int BUILDING_TOWER = 2;
     public static final int BUILDING_SHIP = 3;
-    public static final int NUM_BUILDINGS = 4;
+    // Buffed only: the ruleset's features decide whether a player may build these (Player.canBuild).
+    public static final int BUILDING_CHICKEN_COOP = 4;
+    public static final int BUILDING_TOTEM = 5;
+    public static final int NUM_BUILDINGS = 6;
 
     public static final int UNIT_WARRIOR_ROCK = 0;
     public static final int UNIT_WARRIOR_IRON = 1;
@@ -35,6 +38,8 @@ public final class Race {
             @NonNull BuildingTemplate armory,
             @NonNull BuildingTemplate tower,
             @NonNull BuildingTemplate ship,
+            @NonNull BuildingTemplate chicken_coop,
+            @NonNull BuildingTemplate totem,
             @NonNull UnitTemplate warrior_rock,
             @NonNull UnitTemplate warrior_iron,
             @NonNull UnitTemplate warrior_rubber,
@@ -51,6 +56,8 @@ public final class Race {
         buildings[BUILDING_ARMORY] = armory;
         buildings[BUILDING_TOWER] = tower;
         buildings[BUILDING_SHIP] = ship;
+        buildings[BUILDING_CHICKEN_COOP] = chicken_coop;
+        buildings[BUILDING_TOTEM] = totem;
         for (int i = 0; i < buildings.length; i++) {
             assert buildings[i].getTemplateID() == i;
         }

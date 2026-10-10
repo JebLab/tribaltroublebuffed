@@ -18,6 +18,7 @@ import com.oddlabs.tt.model.Ship;
 import com.oddlabs.tt.model.DeployType;
 import com.oddlabs.tt.model.IronSupply;
 import com.oddlabs.tt.model.Race;
+import com.oddlabs.tt.model.RacesResources;
 import com.oddlabs.tt.model.RockSupply;
 import com.oddlabs.tt.model.RubberSupply;
 import com.oddlabs.tt.model.SupplyCounter;
@@ -28,6 +29,7 @@ import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
 import com.oddlabs.tt.player.Player;
 import com.oddlabs.tt.player.PlayerInterface;
 import com.oddlabs.tt.render.Renderer;
+import com.oddlabs.tt.ruleset.RulesetStats;
 import com.oddlabs.tt.util.Utils;
 import com.oddlabs.tt.viewer.Selection;
 import com.oddlabs.tt.viewer.WorldViewer;
@@ -71,6 +73,7 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
     private final Group army_group = new NonFocusGroup();
     private final Group ship_army_group = new NonFocusGroup();
     private final Group transport_group = new NonFocusGroup();
+    private final Group chicken_coop_status_group = new NonFocusGroup();
 
     private final @NonNull NonFocusIconButton tower_attack_button;
     private final @NonNull NonFocusIconButton tower_exit_button;
@@ -87,6 +90,12 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
     private final @NonNull NonFocusIconButton tower_button;
     //	private boolean tower_button_disabled;
     private final @NonNull NonFocusIconButton ship_button;
+    // Buffed's buildings: the buttons exist under every ruleset but are shown only where it offers them.
+    private final @NonNull NonFocusIconButton chicken_coop_button;
+    private final @NonNull NonFocusIconButton totem_button;
+    private final boolean chicken_coop_enabled;
+    private final boolean totem_enabled;
+    private final @NonNull StatusIcon chicken_coop_stock_status;
     private final @NonNull NonFocusIconButton harvest_button;
     private final @NonNull NonFocusIconButton build_button;
     private final @NonNull NonFocusIconButton army_button;
@@ -168,6 +177,7 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
     private boolean current_peon = false;
     private @Nullable Unit current_chieftain;
     private boolean current_tower = false;
+    private boolean current_chicken_coop = false;
 //	private boolean[] magic_disabled = new boolean[2];
 
     public ActionButtonPanel(@NonNull WorldViewer viewer, @NonNull GameCamera camera) {
@@ -243,12 +253,44 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
             ship_button.setIconDisabler(() -> !player.canBuild(Race.BUILDING_SHIP));
         }
 
+        RulesetStats stats = viewer.getWorld().getRuleset().getStats();
+        RulesetStats.RaceStats race_stats = stats.race(
+                player.getPlayerInfo().getRace() == RacesResources.RACE_VIKINGS);
+        chicken_coop_enabled = stats.features().chicken_coop();
+        totem_enabled = stats.features().totem();
+        String chicken_coop_name = player.getRace().getBuildingTemplate(Race.BUILDING_CHICKEN_COOP).getName();
+        chicken_coop_button = new NonFocusIconButton(race_icons.chickenCoopIcon(), GameAction.UNIT_BUILD_CHICKEN_COOP,
+                () -> i18n("chicken_coop_tip", chicken_coop_name, getBinding(GameAction.UNIT_BUILD_CHICKEN_COOP),
+                        race_stats.chicken_coop().stock()));
+        if (chicken_coop_enabled) {
+            peon_group.addChild(chicken_coop_button);
+            chicken_coop_button.addMouseClickListener((_, _, _, _) -> pushDelegate(new PlacingDelegate(viewer,
+                    camera.getState(), Race.BUILDING_CHICKEN_COOP)));
+            chicken_coop_button.setIconDisabler(() -> !player.canBuild(Race.BUILDING_CHICKEN_COOP));
+        }
+        String totem_name = player.getRace().getBuildingTemplate(Race.BUILDING_TOTEM).getName();
+        totem_button = new NonFocusIconButton(race_icons.totemIcon(), GameAction.UNIT_BUILD_TOTEM,
+                () -> i18n("totem_tip", totem_name, getBinding(GameAction.UNIT_BUILD_TOTEM)));
+        if (totem_enabled) {
+            peon_group.addChild(totem_button);
+            totem_button.addMouseClickListener((_, _, _, _) -> pushDelegate(new PlacingDelegate(viewer,
+                    camera.getState(), Race.BUILDING_TOTEM)));
+            totem_button.setIconDisabler(() -> !player.canBuild(Race.BUILDING_TOTEM));
+        }
+
         gather_repair_button.place();
         quarters_button.place(gather_repair_button, Placement.BOTTOM_MID);
         armory_button.place(quarters_button, Placement.BOTTOM_MID);
         tower_button.place(armory_button, Placement.BOTTOM_MID);
         if (viewer.getWorld().isShipsEnabled()) {
             ship_button.place(tower_button, Placement.BOTTOM_MID);
+        }
+        // A second column, so the peon buttons do not grow taller than the screen.
+        if (chicken_coop_enabled) {
+            chicken_coop_button.place(quarters_button, Placement.LEFT_MID);
+        }
+        if (totem_enabled) {
+            totem_button.place(armory_button, Placement.LEFT_MID);
         }
         peon_group.compileCanvas(GROUP_LEFT_OFFSET, GROUP_BOTTOM_OFFSET, GROUP_RIGHT_OFFSET, 0);
 
@@ -309,6 +351,12 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         iron_status.place(rock_status, Placement.BOTTOM_MID);
         rubber_status.place(iron_status, Placement.BOTTOM_MID);
         status_group.compileCanvas(5, 5, 5, 5);
+
+        chicken_coop_stock_status = new StatusIcon(label_width, icons.getRubberStatusIcon(), i18n("chicken_stock_tip",
+                race_stats.chicken_coop().stock()));
+        chicken_coop_status_group.addChild(chicken_coop_stock_status);
+        chicken_coop_stock_status.place();
+        chicken_coop_status_group.compileCanvas(5, 5, 5, 5);
 
         quarters_unit_status = new WatchStatusIcon(label_width, race_icons.unitStatusIcon(), i18n("units_tip"));
         quarters_status_group.addChild(quarters_unit_status);
@@ -593,14 +641,18 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         boolean new_unit = current_num_units > 0;
         boolean new_peon = current_num_peons > 0;
         boolean new_tower = current_building != null && current_building.getAbilities().hasAbilities(Abilities.ATTACK);
+        boolean new_chicken_coop = current_building != null
+                && current_building.getAbilities().hasAbilities(Abilities.BREED);
         update = update || different_building || different_chieftain || new_quarters != current_quarters
                 || new_armory != current_armory || new_ship != current_ship || new_unit != current_unit
-                || new_peon != current_peon || new_tower != current_tower;
+                || new_peon != current_peon || new_tower != current_tower
+                || new_chicken_coop != current_chicken_coop;
         if (update) {
             current_quarters = new_quarters;
             current_armory = new_armory;
             current_ship = new_ship;
             current_tower = new_tower;
+            current_chicken_coop = new_chicken_coop;
             current_unit = new_unit;
             current_peon = new_peon;
             update = false;
@@ -646,6 +698,10 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                 quarters_chieftain_button.setIconDisabler(() -> current_building != null
                         && !current_building.canBuildChieftain() && !current_building.canStopChieftain());
                 quarters_chieftain_button.setBuilding(current_building);
+            }
+            if (current_chicken_coop) {
+                addChild(chicken_coop_status_group);
+                chicken_coop_stock_status.setCounter(new SupplyCounter(current_building, RubberSupply.class));
             }
             if (current_armory) {
                 addChild(status_group);
@@ -739,12 +795,20 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                     transport_rock_button.doUpdate();
                     transport_iron_button.doUpdate();
                     transport_rubber_button.doUpdate();
+                } else if (current_chicken_coop) {
+                    chicken_coop_stock_status.doUpdate();
                 } else if (current_peon) {
                     quarters_button.doUpdate();
                     armory_button.doUpdate();
                     tower_button.doUpdate();
                     if (viewer.getWorld().isShipsEnabled()) {
                         ship_button.doUpdate();
+                    }
+                    if (chicken_coop_enabled) {
+                        chicken_coop_button.doUpdate();
+                    }
+                    if (totem_enabled) {
+                        totem_button.doUpdate();
                     }
                 }
         if (current_unit) {
@@ -773,6 +837,7 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         army_group.remove();
         ship_army_group.remove();
         transport_group.remove();
+        chicken_coop_status_group.remove();
         current_submenu = null;
     }
 
@@ -873,6 +938,8 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
         ship_army_group.setPos(width - ship_army_group.getWidth(),
                 status_group.getY() - ship_army_group.getHeight());
         transport_group.setPos(width - transport_group.getWidth(), status_group.getY() - transport_group.getHeight());
+        chicken_coop_status_group.setPos(width - chicken_coop_status_group.getWidth(),
+                height - chicken_coop_status_group.getHeight());
     }
 
     @Override
@@ -924,73 +991,98 @@ public final class ActionButtonPanel extends GUIObject implements Animated {
                     if (viewer.getWorld().isShipsEnabled()) {
                         activate(event, ship_button);
                     }
-                } else if ((current_unit || current_tower) && event.consumeAction(GameAction.UNIT_ATTACK)) {
-                    if (current_unit) {
-                        activate(event, attack_button);
-                    } else if (current_tower) {
-                        activate(event, tower_attack_button);
-                    }
-                } else if ((current_unit || current_armory || current_ship) && (event.consumeAction(
-                        GameAction.UNIT_GATHER)
-                        || event.consumeAction(GameAction.PROD_HARVEST))) {
-                            // G - Gather or Harvest
-                            if (current_unit) {
-                                activate(event, gather_repair_button);
-                            } else if (current_armory && current_submenu == null) {
-                                // Legacy gather alias only works from the top level; direct submenu
-                                // switching is reserved for the PROD_HARVEST binding handled above.
-                                activate(event, harvest_button);
-                            } else if (current_ship && current_submenu == null) {
-                                activate(event, ship_harvest_button);
+                } else if (current_unit && current_peon && event.consumeAction(
+                        GameAction.UNIT_BUILD_CHICKEN_COOP)) {
+                            if (chicken_coop_enabled) {
+                                activate(event, chicken_coop_button);
                             }
-                        } else if ((current_peon || current_armory || current_ship) && event.consumeAction(
-                                GameAction.UNIT_BUILD_TOWER)) {
-                                    if (current_peon) {
-                                        activate(event, tower_button);
+                        } else if (current_unit && current_peon && event.consumeAction(GameAction.UNIT_BUILD_TOTEM)) {
+                            if (totem_enabled) {
+                                activate(event, totem_button);
+                            }
+                        } else if ((current_unit || current_tower) && event.consumeAction(GameAction.UNIT_ATTACK)) {
+                            if (current_unit) {
+                                activate(event, attack_button);
+                            } else if (current_tower) {
+                                activate(event, tower_attack_button);
+                            }
+                        } else if ((current_unit || current_armory || current_ship) && (event.consumeAction(
+                                GameAction.UNIT_GATHER)
+                                || event.consumeAction(GameAction.PROD_HARVEST))) {
+                                    // G - Gather or Harvest
+                                    if (current_unit) {
+                                        activate(event, gather_repair_button);
+                                    } else if (current_armory && current_submenu == null) {
+                                        // Legacy gather alias only works from the top level; direct submenu
+                                        // switching is reserved for the PROD_HARVEST binding handled above.
+                                        activate(event, harvest_button);
+                                    } else if (current_ship && current_submenu == null) {
+                                        activate(event, ship_harvest_button);
                                     }
-                                } else if (current_quarters && event.consumeAction(GameAction.TRAIN_CHIEFTAIN)) {
-                                    activate(event, quarters_chieftain_button);
-                                } else if (current_ship && current_submenu == ship_army_group
-                                        && event.consumeAction(GameAction.DEPLOY_CHIEFTAIN)) {
-                                            activate(event, ship_army_chieftain_button);
-                                        } else if (current_chieftain != null && event.consumeAction(
-                                                GameAction.MAGIC_2)) {
-                                                    if (player.canDoMagic(1)) {
-                                                        activate(event, magic2_button);
-                                                    }
-                                                } else if ((current_armory || current_ship) && current_submenu != null
-                                                        && event.consumeAction(GameAction.GAMEPLAY_BACK)) {
-                                                            if (current_submenu == harvest_group)
-                                                                activate(event, harvest_back_button);
-                                                            else if (current_submenu == build_group)
-                                                                activate(event, build_back_button);
-                                                            else if (current_submenu == army_group)
-                                                                activate(event, army_back_button);
-                                                            else if (current_submenu == ship_army_group)
-                                                                activate(event, ship_army_back_button);
-                                                            else if (current_submenu == transport_group)
-                                                                activate(event, transport_back_button);
-                                                        } else if (current_building == null && current_peon
-                                                                && event.consumeAction(
-                                                                        GameAction.UNIT_BUILD_ARMORY)) {
-                                                                            activate(event, armory_button);
-                                                                        } else if (current_building != null
-                                                                                && event.consumeAction(
-                                                                                        GameAction.UNIT_SET_RALLY)) {
-                                                                                            if (current_armory
-                                                                                                    && current_submenu == null) {
-                                                                                                activate(event,
-                                                                                                        rally_point_button);
-                                                                                            } else if (current_ship
-                                                                                                    && current_submenu == null) {
-                                                                                                        activate(event,
-                                                                                                                ship_rally_point_button);
-                                                                                                    } else
-                                                                                                if (current_quarters) {
+                                } else if ((current_peon || current_armory || current_ship) && event.consumeAction(
+                                        GameAction.UNIT_BUILD_TOWER)) {
+                                            if (current_peon) {
+                                                activate(event, tower_button);
+                                            }
+                                        } else if (current_quarters && event.consumeAction(
+                                                GameAction.TRAIN_CHIEFTAIN)) {
+                                                    activate(event, quarters_chieftain_button);
+                                                } else if (current_ship && current_submenu == ship_army_group
+                                                        && event.consumeAction(GameAction.DEPLOY_CHIEFTAIN)) {
+                                                            activate(event, ship_army_chieftain_button);
+                                                        } else if (current_chieftain != null && event.consumeAction(
+                                                                GameAction.MAGIC_2)) {
+                                                                    if (player.canDoMagic(1)) {
+                                                                        activate(event, magic2_button);
+                                                                    }
+                                                                } else if ((current_armory || current_ship)
+                                                                        && current_submenu != null
+                                                                        && event.consumeAction(
+                                                                                GameAction.GAMEPLAY_BACK)) {
+                                                                                    if (current_submenu == harvest_group)
+                                                                                        activate(event,
+                                                                                                harvest_back_button);
+                                                                                    else if (current_submenu == build_group)
+                                                                                        activate(event,
+                                                                                                build_back_button);
+                                                                                    else if (current_submenu == army_group)
+                                                                                        activate(event,
+                                                                                                army_back_button);
+                                                                                    else if (current_submenu == ship_army_group)
+                                                                                        activate(event,
+                                                                                                ship_army_back_button);
+                                                                                    else if (current_submenu == transport_group)
+                                                                                        activate(event,
+                                                                                                transport_back_button);
+                                                                                } else if (current_building == null
+                                                                                        && current_peon
+                                                                                        && event.consumeAction(
+                                                                                                GameAction.UNIT_BUILD_ARMORY)) {
                                                                                                     activate(event,
-                                                                                                            quarters_rally_point_button);
-                                                                                                }
-                                                                                        } else if (current_tower
+                                                                                                            armory_button);
+                                                                                                } else
+                                                                                    if (current_building != null
+                                                                                            && event.consumeAction(
+                                                                                                    GameAction.UNIT_SET_RALLY)) {
+                                                                                                        if (current_armory
+                                                                                                                && current_submenu == null) {
+                                                                                                            activate(
+                                                                                                                    event,
+                                                                                                                    rally_point_button);
+                                                                                                        } else
+                                                                                                            if (current_ship
+                                                                                                                    && current_submenu == null) {
+                                                                                                                        activate(
+                                                                                                                                event,
+                                                                                                                                ship_rally_point_button);
+                                                                                                                    } else
+                                                                                                                if (current_quarters) {
+                                                                                                                    activate(
+                                                                                                                            event,
+                                                                                                                            quarters_rally_point_button);
+                                                                                                                }
+                                                                                                    } else
+                                                                                        if (current_tower
                                                                                                 && event.consumeAction(
                                                                                                         GameAction.UNIT_EXIT_TOWER)) {
                                                                                                             activate(

@@ -24,15 +24,22 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
      * @param max_players       player slots, 6 to 12
      * @param adjustable_limits the starting units, unit and building limits under Advanced...; when false the game
      *                          uses the 2004 values (20, 250, 20)
+     * @param chicken_coop      peons can build the Chicken Coop / Henhouse
+     * @param totem             peons can build the Totem / Runestone
      */
     public record Features(boolean ships, boolean enormous_islands, boolean archipelago, int max_players,
-                           boolean adjustable_limits) {
+                           boolean adjustable_limits, boolean chicken_coop, boolean totem) {
     }
 
+    /**
+     * One race's numbers. A building that a ruleset does not offer still has its numbers here (the base file must be
+     * complete); its {@link Features} flag keeps it out of the game.
+     */
     public record RaceStats(@NonNull UnitStats peon, @NonNull UnitStats rock_warrior, @NonNull UnitStats iron_warrior,
                             @NonNull UnitStats chicken_warrior, @NonNull UnitStats chieftain,
                             @NonNull BuildingStats quarters, @NonNull BuildingStats armory,
-                            @NonNull BuildingStats tower, @NonNull BuildingStats ship) {
+                            @NonNull BuildingStats tower, @NonNull BuildingStats ship,
+                            @NonNull ChickenCoopStats chicken_coop, @NonNull TotemStats totem) {
     }
 
     /**
@@ -45,6 +52,29 @@ public record RulesetStats(@NonNull Features features, @NonNull RaceStats native
     }
 
     public record BuildingStats(int hit_points) {
+    }
+
+    /**
+     * Breeds catchable chickens once peons have brought it its first chickens. Built from wood like every building
+     * (5 hit points per log).
+     *
+     * @param stock         chickens peons must bring to the finished coop before it breeds
+     * @param spawn_seconds seconds between two new chickens, counted while fewer than {@code max_chickens} roam
+     * @param max_chickens  chickens of one coop alive at a time; they roam near it and anyone may catch them
+     */
+    public record ChickenCoopStats(int hit_points, int stock, float spawn_seconds, int max_chickens) {
+    }
+
+    /**
+     * Raises the hit chance of its owner's and allies' units nearby. Built from wood, then finished with rock: each
+     * rock is the last 5 of its hit points.
+     *
+     * @param rock         rocks that finish it, after the wood
+     * @param hit_bonus    added to the hit chance of a friendly unit within {@code radius}, per totem
+     * @param radius       meters
+     * @param max_stacking at most this many totems add up
+     */
+    public record TotemStats(int hit_points, int rock, float hit_bonus, float radius, int max_stacking) {
     }
 
     /** The chieftains' spells, by their in-game names. */

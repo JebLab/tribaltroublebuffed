@@ -2,6 +2,7 @@ package com.oddlabs.tt.model.weapon;
 
 import com.oddlabs.tt.landscape.HeightMap;
 import com.oddlabs.tt.model.Selectable;
+import com.oddlabs.tt.model.TotemAura;
 import com.oddlabs.tt.model.Unit;
 import com.oddlabs.tt.util.Target;
 import org.jspecify.annotations.NonNull;
@@ -41,7 +42,12 @@ public abstract class WeaponFactory {
         /* GAMEPLAY: Terrain bonus, according to who is positioned highest */
         float terrain_bonus = computeTerrainBonus(src.getOwner().getWorld().getHeightMap(), src, target);
         float difficulty_bonus = src.getOwner().getHitBonus();
-        boolean hit = target.getOwner().getWorld().getRandom().nextFloat() < factor * (difficulty_bonus + terrain_bonus + hit_chance) * (1 - target.getDefenseChance());
+        float chance = difficulty_bonus + terrain_bonus + hit_chance;
+        /* GAMEPLAY: Totems nearby (Buffed); without one the roll is the original, bit for bit */
+        float totem_bonus = TotemAura.getHitBonus(src);
+        if (totem_bonus != 0f)
+            chance += totem_bonus;
+        boolean hit = target.getOwner().getWorld().getRandom().nextFloat() < factor * chance * (1 - target.getDefenseChance());
         doAttack(hit, src, target);
     }
 

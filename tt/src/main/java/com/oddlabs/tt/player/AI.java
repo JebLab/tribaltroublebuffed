@@ -45,6 +45,8 @@ public abstract class AI implements Animated {
     private int INDEX_QUARTERS;
     private int INDEX_TOWERS;
     private int INDEX_SHIPS;
+    private int INDEX_CHICKEN_COOPS;
+    private int INDEX_TOTEMS;
     private int INDEX_CONSTRUCTION_SITES;
     private int INDEX_PLACE_BUILDING_PEONS;
     private int INDEX_DEFENDING_UNITS;
@@ -54,6 +56,8 @@ public abstract class AI implements Animated {
     private boolean quarters_under_construction = false;
     private boolean tower_under_construction = false;
     private boolean ship_under_construction = false;
+    private boolean chicken_coop_under_construction = false;
+    private boolean totem_under_construction = false;
     private boolean found_island = false;
     private float sleep_time;
 
@@ -212,6 +216,16 @@ public abstract class AI implements Animated {
         return INDEX_SHIPS == -1 ? null : lists[INDEX_SHIPS];
     }
 
+    /** Finished Chicken Coops (Buffed). */
+    protected final @NonNull Selectable<?> @Nullable [] getChickenCoops() {
+        return INDEX_CHICKEN_COOPS == -1 ? null : lists[INDEX_CHICKEN_COOPS];
+    }
+
+    /** Finished Totems (Buffed). */
+    protected final @NonNull Selectable<?> @Nullable [] getTotems() {
+        return INDEX_TOTEMS == -1 ? null : lists[INDEX_TOTEMS];
+    }
+
     protected final @NonNull Selectable<?> @Nullable [] getConstructionSites() {
         return INDEX_CONSTRUCTION_SITES == -1 ? null : lists[INDEX_CONSTRUCTION_SITES];
     }
@@ -236,6 +250,8 @@ public abstract class AI implements Animated {
         INDEX_QUARTERS = -1;
         INDEX_TOWERS = -1;
         INDEX_SHIPS = -1;
+        INDEX_CHICKEN_COOPS = -1;
+        INDEX_TOTEMS = -1;
         INDEX_CONSTRUCTION_SITES = -1;
         INDEX_PLACE_BUILDING_PEONS = -1;
         INDEX_DEFENDING_UNITS = -1;
@@ -276,6 +292,11 @@ public abstract class AI implements Animated {
                 } else if (s.getAbilities().hasAbilities(Abilities.SAIL)) {
                     INDEX_SHIPS = i;
                     ship_under_construction = false;
+                } else if (s.getAbilities().hasAbilities(Abilities.BREED)) {
+                    INDEX_CHICKEN_COOPS = i;
+                    chicken_coop_under_construction = false;
+                } else if (s.getAbilities().hasAbilities(Abilities.AURA)) {
+                    INDEX_TOTEMS = i;
                 } else {
                     INDEX_CONSTRUCTION_SITES = i;
                 }
@@ -290,6 +311,8 @@ public abstract class AI implements Animated {
             quarters_under_construction = false;
             tower_under_construction = false;
             ship_under_construction = false;
+            chicken_coop_under_construction = false;
+            totem_under_construction = false;
         }
     }
 
@@ -323,6 +346,22 @@ public abstract class AI implements Animated {
 
     protected final void setShipUnderConstruction(boolean ship_under_construction) {
         this.ship_under_construction = ship_under_construction;
+    }
+
+    protected final boolean chickenCoopUnderConstruction() {
+        return chicken_coop_under_construction;
+    }
+
+    protected final void setChickenCoopUnderConstruction(boolean chicken_coop_under_construction) {
+        this.chicken_coop_under_construction = chicken_coop_under_construction;
+    }
+
+    protected final boolean totemUnderConstruction() {
+        return totem_under_construction;
+    }
+
+    protected final void setTotemUnderConstruction(boolean totem_under_construction) {
+        this.totem_under_construction = totem_under_construction;
     }
 
     private void reset() {

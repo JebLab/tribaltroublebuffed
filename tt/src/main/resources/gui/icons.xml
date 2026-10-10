@@ -37,6 +37,8 @@
                 vikings_magic1_icon,
                 vikings_magic2_icon,
                 vikings_ship_icon,
+                vikings_chicken_coop_icon,
+                vikings_totem_icon,
                 natives_unit_status_icon,
                 natives_weapon_rock_status_icon,
                 natives_weapon_iron_status_icon,
@@ -63,6 +65,8 @@
                 natives_magic1_icon,
                 natives_magic2_icon,
                 natives_ship_icon,
+                natives_chicken_coop_icon,
+                natives_totem_icon,
                 watch,
                 infinite,
                 notify_arrow
@@ -114,6 +118,8 @@
         <!ELEMENT vikings_magic1_icon                (normal, active, disabled)>
         <!ELEMENT vikings_magic2_icon                (normal, active, disabled)>
         <!ELEMENT vikings_ship_icon                  (normal, active, disabled)>
+        <!ELEMENT vikings_chicken_coop_icon          (normal, active, disabled)>
+        <!ELEMENT vikings_totem_icon                 (normal, active, disabled)>
 
         <!ELEMENT natives_unit_status_icon            (quad)>
         <!ELEMENT natives_weapon_rock_status_icon    (quad)>
@@ -141,6 +147,8 @@
         <!ELEMENT natives_magic1_icon                (normal, active, disabled)>
         <!ELEMENT natives_magic2_icon                (normal, active, disabled)>
         <!ELEMENT natives_ship_icon                  (normal, active, disabled)>
+        <!ELEMENT natives_chicken_coop_icon          (normal, active, disabled)>
+        <!ELEMENT natives_totem_icon                 (normal, active, disabled)>
 
         <!ELEMENT watch                                (quad+)>
 
@@ -480,6 +488,28 @@
             <quad left="704" top="640" right="768" bottom="704"/>
         </disabled>
     </vikings_ship_icon>
+    <vikings_chicken_coop_icon>
+        <normal>
+            <quad left="896" top="512" right="960" bottom="576"/>
+        </normal>
+        <active>
+            <quad left="896" top="576" right="960" bottom="640"/>
+        </active>
+        <disabled>
+            <quad left="896" top="640" right="960" bottom="704"/>
+        </disabled>
+    </vikings_chicken_coop_icon>
+    <vikings_totem_icon>
+        <normal>
+            <quad left="960" top="512" right="1024" bottom="576"/>
+        </normal>
+        <active>
+            <quad left="960" top="576" right="1024" bottom="640"/>
+        </active>
+        <disabled>
+            <quad left="960" top="640" right="1024" bottom="704"/>
+        </disabled>
+    </vikings_totem_icon>
 
     <!-- NATIVES -->
     <natives_unit_status_icon>
@@ -736,6 +766,28 @@
             <quad left="640" top="640" right="704" bottom="704"/>
         </disabled>
     </natives_ship_icon>
+    <natives_chicken_coop_icon>
+        <normal>
+            <quad left="768" top="512" right="832" bottom="576"/>
+        </normal>
+        <active>
+            <quad left="768" top="576" right="832" bottom="640"/>
+        </active>
+        <disabled>
+            <quad left="768" top="640" right="832" bottom="704"/>
+        </disabled>
+    </natives_chicken_coop_icon>
+    <natives_totem_icon>
+        <normal>
+            <quad left="832" top="512" right="896" bottom="576"/>
+        </normal>
+        <active>
+            <quad left="832" top="576" right="896" bottom="640"/>
+        </active>
+        <disabled>
+            <quad left="832" top="640" right="896" bottom="704"/>
+        </disabled>
+    </natives_totem_icon>
 
     <!-- Watch icons -->
     <watch>

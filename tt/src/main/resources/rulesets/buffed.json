@@ -1,4 +1,13 @@
 {
-  "description": "Tribal Trouble Buffed: this fork's new content, layered on Resurrected. Identical to Resurrected until the first new buildings land (milestone M5). Field reference: docs/rulesets.md.",
-  "extends": "resurrected"
+  "description": "Tribal Trouble Buffed: this fork's new content, layered on Resurrected, whose numbers it keeps. New buildings: the Chicken Coop / Henhouse and the Totem / Runestone (milestone M5, PLAN.md section 4.5). Their numbers are repeated here so Buffed's balance reads in one file. Field reference: docs/rulesets.md.",
+  "extends": "resurrected",
+  "features": { "chicken_coop": true, "totem": true },
+  "natives": {
+    "chicken_coop": { "hit_points": 100, "stock": 2, "spawn_seconds": 90.0, "max_chickens": 6 },
+    "totem": { "hit_points": 30, "rock": 1, "hit_bonus": 0.05, "radius": 10.0, "max_stacking": 2 }
+  },
+  "vikings": {
+    "chicken_coop": { "hit_points": 100, "stock": 2, "spawn_seconds": 90.0, "max_chickens": 6 },
+    "totem": { "hit_points": 30, "rock": 1, "hit_bonus": 0.05, "radius": 10.0, "max_stacking": 2 }
+  }
 }

@@ -28,6 +28,10 @@ public final class Abilities {
     public static final int MAGIC = 512;
     // Can sail
     public static final int SAIL = 1024;
+    // Breeds chickens (the Chicken Coop)
+    public static final int BREED = 2048;
+    // Raises friendly hit chance nearby (the Totem)
+    public static final int AURA = 4096;
 
     private int abilities;
 

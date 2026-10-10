@@ -25,6 +25,7 @@ import com.oddlabs.tt.model.behaviour.NullController;
 import com.oddlabs.tt.model.weapon.IronAxeWeapon;
 import com.oddlabs.tt.model.weapon.RockAxeWeapon;
 import com.oddlabs.tt.model.weapon.RubberAxeWeapon;
+import com.oddlabs.tt.ruleset.RulesetStats;
 import com.oddlabs.tt.util.Target;
 import org.joml.Vector4fc;
 import org.jspecify.annotations.NonNull;
@@ -97,6 +98,10 @@ public final class Player implements PlayerInterface {
         this.color = color;
         Arrays.fill(can_do_magic, true);
         Arrays.fill(can_build, true);
+        // Buffed's buildings exist in every game's Race, but only a ruleset that offers them lets anyone build them.
+        RulesetStats.Features features = world.getRuleset().getStats().features();
+        can_build[Race.BUILDING_CHICKEN_COOP] = features.chicken_coop();
+        can_build[Race.BUILDING_TOTEM] = features.totem();
         this.player_info = player_info;
         this.unit_count = new SupplyContainer(world.getMaxUnitCount());
         this.building_count = new SupplyContainer(world.getMaxBuildingCount());

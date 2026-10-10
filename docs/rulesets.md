@@ -6,7 +6,7 @@ A *ruleset* is the set of gameplay numbers a game is played with. Three ship wit
 |---|---|---|
 | **Classic (2004)** | [`classic.json`](../tt/src/main/resources/rulesets/classic.json) | The numbers of the 2004 Oddlabs release. |
 | **Resurrected** | [`resurrected.json`](../tt/src/main/resources/rulesets/resurrected.json) | Tribal Trouble: Resurrected's numbers when this fork was made (October 2026). The complete base file. |
-| **Buffed** | [`buffed.json`](../tt/src/main/resources/rulesets/buffed.json) | This fork's new content. Identical to Resurrected until the first new buildings land (M5). |
+| **Buffed** | [`buffed.json`](../tt/src/main/resources/rulesets/buffed.json) | This fork's new content on top of Resurrected's numbers, which it keeps: so far the Chicken Coop / Henhouse and the Totem / Runestone (M5). |
 
 The skirmish menu preselects Buffed. Everything else plays under **Resurrected**: the campaign and tutorials (their islands were tuned for those numbers) and multiplayer (every client and the inherited servers expect them, so the pulldown is hidden there). Presets saved before rulesets existed load as Resurrected.
 
@@ -41,7 +41,7 @@ Reverting any of these behind Classic is possible later, per item, if it turns o
 
 ## Fields
 
-**Features** (`features`): `ships`, `enormous_islands`, `archipelago` (true/false), `max_players` (6–12), `adjustable_limits` (false = the 2004 limits). `TerrainMenu.enforceRulesetFeatures()` applies them.
+**Features** (`features`): `ships`, `enormous_islands`, `archipelago` (true/false), `max_players` (6–12), `adjustable_limits` (false = the 2004 limits). `TerrainMenu.enforceRulesetFeatures()` applies them. `chicken_coop` and `totem` say whether peons may build Buffed's buildings: `Player` sets its build permissions from them, and the peon panel shows their buttons only when they are on.
 
 Every number is per race (`natives`, `vikings`) except the spells, which belong to one race each.
 
@@ -52,9 +52,23 @@ Every number is per race (`natives`, `vikings`) except the spells, which belong 
 | `hit_points` | 1 for everything but the chieftain: any hit kills. |
 | `speed` | meters per second. |
 | `defense_chance` | chance that a hit aimed at the unit misses (the dodge in the plan). Ignored while stunned. |
-| `hit_chance` | base chance the unit's own attack hits. The roll is `(hit_chance + terrain bonus + campaign difficulty bonus) × (1 − target's defense_chance)`, tripled for a unit in a tower or on a ship. |
+| `hit_chance` | base chance the unit's own attack hits. The roll is `(hit_chance + terrain bonus + campaign difficulty bonus + totem bonus) × (1 − target's defense_chance)`, tripled for a unit in a tower or on a ship. The totem bonus is Buffed's and 0 elsewhere. |
 
-**Buildings** (`quarters`, `armory`, `tower`, `ship`): `hit_points`.
+**Buildings** (`quarters`, `armory`, `tower`, `ship`): `hit_points`. Peons build every building with wood, 5 hit points per log, so its wood cost is its hit points over 5.
+
+**Buffed's buildings.** A building that Classic and Resurrected do not have still has its numbers in `resurrected.json`, because the base must be complete, and its `features` flag is false there; `buffed.json` turns the flag on and repeats the numbers, so Buffed's balance reads in one file.
+
+| Building | Key | Meaning |
+|---|---|---|
+| Chicken Coop / Henhouse (`chicken_coop`) | `hit_points` | 100: 20 logs. |
+| | `stock` | chickens peons must bring to the finished coop before it breeds (2). Peons sent to it catch them themselves. |
+| | `spawn_seconds` | a new chicken every so many seconds (90), counted while fewer than `max_chickens` of its own roam. |
+| | `max_chickens` | its chickens alive at a time (6). They roam near it, anyone may catch them, and they do not count towards the island's three wild flocks. |
+| Totem / Runestone (`totem`) | `hit_points` | 30. |
+| | `rock` | rocks that finish it (1). Each rock is the last 5 hit points, so the recipe is 5 logs and then a rock, which peons fetch themselves. |
+| | `hit_bonus` | added to the hit chance of a unit within `radius` of a finished totem of its own team (0.05), inside the hit chance, so a tower triples it too. It counts for thrown weapons and blows, not for spells. |
+| | `radius` | meters (10). |
+| | `max_stacking` | at most this many totems add up (2). |
 
 **Spells** (by their in-game names):
 

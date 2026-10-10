@@ -3,9 +3,12 @@ package com.oddlabs.tt.ruleset;
 import com.oddlabs.matchmaking.Preset;
 import com.oddlabs.matchmaking.WorldConfig;
 import com.oddlabs.tt.gamemode.PresetLibrary;
+import com.oddlabs.tt.model.behaviour.RepairBehaviour;
 import com.oddlabs.tt.ruleset.RulesetStats.BuildingStats;
+import com.oddlabs.tt.ruleset.RulesetStats.ChickenCoopStats;
 import com.oddlabs.tt.ruleset.RulesetStats.RaceStats;
 import com.oddlabs.tt.ruleset.RulesetStats.SpellStats;
+import com.oddlabs.tt.ruleset.RulesetStats.TotemStats;
 import com.oddlabs.tt.ruleset.RulesetStats.UnitStats;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -74,12 +77,44 @@ final class RulesetTest {
         assertEquals(new RulesetStats.RavagingRoarStats(36f, 17f, 2f, 150, 30, .8f), spells.ravaging_roar());
     }
 
-    /** 2004 had no boats, Small/Medium/Large islands only, six players (MAX_PLAYERS = 6) and fixed limits. */
+    /**
+     * 2004 had no boats, Small/Medium/Large islands only, six players (MAX_PLAYERS = 6) and fixed limits. Neither
+     * 2004 nor Resurrected has the Chicken Coop or the Totem.
+     */
     @Test
     void classicOffersOnly2004WorldOptions() {
-        assertEquals(new RulesetStats.Features(false, false, false, 6, false), Ruleset.CLASSIC.getStats().features());
-        assertEquals(new RulesetStats.Features(true, true, true, 12, true),
+        assertEquals(new RulesetStats.Features(false, false, false, 6, false, false, false),
+                Ruleset.CLASSIC.getStats().features());
+        assertEquals(new RulesetStats.Features(true, true, true, 12, true, false, false),
                 Ruleset.RESURRECTED.getStats().features());
+    }
+
+    /** Buffed offers Resurrected's world options plus its own buildings. */
+    @Test
+    void buffedOffersItsBuildings() {
+        assertEquals(new RulesetStats.Features(true, true, true, 12, true, true, true),
+                Ruleset.BUFFED.getStats().features());
+    }
+
+    /** PLAN.md section 4.5: the Chicken Coop / Henhouse and the Totem / Runestone, the same for both races. */
+    @Test
+    void buffedBuildingsMatchThePlan() {
+        for (boolean vikings : new boolean[]{false, true}) {
+            RaceStats race = Ruleset.BUFFED.getStats().race(vikings);
+            assertAll(
+                    () -> assertEquals(new ChickenCoopStats(100, 2, 90f, 6), race.chicken_coop(), "chicken_coop"),
+                    () -> assertEquals(new TotemStats(30, 1, .05f, 10f, 2), race.totem(), "totem"));
+        }
+    }
+
+    /** A building's hit points are built 5 per log, so the plan's wood cost is its hit points over 5. */
+    @Test
+    void buffedBuildingsCostWhatThePlanSays() {
+        RaceStats race = Ruleset.BUFFED.getStats().natives();
+        assertEquals(20, race.chicken_coop().hit_points() / RepairBehaviour.REPAIRS_PER_SUPPLY, "coop wood");
+        assertEquals(5,
+                (race.totem().hit_points() - race.totem().rock() * RepairBehaviour.REPAIRS_PER_SUPPLY) / RepairBehaviour.REPAIRS_PER_SUPPLY,
+                "totem wood");
     }
 
     /** 2004's Player hard-coded 20 starting units, 250 units and 20 buildings; the Classic preset must keep them. */
@@ -100,9 +135,23 @@ final class RulesetTest {
         assertTrue(library.all().isEmpty(), "built-in presets must not be saved with the user's");
     }
 
+    /** Buffed adds buildings and changes none of Resurrected's numbers. */
     @Test
-    void buffedIsResurrectedUntilNewContentLands() {
-        assertEquals(Ruleset.RESURRECTED.getStats(), Ruleset.BUFFED.getStats());
+    void buffedKeepsResurrectedNumbers() {
+        RulesetStats resurrected = Ruleset.RESURRECTED.getStats();
+        RulesetStats buffed = Ruleset.BUFFED.getStats();
+        assertEquals(resurrected.spells(), buffed.spells());
+        for (boolean vikings : new boolean[]{false, true}) {
+            RaceStats r = resurrected.race(vikings);
+            RaceStats b = buffed.race(vikings);
+            assertAll(
+                    () -> assertEquals(r.peon(), b.peon()),
+                    () -> assertEquals(r.rock_warrior(), b.rock_warrior()),
+                    () -> assertEquals(r.iron_warrior(), b.iron_warrior()),
+                    () -> assertEquals(r.chicken_warrior(), b.chicken_warrior()),
+                    () -> assertEquals(r.chieftain(), b.chieftain()),
+                    () -> assertBuildings(b, 200, 200, 100, 250));
+        }
     }
 
     @Test
