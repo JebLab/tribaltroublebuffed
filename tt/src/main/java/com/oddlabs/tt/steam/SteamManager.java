@@ -125,14 +125,16 @@ public final class SteamManager implements SteamUserCallback, SteamFriendsCallba
     }
 
     public static void shutdown() {
-        if (instance != null) {
-            instance.cancelAuthTicket();
-            instance.steamUserStats.dispose();
-            instance.steamUser.dispose();
-            instance.steamFriends.dispose();
-            instance.steamUtils.dispose();
-            instance = null;
-        }
+        // Without a running Steam (or with Steam switched off) the native library was never loaded, and calling into
+        // it would end every quit with an UnsatisfiedLinkError.
+        if (instance == null)
+            return;
+        instance.cancelAuthTicket();
+        instance.steamUserStats.dispose();
+        instance.steamUser.dispose();
+        instance.steamFriends.dispose();
+        instance.steamUtils.dispose();
+        instance = null;
         SteamAPI.shutdown();
     }
 

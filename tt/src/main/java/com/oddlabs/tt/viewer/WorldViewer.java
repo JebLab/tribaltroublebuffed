@@ -51,6 +51,7 @@ import com.oddlabs.tt.resource.FogInfo;
 import com.oddlabs.tt.resource.WorldGenerator;
 import com.oddlabs.tt.resource.WorldInfo;
 import com.oddlabs.tt.util.ServerMessageBundler;
+import com.oddlabs.tt.util.StateChecksum;
 import com.oddlabs.tt.util.Target;
 import com.oddlabs.tt.util.Utils;
 import org.joml.Vector4fc;
@@ -273,6 +274,18 @@ public final class WorldViewer implements Animated, AutoCloseable {
     @Override
     public void animate(float t) {
         animation_manager_local.runAnimations(t);
+    }
+
+    /**
+     * An event-log replay compares the local event queue's checksum with the logged one every two seconds
+     * ({@code AnimationManager.runGameLoop}); this puts the world into it, so a replay whose simulation diverges says
+     * so. Plain reads: computing the world's full checksum would flush its animation managers at other ticks than a
+     * recording did.
+     */
+    @Override
+    public void updateChecksum(@NonNull StateChecksum checksum) {
+        checksum.update(world.getTick());
+        checksum.update(world.getChecksum());
     }
 
     @Override

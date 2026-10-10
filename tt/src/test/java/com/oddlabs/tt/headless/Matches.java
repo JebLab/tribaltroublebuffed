@@ -58,7 +58,6 @@ final class Matches {
         HeadlessMatchConfig config = ALL.get(name);
         if (config == null)
             throw new IllegalArgumentException("no match named " + name);
-        return results.computeIfAbsent(name, _ -> new HeadlessMatchRunner(HeadlessMatchRunner.DEFAULT_SAMPLE_INTERVAL,
-                false).run(config));
+        return results.computeIfAbsent(name, _ -> new HeadlessMatchRunner(false).run(config));
     }
 }

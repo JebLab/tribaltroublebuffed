@@ -39,24 +39,25 @@ import java.util.function.IntPredicate;
  * a loopback router; this engine has one world and no AI traffic on the network, so it ticks that world directly.
  */
 public final class HeadlessMatchRunner {
-    /** Checksum samples every ten seconds of game time, as often as multiplayer peers compare them. */
-    public static final int DEFAULT_SAMPLE_INTERVAL = (int) (10 / AnimationManager.ANIMATION_SECONDS_PER_TICK);
+    /**
+     * Ticks between checksum samples: ten seconds of game time, where a game's {@code PeerHub} computes its checksum
+     * too. Computing one flushes the animation managers' removal lists, which can reorder animations, so sampling
+     * anywhere else would make a headless match diverge from the same match in the game.
+     */
+    public static final int SAMPLE_INTERVAL = (int) (10 / AnimationManager.ANIMATION_SECONDS_PER_TICK);
 
     private static final int PROGRESS_INTERVAL = (int) (300 / AnimationManager.ANIMATION_SECONDS_PER_TICK);
 
-    private final int sample_interval;
     private final boolean verbose;
 
     public HeadlessMatchRunner() {
-        this(DEFAULT_SAMPLE_INTERVAL, true);
+        this(true);
     }
 
     /**
-     * @param sample_interval ticks between checksum samples in the trace
-     * @param verbose         print the tribes' unit and building counts every five minutes of game time
+     * @param verbose print the tribes' unit and building counts every five minutes of game time
      */
-    public HeadlessMatchRunner(int sample_interval, boolean verbose) {
-        this.sample_interval = sample_interval;
+    public HeadlessMatchRunner(boolean verbose) {
         this.verbose = verbose;
     }
 
@@ -81,11 +82,12 @@ public final class HeadlessMatchRunner {
         World world = newWorld(config);
         Player[] players = world.getPlayers();
         List<HeadlessMatchResult.Sample> trace = new ArrayList<>();
+        // Before the first tick nothing runs between this flush and the one the tick starts with.
         trace.add(new HeadlessMatchResult.Sample(world.getTick(), checksum(world)));
         while (true) {
             world.tick(AnimationManager.ANIMATION_SECONDS_PER_TICK);
             int tick = world.getTick();
-            if (tick % sample_interval == 0)
+            if (tick % SAMPLE_INTERVAL == 0)
                 trace.add(new HeadlessMatchResult.Sample(tick, checksum(world)));
             if (verbose && tick % PROGRESS_INTERVAL == 0)
                 IO.println(progress(tick, players));

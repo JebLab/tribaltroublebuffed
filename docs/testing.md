@@ -24,9 +24,9 @@ Play one match from the command line (PowerShell; in Git Bash the quoted `--args
 .\gradlew.bat tt:headlessMatch --args="--ruleset buffed --size 1 --seed 11 --player 0:0:3 --player 1:1:3"
 ```
 
-Options: `--ruleset classic|resurrected|buffed`, `--terrain NATIVE|VIKING`, `--size 0..3` (small to enormous), `--seed`, `--hills`/`--vegetation`/`--supplies` (0 to 1), `--max-ticks`, and one `--player team:race:difficulty` per tribe (race 0 natives, 1 vikings; difficulty 1 easy, 2 normal, 3 hard). `--sample-interval <ticks>` sets how often a checksum is printed, `--quiet` drops the five-minute progress lines, and `-PheadlessJvmArgs="..."` passes JVM options. It prints the checksum trace and a `result` line with the winning team, the final tick and checksum.
+Options: `--ruleset classic|resurrected|buffed`, `--terrain NATIVE|VIKING`, `--size 0..3` (small to enormous), `--seed`, `--hills`/`--vegetation`/`--supplies` (0 to 1), `--max-ticks`, and one `--player team:race:difficulty` per tribe (race 0 natives, 1 vikings; difficulty 1 easy, 2 normal, 3 hard). `--quiet` drops the five-minute progress lines, and `-PheadlessJvmArgs="..."` passes JVM options. It prints the checksum trace and a `result` line with the winning team, the final tick and checksum.
 
-The checksum is the one multiplayer peers compare: the tick, the world's running checksum and every animation's contribution (`HeadlessMatchRunner.checksum`).
+The checksum is the one multiplayer peers compare: the tick, the world's running checksum and every animation's contribution (`HeadlessMatchRunner.checksum`). It is sampled every 500 ticks (ten seconds of game time), exactly where a game computes it, because computing it flushes the animation managers' removal lists and can reorder animations.
 
 ## Golden traces and SIM_VERSION
 
@@ -46,7 +46,15 @@ Then read the diff: only the matches of the ruleset you changed should move. Tod
 
 ## Replaying a game
 
-Every run of the game records an `event.log` that `--eventload` replays ([event-logs.md](event-logs.md)). During a replay the game compares its state checksum with the logged one every few seconds and logs `Checksum mismatch` at the first difference. That replay needs the full game with a window, so it is a local check, not part of CI.
+Every run of the game records an `event.log` that `--eventload` replays ([event-logs.md](event-logs.md)). Every two seconds the game logs a checksum of its event queue, and a replay compares its own with the logged one and logs `SEVERE: ... Checksum mismatch at tick N` at the first difference. Since M3 that checksum includes the world's tick and running checksum (`WorldViewer.updateChecksum`); before, it covered only the frame loop, so a replay whose simulation diverged went unnoticed.
+
+The replay needs the full game with a window, so it is a local check, not part of CI. To run it (Windows, PowerShell):
+
+1. `.\gradlew.bat tt:run`, start a skirmish, play a minute, quit through the menu. The output names the log: `Logging to ...\logs\<run>\event.log`.
+2. `.\gradlew.bat tt:run --args="--eventload normal <that path>"` and keep hands off the mouse and keyboard: the replay drives the menus itself and quits where the recording did.
+3. Search the output for `Checksum mismatch`; there should be none. The `Map code:` line and the tick in `Generating landscape at tick N` should match the recording's.
+
+A log recorded by a build with a different simulation, or a different checksum, reports a mismatch at the first comparison after the game starts; that is expected, and a quick way to see that the comparison is live. Checked in M3 on 9 October 2026 with a one-minute Buffed skirmish against an Easy AI.
 
 ## Known gaps
 

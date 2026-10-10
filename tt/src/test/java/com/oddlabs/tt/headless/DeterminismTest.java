@@ -23,7 +23,7 @@ final class DeterminismTest {
     @Test
     void sameMatchTwiceInOneJvm() {
         HeadlessMatchResult first = Matches.play(MATCH);
-        HeadlessMatchResult again = new HeadlessMatchRunner(HeadlessMatchRunner.DEFAULT_SAMPLE_INTERVAL, false).run(
+        HeadlessMatchResult again = new HeadlessMatchRunner(false).run(
                 Matches.ALL.get(MATCH));
 
         assertEquals(first.trace(), again.trace());
