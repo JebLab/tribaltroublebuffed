@@ -184,7 +184,7 @@ final class BuffedGearTest {
         }
         assertEquals(Shield.class, shield.getWeaponFactory().getType());
         assertEquals(Torch.class, torch.getWeaponFactory().getType());
-        assertEquals(.85f, shield.getDefenseChance());
+        assertEquals(.7f, shield.getDefenseChance());
         assertEquals(.3f, torch.getDefenseChance());
         assertFalse(rock.isGearWarrior());
 
@@ -209,7 +209,7 @@ final class BuffedGearTest {
         assertEquals(1, armory.getUnitCount());
     }
 
-    /** A torch's blow always takes 6 and lights a fire: 2 a second for 15 s, started again by another blow. */
+    /** A torch's blow always takes 4 and lights a fire: 2 a second for 15 s, started again by another blow (D-09). */
     @Test
     void torchesSetBuildingsOnFire() {
         World world = newWorld(Ruleset.BUFFED);
@@ -220,23 +220,23 @@ final class BuffedGearTest {
         int hit_points = quarters.getHitPoints();
 
         torch.getWeaponFactory().attack(torch, quarters);
-        assertEquals(hit_points - 6, quarters.getHitPoints(), "a torch always hits a building for 6");
+        assertEquals(hit_points - 4, quarters.getHitPoints(), "a torch always hits a building for 4");
         assertTrue(quarters.isBurning());
         assertEquals(natives, quarters.getFireOwner());
         assertEquals(1, natives.getFiresLit());
 
         tick(world, 10);
         int after_ten_seconds = quarters.getHitPoints();
-        assertTrue(Math.abs(hit_points - 6 - 20 - after_ten_seconds) <= 1,
+        assertTrue(Math.abs(hit_points - 4 - 20 - after_ten_seconds) <= 1,
                 "2 hit points a second: " + after_ten_seconds);
         torch.getWeaponFactory().attack(torch, quarters);
         tick(world, 14);
         assertTrue(quarters.isBurning(), "another blow starts the 15 s again");
         tick(world, 2);
         assertFalse(quarters.isBurning());
-        assertEquals(after_ten_seconds - 6 - 30, quarters.getHitPoints(), "a fire takes 30 hit points in all");
+        assertEquals(after_ten_seconds - 4 - 30, quarters.getHitPoints(), "a fire takes 30 hit points in all");
         tick(world, 10);
-        assertEquals(after_ten_seconds - 6 - 30, quarters.getHitPoints(), "a fire out takes nothing");
+        assertEquals(after_ten_seconds - 4 - 30, quarters.getHitPoints(), "a fire out takes nothing");
     }
 
     /** A peon's repair puts the fire out at once. */
@@ -267,8 +267,8 @@ final class BuffedGearTest {
         LandBuilding totem = build(vikings, Race.BUILDING_TOTEM);
         Unit torch = away(natives, Race.UNIT_WARRIOR_TORCH);
         torch.getWeaponFactory().attack(torch, totem);
-        assertEquals(24, totem.getHitPoints());
-        assertTrue(tickUntil(world, 13, totem::isDead), "30 hit points did not burn down in 12 s");
+        assertEquals(26, totem.getHitPoints());
+        assertTrue(tickUntil(world, 14, totem::isDead), "26 hit points did not burn down in 13 s");
         assertEquals(1, natives.getBuildingsDestroyed());
         assertEquals(1, vikings.getBuildingsLost());
     }

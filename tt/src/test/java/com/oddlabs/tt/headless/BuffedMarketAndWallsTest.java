@@ -388,7 +388,7 @@ final class BuffedMarketAndWallsTest {
         assertTrue(inside(peon, center), "an enemy peon got through the gate");
     }
 
-    /** Torches burn walls like any building: a blow and its fire take 36 of a segment's 40, the next blow the rest. */
+    /** Torches burn walls like any building: a blow and its fire take 34 of a segment's 40, the next the rest. */
     @Test
     void torchesBurnPalisades() {
         World world = newWorld(Ruleset.BUFFED);
@@ -401,9 +401,9 @@ final class BuffedMarketAndWallsTest {
         torch.getWeaponFactory().attack(torch, palisade);
         assertTrue(palisade.isBurning());
         tick(world, 16);
-        assertEquals(4, palisade.getHitPoints());
+        assertEquals(6, palisade.getHitPoints());
         torch.getWeaponFactory().attack(torch, palisade);
-        assertTrue(tickUntil(world, 1, palisade::isDead), "the second blow did not bring the segment down");
+        assertTrue(tickUntil(world, 2, palisade::isDead), "the second blow did not bring the segment down");
         assertEquals(1, natives.getBuildingsDestroyed());
     }
 

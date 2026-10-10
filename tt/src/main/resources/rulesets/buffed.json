@@ -3,11 +3,11 @@
   "extends": "resurrected",
   "features": { "chicken_coop": true, "totem": true, "shield": true, "torch": true, "market": true, "palisade": true, "great_tower": true, "lodge": true },
   "natives": {
-    "shield_warrior": { "hit_points": 1, "speed": 3.5, "defense_chance": 0.85, "hit_chance": 0.3 },
+    "shield_warrior": { "hit_points": 1, "speed": 3.5, "defense_chance": 0.7, "hit_chance": 0.3 },
     "torch_warrior": { "hit_points": 1, "speed": 4.0, "defense_chance": 0.3, "hit_chance": 0.5 },
     "chicken_coop": { "hit_points": 100, "stock": 2, "spawn_seconds": 90.0, "max_chickens": 6 },
     "totem": { "hit_points": 30, "rock": 1, "hit_bonus": 0.05, "radius": 10.0, "max_stacking": 2 },
-    "torch": { "building_damage": 6, "fire_seconds": 15.0, "fire_damage": 2.0 },
+    "torch": { "building_damage": 4, "fire_seconds": 15.0, "fire_damage": 2.0 },
     "market": { "hit_points": 150, "give": 3, "get": 1, "seconds": 20.0 },
     "palisade": { "hit_points": 40, "max_segments": 100 },
     "gate": { "hit_points": 120 },
@@ -16,11 +16,11 @@
     "lodge": { "hit_points": 200, "iron": 5, "shelter": 30, "spell_radius": 30.0, "spell_charge_factor": 2.0, "champion_seconds": 30.0, "max_champions": 5 }
   },
   "vikings": {
-    "shield_warrior": { "hit_points": 1, "speed": 3.5, "defense_chance": 0.85, "hit_chance": 0.3 },
+    "shield_warrior": { "hit_points": 1, "speed": 3.5, "defense_chance": 0.7, "hit_chance": 0.3 },
     "torch_warrior": { "hit_points": 1, "speed": 4.0, "defense_chance": 0.3, "hit_chance": 0.5 },
     "chicken_coop": { "hit_points": 100, "stock": 2, "spawn_seconds": 90.0, "max_chickens": 6 },
     "totem": { "hit_points": 30, "rock": 1, "hit_bonus": 0.05, "radius": 10.0, "max_stacking": 2 },
-    "torch": { "building_damage": 6, "fire_seconds": 15.0, "fire_damage": 2.0 },
+    "torch": { "building_damage": 4, "fire_seconds": 15.0, "fire_damage": 2.0 },
     "market": { "hit_points": 150, "give": 3, "get": 1, "seconds": 20.0 },
     "palisade": { "hit_points": 40, "max_segments": 100 },
     "gate": { "hit_points": 120 },

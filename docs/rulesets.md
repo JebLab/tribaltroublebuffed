@@ -85,7 +85,7 @@ Every number is per race (`natives`, `vikings`) except the spells, which belong 
 | | `champion_seconds` | seconds a Champion trains (30), while a peon is inside to become it. |
 | | `max_champions` | a player's Champions alive, sheltered or in training (5). |
 
-**The torch** (`torch`, Buffed's): `building_damage`, what its blow takes from any building, always (6); `fire_seconds` (15) and `fire_damage` (2 per second): the fire it lights, which takes its `fire_seconds × fire_damage` hit points one at a time, is started again by another blow, and goes out when a peon repairs the building. The gear's recipes (Shield: 2 wood + 1 rock in 40 man-seconds; Torch: 2 wood + 1 rock + 1 iron in 80) and deploy times (1 s, 1.5 s) are constants in `LandBuilding`, as the 2004 weapons' are; the Champion's (2 wood + 1 iron + 1 chicken, taken from the nearest Armory) is a constant in `Lodge`.
+**The torch** (`torch`, Buffed's): `building_damage`, what its blow takes from any building, always (4; 6 until M9, D-09); `fire_seconds` (15) and `fire_damage` (2 per second): the fire it lights, which takes its `fire_seconds × fire_damage` hit points one at a time, is started again by another blow, and goes out when a peon repairs the building. The gear's recipes (Shield: 2 wood + 1 rock in 40 man-seconds; Torch: 2 wood + 1 rock + 1 iron in 80) and deploy times (1 s, 1.5 s) are constants in `LandBuilding`, as the 2004 weapons' are; the Champion's (2 wood + 1 iron + 1 chicken, taken from the nearest Armory) is a constant in `Lodge`.
 
 **Spells** (by their in-game names):
 

@@ -153,8 +153,8 @@ Each is a texture variant + prop on the existing peon/warrior rig, crafted in th
 
 | Gear (Armory recipe, labour) | Natives / Vikings | Role | Proposed numbers (Revamped ruleset) | Counter |
 |---|---|---|---|---|
-| **Shield** — 2 wood + 1 rock, 40 man-s ✅ M6 | Bark-Shield Bearer / Round-Shield Carl | Front line that soaks throws | dodge 0.85, speed 3.5, melee hit 0.3 | chicken warriors (0.95 hit), tower fire (×3), spells |
-| **Torch** — 2 wood + 1 rock + 1 iron, 80 ✅ M6 | Firebrand / Torchbearer | Siege: burns buildings | melee hit 0.5 vs units; vs buildings always hits for 6 and sets fire: −2 HP/s for 15 s unless peons repair; dodge 0.3 | any warrior, towers |
+| **Shield** — 2 wood + 1 rock, 40 man-s ✅ M6 | Bark-Shield Bearer / Round-Shield Carl | Front line that soaks throws | dodge 0.7 (0.85 until M9, D-10), speed 3.5, melee hit 0.3 | chicken warriors (0.95 hit), tower fire (×3), spells |
+| **Torch** — 2 wood + 1 rock + 1 iron, 80 ✅ M6 | Firebrand / Torchbearer | Siege: burns buildings | melee hit 0.5 vs units; vs buildings always hits for 4 (6 until M9, D-09) and sets fire: −2 HP/s for 15 s unless peons repair; dodge 0.3 | any warrior, towers |
 | **Drum / Horn** — 3 wood + 1 iron, 60 | Drummer / Hornblower | Support aura | no attack; +0.10 hit and +15 % speed to friendlies within 12 m (doesn't stack); dodge 0.5; auto-targeted first (priority 4) | focus fire |
 | **Net / Snare** — 2 wood + 1 chicken, 60 | Chicken Catcher / Fowler | Utility | catches a chicken in one hit instead of ten; lays up to 3 snares that stun the first enemy for 4 s; melee hit 0.4 | cheap and fragile |
 

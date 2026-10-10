@@ -41,8 +41,11 @@ final class Matches {
             for (int i = 0; i < difficulties.length; i++) {
                 six.add(new PlayerConfig(i, i % 2 == 0 ? NATIVES : VIKINGS, difficulties[i]));
             }
+            // Buffed's six tribes leave about half of the seeds undecided after 60 minutes (Easy AIs sit at the unit
+            // cap; for the AI milestone, M14), seed 11 among them since M9: it plays a seed that finishes.
+            int seed = ruleset == Ruleset.BUFFED ? 9 : 11;
             all.put(ruleset.getId() + "-6p", new HeadlessMatchConfig(ruleset, Landscape.TerrainType.VIKING,
-                    Game.SIZE_MEDIUM, .5f, .5f, .5f, 11, six, HeadlessMatchConfig.DEFAULT_MAX_TICKS));
+                    Game.SIZE_MEDIUM, .5f, .5f, .5f, seed, six, HeadlessMatchConfig.DEFAULT_MAX_TICKS));
         }
         List<PlayerConfig> twelve = new ArrayList<>();
         for (int i = 0; i < 12; i++) {

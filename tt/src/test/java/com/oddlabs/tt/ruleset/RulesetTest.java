@@ -133,9 +133,9 @@ final class RulesetTest {
         for (boolean vikings : new boolean[]{false, true}) {
             RaceStats race = Ruleset.BUFFED.getStats().race(vikings);
             assertAll(
-                    () -> assertUnit(race.shield_warrior(), 1, 3.5f, .85f, .3f),
+                    () -> assertUnit(race.shield_warrior(), 1, 3.5f, .7f, .3f),
                     () -> assertUnit(race.torch_warrior(), 1, 4f, .3f, .5f),
-                    () -> assertEquals(new TorchStats(6, 15f, 2f), race.torch(), "torch"));
+                    () -> assertEquals(new TorchStats(4, 15f, 2f), race.torch(), "torch"));
         }
     }
 
